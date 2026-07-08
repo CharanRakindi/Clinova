@@ -1,0 +1,72 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-[#F8FAFC] text-slate-900 antialiased selection:bg-primary-200 selection:text-primary-900;
+  }
+  
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 rounded-full hover:bg-slate-400 transition-colors;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center rounded-lg text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98];
+  }
+  .btn-primary {
+    @apply bg-primary-600 text-white hover:bg-primary-700 shadow-sm hover:shadow-md;
+  }
+  .btn-outline {
+    @apply border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 hover:border-slate-300 shadow-sm;
+  }
+  .btn-ghost {
+    @apply bg-transparent hover:bg-slate-100 text-slate-700 hover:text-slate-900;
+  }
+  .btn-danger {
+    @apply bg-red-600 text-white hover:bg-red-700 shadow-sm hover:shadow-md;
+  }
+  .input {
+    @apply flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500 transition-shadow duration-200;
+  }
+  .card {
+    @apply rounded-xl border border-slate-200/60 bg-white shadow-sm hover:shadow-md transition-shadow duration-300;
+  }
+  .glass-card {
+    @apply rounded-xl border border-white/20 bg-white/70 backdrop-blur-md shadow-sm;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-indigo-600;
+  }
+  .bg-gradient-mesh {
+    background-color: #f8fafc;
+    background-image: 
+      radial-gradient(at 0% 0%, hsla(199,89%,78%,0.3) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, hsla(256,89%,83%,0.3) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, hsla(199,89%,78%,0.2) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, hsla(256,89%,83%,0.2) 0px, transparent 50%);
+  }
+  .bg-gradient-sidebar {
+    @apply bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900;
+  }
+  .animation-delay-100 { animation-delay: 100ms; }
+  .animation-delay-200 { animation-delay: 200ms; }
+  .animation-delay-300 { animation-delay: 300ms; }
+  .animation-delay-400 { animation-delay: 400ms; }
+  .animation-delay-500 { animation-delay: 500ms; }
+}
