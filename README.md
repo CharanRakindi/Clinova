@@ -1,41 +1,57 @@
-# MediVault
+# 🏥 MediVault
 
-A secure web-based Medical Record Management System for patients, doctors, and administrators built with the MERN stack.
+A premium, full-featured **Electronic Health Record (EHR) and Medical Record Management System** built with the MERN stack. Designed with a modern healthcare SaaS aesthetic inspired by Linear, Stripe, and Apple HIG.
 
-## 🚀 Features
+![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js&logoColor=white)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb&logoColor=white)
+![License](https://img.shields.io/badge/License-ISC-blue)
 
-- **Role-Based Access Control**: Separate interfaces and permissions for Patients, Doctors, and Admins.
-- **Secure Authentication**: JWT-based auth with HttpOnly cookies, bcrypt password hashing, and rate limiting.
-- **Dashboard Analytics**: Visual data representations using Recharts for daily appointments and system stats.
-- **Patient Management**: Authorized doctors can view and manage assigned patients' records.
-- **Appointment Scheduling**: Book, confirm, and cancel appointments with conflict prevention.
-- **Medical Records & History**: Robust medical record tracking with amendment/version history.
-- **Modern UI**: Built with React, Tailwind CSS, and Radix/Lucide icons for a premium look and feel.
+---
+
+## ✨ Features
+
+### Core Platform
+- **Role-Based Access Control** — Separate interfaces and permissions for Patients, Doctors, and Admins
+- **Secure Authentication** — JWT access/refresh tokens in HttpOnly cookies, bcrypt hashing, rate limiting
+- **Dashboard Analytics** — Real-time stats with Recharts visualizations and animated counters
+
+### Clinical
+- **Patient Management** — Doctors can view and manage assigned patients' records
+- **Appointment Scheduling** — Book, confirm, cancel, and complete appointments with conflict prevention
+- **Medical Records** — Full CRUD with amendment/versioning, vitals tracking, diagnosis tags, and treatment plans
+- **File Attachments** — Upload lab results, X-rays, and documents (local storage or Cloudinary)
+
+### Enterprise Features
+- **Real-Time Notifications** — Socket.io powered notification system with live updates
+- **Interactive Calendar** — Full-featured calendar view (react-big-calendar) for appointments
+- **Command Palette** — `⌘K` / `Ctrl+K` quick navigation (cmdk)
+- **Dark Mode** — System-aware theme switching via next-themes
+- **File Upload System** — Drag-and-drop uploads with Cloudinary integration
+
+---
 
 ## 🛠️ Tech Stack
 
-**Frontend**:
-- React (Vite)
-- React Router
-- Tailwind CSS
-- TanStack React Query (Server State)
-- React Hook Form + Zod (Validation)
-- Recharts (Analytics)
-- Axios
-
-**Backend**:
-- Node.js & Express.js
-- MongoDB & Mongoose
-- JSON Web Tokens (JWT)
-- bcrypt, Helmet, CORS, express-rate-limit
+| Layer | Technologies |
+|-------|-------------|
+| **Frontend** | React 19, Vite, React Router 7, Tailwind CSS 3, TanStack React Query 5 |
+| **UI/UX** | Lucide Icons, Sonner (toasts), cmdk (command palette), react-big-calendar |
+| **Forms** | React Hook Form + Zod validation |
+| **Charts** | Recharts |
+| **Backend** | Node.js, Express 5, Mongoose 9 |
+| **Auth** | JWT (access + refresh), bcrypt, HttpOnly cookies |
+| **Real-time** | Socket.io |
+| **File Storage** | Multer + Cloudinary (with local disk fallback) |
+| **Security** | Helmet, CORS, express-rate-limit |
 
 ---
 
 ## 💻 Prerequisites
 
-To run this project locally, ensure you have the following installed:
-- [Node.js](https://nodejs.org/en/) (v18 or higher)
-- [MongoDB](https://www.mongodb.com/try/download/community) (running locally on port `27017` or a MongoDB Atlas URI)
+- [Node.js](https://nodejs.org/) v18 or higher
+- [MongoDB](https://www.mongodb.com/) (local instance or Atlas URI)
+- (Optional) [Cloudinary](https://cloudinary.com/) account for cloud file storage
 
 ---
 
@@ -43,8 +59,8 @@ To run this project locally, ensure you have the following installed:
 
 ### 1. Clone the repository
 ```bash
-git clone <your-repo-url>
-cd medivault
+git clone https://github.com/CharanRakindi/MediVault.git
+cd MediVault
 ```
 
 ### 2. Setup the Backend
@@ -55,7 +71,11 @@ npm install
 # Create environment file from example
 cp .env.example .env
 ```
-Ensure your MongoDB instance is running, or update the `MONGO_URI` in `server/.env` to point to your cloud instance.
+
+Edit `server/.env` and update:
+- `MONGO_URI` — your MongoDB connection string
+- `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` — strong random strings
+- (Optional) `CLOUDINARY_*` — for cloud file uploads
 
 ### 3. Setup the Frontend
 ```bash
@@ -67,52 +87,83 @@ npm install
 
 ## 🚦 Running the Application
 
-### Seed the Database (Important)
-Before starting the app for the first time, you should populate the database with mock roles, users, and departments.
-From the `server` directory, run:
+### Seed the Database (First Time)
+Populate the database with demo users, roles, and departments:
 ```bash
+cd server
 npm run seed
 ```
 
-### Start the Development Servers
+### Start Development Servers
 
-**Run Backend**:
+**Backend** (runs on `http://localhost:5001`):
 ```bash
 cd server
 npm run dev
 ```
-The server will run on `http://localhost:5000`
 
-**Run Frontend**:
+**Frontend** (runs on `http://localhost:5173`):
 ```bash
 cd client
 npm run dev
 ```
-The client will run on `http://localhost:5173`
 
 ---
 
 ## 🔑 Demo Credentials
 
-Once the database is seeded, you can log in using the following accounts:
+After seeding, log in with:
 
-- **Admin**: 
-  - Email: `admin@medivault.com`
-  - Password: `password123`
-- **Doctor**: 
-  - Email: `sarah@medivault.com`
-  - Password: `password123`
-- **Patient**: 
-  - Email: `john@example.com`
-  - Password: `password123`
+| Role | Email | Password |
+|------|-------|----------|
+| **Admin** | `admin@medivault.com` | `password123` |
+| **Doctor** | `sarah@medivault.com` | `password123` |
+| **Patient** | `john@example.com` | `password123` |
 
 ---
 
-## 🔒 Security Considerations
+## 📁 Project Structure
 
-- **ABAC (Attribute-Based Access Control)**: Doctors cannot view random patient profiles. They must either be explicitly assigned to the patient or have an existing appointment history with them.
-- **HttpOnly Cookies**: Access and refresh tokens are stored safely to prevent XSS attacks.
-- **Data Integrity**: Medical records are never "hard deleted" by doctors. Instead, amendments create a new version of the record while retaining the previous archived version.
-- **API Protection**: Helmet headers, rate limiting, and CORS allowlists are enforced on the server.
+```
+medivault/
+├── client/                    # React frontend (Vite)
+│   ├── src/
+│   │   ├── api/               # Axios instance & interceptors
+│   │   ├── components/        # Reusable UI components
+│   │   ├── contexts/          # Auth, Socket, Theme providers
+│   │   ├── layouts/           # Root & dashboard layouts
+│   │   ├── pages/             # Route pages (admin, doctor, patient)
+│   │   └── utils/             # Utility functions
+│   └── tailwind.config.js
+├── server/                    # Express backend
+│   ├── src/
+│   │   ├── config/            # Database connection
+│   │   ├── controllers/       # Route handlers
+│   │   ├── middleware/        # Auth, error handling
+│   │   ├── models/            # Mongoose schemas
+│   │   ├── routes/            # API route definitions
+│   │   ├── seeders/           # Database seeder
+│   │   ├── services/          # Socket.io service
+│   │   ├── utils/             # Upload config, token helpers
+│   │   └── validators/        # Zod validation schemas
+│   └── .env.example
+└── README.md
+```
 
-> **Note on Compliance**: This is an educational portfolio project and is **not automatically HIPAA or GDPR compliant**. Real-world deployment would require BAA agreements, third-party security audits, encrypted at-rest storage in compliant cloud environments, and extensive logging of all access events.
+---
+
+## 🔒 Security
+
+- **ABAC**: Doctors can only access patients they are assigned to or have appointment history with
+- **HttpOnly Cookies**: Tokens stored securely — immune to XSS
+- **Record Versioning**: Medical records are never hard-deleted; amendments create new versions
+- **Helmet + CORS + Rate Limiting**: Production-ready API protection
+- **Input Validation**: Zod schemas on all endpoints
+
+> **⚠️ Compliance Note**: This is a portfolio/educational project and is **not automatically HIPAA or GDPR compliant**. Production deployment would require BAAs, security audits, encrypted-at-rest storage, and comprehensive access logging.
+
+---
+
+## 📝 License
+
+ISC License © [Charan Rakindi](https://github.com/CharanRakindi)

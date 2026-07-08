@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../../api/axios';
-import { ArrowLeft, Plus, X, FileText, Heart, Thermometer, Activity, User, Phone, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Plus, X, FileText, Heart, Thermometer, Activity, User, Phone, CheckCircle, Paperclip } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import FileUpload from '../../components/FileUpload';
 
 const DoctorPatientDetail = () => {
   const { patientId } = useParams();
@@ -26,6 +27,7 @@ const DoctorPatientDetail = () => {
       pulse: '',
       oxygenSaturation: '',
     },
+    attachments: [],
   });
 
   const { data: patient, isLoading: profileLoading } = useQuery({
@@ -56,6 +58,7 @@ const DoctorPatientDetail = () => {
         chiefComplaint: '', symptoms: '', diagnosis: '', clinicalNotes: '',
         treatmentPlan: '', followUpDate: '',
         vitals: { height: '', weight: '', temperature: '', bloodPressureSystolic: '', bloodPressureDiastolic: '', pulse: '', oxygenSaturation: '' },
+        attachments: [],
       });
       toast.success('Medical record created successfully');
     },
@@ -80,6 +83,17 @@ const DoctorPatientDetail = () => {
     };
     if (!formData.followUpDate) delete payload.followUpDate;
     createRecord.mutate(payload);
+  };
+
+  const handleUploadSuccess = (url, data) => {
+    setFormData(prev => ({
+      ...prev,
+      attachments: [...prev.attachments, {
+        filename: data.filename,
+        url: url,
+        mimetype: data.mimetype
+      }]
+    }));
   };
 
   if (profileLoading || recordsLoading) return <div className="p-8 flex justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div></div>;
@@ -257,6 +271,19 @@ const DoctorPatientDetail = () => {
                       <p className="text-sm font-medium text-emerald-900">{record.treatmentPlan}</p>
                     </div>
                   )}
+
+                  {record.attachments && record.attachments.length > 0 && (
+                    <div>
+                       <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Attachments</span>
+                       <div className="flex flex-wrap gap-2">
+                         {record.attachments.map((att, idx) => (
+                           <a key={idx} href={att.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-sm font-medium text-primary-600 bg-primary-50 px-3 py-1.5 rounded-lg hover:bg-primary-100 border border-primary-100 transition-colors">
+                             <Paperclip className="w-4 h-4" /> {att.filename}
+                           </a>
+                         ))}
+                       </div>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -375,6 +402,24 @@ const DoctorPatientDetail = () => {
                   min={new Date().toISOString().split('T')[0]}
                   onChange={(e) => setFormData({ ...formData, followUpDate: e.target.value })}
                 />
+              </div>
+
+              {/* Attachments Section */}
+              <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                 <FileUpload onUploadSuccess={handleUploadSuccess} label="Attach Documents (Lab Results, X-Rays)" />
+                 {formData.attachments.length > 0 && (
+                   <div className="mt-4">
+                     <p className="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">Uploaded Files</p>
+                     <div className="flex flex-wrap gap-2">
+                       {formData.attachments.map((att, idx) => (
+                         <div key={idx} className="flex items-center gap-2 bg-primary-50 text-primary-700 px-3 py-1.5 rounded-lg border border-primary-100 text-sm font-medium">
+                           <Paperclip className="w-4 h-4" />
+                           {att.filename}
+                         </div>
+                       ))}
+                     </div>
+                   </div>
+                 )}
               </div>
 
               <div className="flex justify-end gap-3 pt-6 border-t border-slate-200">

@@ -1,5 +1,6 @@
 import MedicalRecord from '../models/MedicalRecord.js';
 import AuditLog from '../models/AuditLog.js';
+import { sendToUser } from '../services/socketService.js';
 
 // @desc    Get medical records for a patient
 // @route   GET /api/v1/patients/:patientId/medical-records
@@ -55,6 +56,12 @@ export const createMedicalRecord = async (req, res, next) => {
       metadata: { patientId: req.params.patientId }
     });
 
+    // Notify patient
+    sendToUser(req.params.patientId, 'notification', {
+      message: `Dr. ${req.user.name} added a new medical record to your file`,
+      timestamp: new Date()
+    });
+
     res.status(201).json({ success: true, data: record });
   } catch (error) {
     next(error);
@@ -101,6 +108,12 @@ export const amendMedicalRecord = async (req, res, next) => {
       resourceId: newRecord._id,
       ipAddress: req.ip,
       metadata: { amendedFrom: oldRecord._id }
+    });
+
+    // Notify patient
+    sendToUser(oldRecord.patient, 'notification', {
+      message: `Dr. ${req.user.name} amended one of your medical records`,
+      timestamp: new Date()
     });
 
     res.status(201).json({ success: true, data: newRecord });

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import api from '../../api/axios';
 import { useAuth } from '../../contexts/AuthContext';
-import { FileText, Heart, Thermometer, Activity, Calendar } from 'lucide-react';
+import { FileText, Heart, Thermometer, Activity, Calendar, Paperclip } from 'lucide-react';
 import { format } from 'date-fns';
 
 const PatientMedicalRecords = () => {
@@ -144,6 +144,20 @@ const PatientMedicalRecords = () => {
                     <div className="absolute top-0 left-0 w-1 h-full bg-emerald-400"></div>
                     <p className="text-xs font-bold text-emerald-800 uppercase tracking-wider mb-2">Treatment Plan</p>
                     <p className="text-sm font-medium text-emerald-900">{record.treatmentPlan}</p>
+                  </div>
+                )}
+
+                {/* Attachments Section */}
+                {record.attachments && record.attachments.length > 0 && (
+                  <div>
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Attachments</p>
+                    <div className="flex flex-wrap gap-2">
+                      {record.attachments.map((att, idx) => (
+                        <a key={idx} href={att.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-sm font-medium text-primary-600 bg-primary-50 px-3 py-1.5 rounded-lg hover:bg-primary-100 border border-primary-100 transition-colors">
+                          <Paperclip className="w-4 h-4" /> {att.filename}
+                        </a>
+                      ))}
+                    </div>
                   </div>
                 )}
 

@@ -1,5 +1,6 @@
 import Appointment from '../models/Appointment.js';
 import DoctorProfile from '../models/DoctorProfile.js';
+import { sendToUser } from '../services/socketService.js';
 
 // @desc    Get all appointments
 // @route   GET /api/v1/appointments
@@ -58,6 +59,19 @@ export const createAppointment = async (req, res, next) => {
       createdBy: req.user._id,
     });
 
+    // Notify the other party
+    if (req.user.role === 'patient') {
+      sendToUser(doctor, 'notification', {
+        message: `New appointment requested by ${req.user.name}`,
+        timestamp: new Date()
+      });
+    } else if (req.user.role === 'doctor') {
+      sendToUser(patientId, 'notification', {
+        message: `Dr. ${req.user.name} has scheduled an appointment with you`,
+        timestamp: new Date()
+      });
+    }
+
     res.status(201).json({ success: true, data: appointment });
   } catch (error) {
     next(error);
@@ -98,6 +112,13 @@ export const updateAppointmentStatus = async (req, res, next) => {
     }
 
     await appointment.save();
+
+    // Notify Patient
+    sendToUser(appointment.patient, 'notification', {
+      message: `Your appointment status was updated to ${status}`,
+      timestamp: new Date()
+    });
+
     res.status(200).json({ success: true, data: appointment });
   } catch (error) {
     next(error);

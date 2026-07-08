@@ -1,0 +1,93 @@
+/* Custom overrides for react-big-calendar to fit the MediVault theme */
+
+.rbc-calendar {
+  font-family: inherit;
+  min-height: 500px;
+}
+
+.rbc-header {
+  padding: 10px 0;
+  font-weight: 700;
+  color: #64748b; /* slate-500 */
+  border-bottom: 1px solid #e2e8f0; /* slate-200 */
+}
+
+.rbc-today {
+  background-color: #f0f9ff; /* primary-50 */
+}
+
+.rbc-event {
+  border-radius: 8px;
+  padding: 4px;
+  transition: opacity 0.2s;
+}
+
+.rbc-event:hover {
+  opacity: 1 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.rbc-toolbar button {
+  color: #334155;
+  border-radius: 8px;
+  border-color: #e2e8f0;
+  font-weight: 600;
+}
+
+.rbc-toolbar button:active,
+.rbc-toolbar button.rbc-active {
+  background-color: #0ea5e9; /* primary-500 */
+  color: white;
+  border-color: #0ea5e9;
+  box-shadow: none;
+}
+
+.rbc-toolbar button:focus {
+  outline: none;
+}
+
+/* Dark Mode Overrides */
+.dark-calendar .rbc-header {
+  color: #94a3b8; /* slate-400 */
+  border-bottom: 1px solid #1e293b; /* slate-800 */
+  border-left: 1px solid #1e293b;
+}
+
+.dark-calendar .rbc-month-view,
+.dark-calendar .rbc-time-view,
+.dark-calendar .rbc-month-row,
+.dark-calendar .rbc-day-bg,
+.dark-calendar .rbc-time-header-content,
+.dark-calendar .rbc-timeslot-group,
+.dark-calendar .rbc-time-content {
+  border-color: #1e293b; /* slate-800 */
+}
+
+.dark-calendar .rbc-off-range-bg {
+  background-color: #0f172a; /* slate-900 */
+}
+
+.dark-calendar .rbc-today {
+  background-color: #0c4a6e; /* primary-900 */
+}
+
+.dark-calendar .rbc-toolbar button {
+  color: #e2e8f0;
+  border-color: #334155;
+}
+
+.dark-calendar .rbc-toolbar button:active,
+.dark-calendar .rbc-toolbar button.rbc-active {
+  background-color: #0ea5e9;
+  color: white;
+  border-color: #0ea5e9;
+}
+
+.dark-calendar .rbc-date-cell {
+  color: #cbd5e1;
+}
+
+.dark-calendar .rbc-time-slot {
+  border-color: #1e293b;
+}
