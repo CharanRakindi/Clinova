@@ -20,7 +20,8 @@ const localizer = dateFnsLocalizer({
   locales,
 });
 
-const DnDCalendar = withDragAndDrop(Calendar);
+const dragAndDropHelper = withDragAndDrop && (withDragAndDrop.default || withDragAndDrop);
+const DnDCalendar = typeof dragAndDropHelper === 'function' ? dragAndDropHelper(Calendar) : Calendar;
 
 export default function InteractiveCalendar({ events = [], onSelectEvent, onEventDrop }) {
   
