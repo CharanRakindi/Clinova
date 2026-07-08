@@ -1,36 +1,40 @@
 import { cn } from '../utils/cn';
 import AnimatedCounter from './AnimatedCounter';
+import { motion } from 'framer-motion';
 
 const StatCard = ({ title, value, icon: Icon, description, className, index = 0 }) => {
-  const delayClass = `animation-delay-${(index + 1) * 100}`;
-  
   return (
-    <div className={cn(
-      "glass-card p-6 flex flex-col justify-between animate-fade-in-up hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group", 
-      delayClass,
-      className
-    )}>
+    <motion.div
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.06, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      whileHover={{ y: -4, transition: { duration: 0.2 } }}
+      className={cn(
+        "glass-card p-6 flex flex-col justify-between relative overflow-hidden group border border-slate-200/50 dark:border-white/5 shadow-premium dark:shadow-premium-dark", 
+        className
+      )}
+    >
       {/* Decorative gradient blob */}
-      <div className="absolute -right-4 -top-4 w-24 h-24 rounded-full bg-gradient-to-br from-white/40 to-transparent blur-2xl opacity-50 group-hover:opacity-100 transition-opacity" />
+      <div className="absolute -right-4 -top-4 w-24 h-24 rounded-full bg-gradient-to-br from-primary-500/10 to-transparent blur-2xl opacity-50 group-hover:opacity-100 transition-opacity" />
       
       <div className="flex items-center justify-between relative z-10">
-        <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">{title}</h3>
+        <h3 className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{title}</h3>
         {Icon && (
-          <div className="p-2.5 rounded-xl bg-slate-50 text-slate-400 group-hover:text-primary-600 group-hover:bg-primary-50 transition-colors duration-300 shadow-sm border border-slate-100">
+          <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 text-slate-400 dark:text-slate-450 group-hover:text-primary-500 group-hover:bg-primary-50 dark:group-hover:bg-primary-950/30 transition-all duration-300 border border-slate-100 dark:border-slate-800">
             <Icon className="w-5 h-5" />
           </div>
         )}
       </div>
       
       <div className="mt-6 relative z-10">
-        <p className="text-4xl font-extrabold text-slate-800 tracking-tight">
+        <p className="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
           <AnimatedCounter value={value} />
         </p>
         {description && (
-          <p className="mt-2 text-sm text-slate-500 font-medium">{description}</p>
+          <p className="mt-2 text-xs text-slate-500 dark:text-slate-400 font-semibold">{description}</p>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };
 

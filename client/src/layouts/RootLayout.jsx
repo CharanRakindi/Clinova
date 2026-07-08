@@ -10,6 +10,7 @@ import OnboardingTour from '../components/OnboardingTour';
 import KeyboardShortcutsHelp from '../components/KeyboardShortcutsHelp';
 import ErrorBoundary from '../components/ErrorBoundary';
 import { useTheme } from 'next-themes';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const RootLayout = () => {
   const { user, logout } = useAuth();
@@ -190,32 +191,38 @@ const RootLayout = () => {
             <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4 px-3">
               Menu
             </div>
-            {navItems.map((item) => {
+            {navItems.map((item, index) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.href;
               return (
-                <Link
+                <motion.div
                   key={item.name}
-                  to={item.href}
-                  onClick={() => setIsSidebarOpen(false)}
-                  className={cn(
-                    "flex items-center justify-between px-3 py-2.5 rounded-lg transition-all duration-200 group",
-                    isActive 
-                      ? "bg-white/10 text-white shadow-inner" 
-                      : "text-slate-300 hover:bg-white/5 hover:text-white"
-                  )}
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.04, duration: 0.3, ease: 'easeOut' }}
                 >
-                  <div className="flex items-center gap-3">
-                    <Icon className={cn(
-                      "w-5 h-5 transition-colors duration-200", 
-                      isActive ? "text-primary-400" : "text-slate-400 group-hover:text-primary-400"
-                    )} />
-                    <span className="font-medium text-sm">{item.name}</span>
-                  </div>
-                  {isActive && (
-                    <div className="w-1.5 h-1.5 rounded-full bg-primary-400 shadow-[0_0_8px_rgba(56,189,248,0.8)] animate-pulse" />
-                  )}
-                </Link>
+                  <Link
+                    to={item.href}
+                    onClick={() => setIsSidebarOpen(false)}
+                    className={cn(
+                      "flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-200 group",
+                      isActive 
+                        ? "bg-white/10 text-white shadow-inner" 
+                        : "text-slate-350 hover:bg-white/5 hover:text-white"
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Icon className={cn(
+                        "w-5 h-5 transition-colors duration-200", 
+                        isActive ? "text-primary-400" : "text-slate-400 group-hover:text-primary-400"
+                      )} />
+                      <span className="font-medium text-sm">{item.name}</span>
+                    </div>
+                    {isActive && (
+                      <div className="w-1.5 h-1.5 rounded-full bg-primary-400 shadow-[0_0_8px_rgba(56,189,248,0.8)] animate-pulse" />
+                    )}
+                  </Link>
+                </motion.div>
               );
             })}
           </nav>
@@ -227,7 +234,7 @@ const RootLayout = () => {
                 <div className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse" />
                 <span className="text-xs font-medium text-slate-300">System Online</span>
               </div>
-              <span className="text-[10px] font-bold text-slate-400 hover:text-white cursor-pointer transition-colors" onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: '?' }))}>
+              <span className="text-[10px] font-bold text-slate-450 hover:text-white cursor-pointer transition-colors" onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: '?' }))}>
                 Shortcuts (?)
               </span>
             </div>
@@ -235,12 +242,21 @@ const RootLayout = () => {
         </aside>
 
         {/* Main content */}
-        <main className="flex-1 overflow-y-auto bg-gradient-mesh dark:bg-slate-950">
-          <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 animate-fade-in">
-            <ErrorBoundary>
-              <Outlet />
-            </ErrorBoundary>
-          </div>
+        <main className="flex-1 overflow-y-auto bg-gradient-mesh dark:bg-[#030712]">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8"
+            >
+              <ErrorBoundary>
+                <Outlet />
+              </ErrorBoundary>
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
     </div>

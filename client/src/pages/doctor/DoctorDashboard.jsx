@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { useAuth } from '../../contexts/AuthContext';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const DoctorDashboard = () => {
   const queryClient = useQueryClient();
@@ -138,37 +139,50 @@ const DoctorDashboard = () => {
               Patient Queue
             </h3>
             <div className="space-y-3.5 max-h-[300px] overflow-y-auto pr-1">
-              {todayAppointments.length === 0 ? (
-                <div className="text-sm font-semibold text-slate-400 py-6 text-center">
-                  No appointments scheduled today
-                </div>
-              ) : (
-                todayAppointments.map((apt) => (
-                  <div key={apt._id} className="flex justify-between items-center p-3 rounded-xl border border-slate-100 dark:border-slate-850 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
-                    <div>
-                      <p className="font-extrabold text-sm text-slate-900 dark:text-white">{apt.patient?.name}</p>
-                      <p className="text-xs font-semibold text-slate-400 mt-0.5">{apt.timeSlot} • {apt.reason}</p>
-                    </div>
-                    <div className="flex gap-1">
-                      {apt.status !== 'completed' && (
-                        <button
-                          onClick={() => updateStatus.mutate({ id: apt._id, status: 'completed' })}
-                          className="p-1.5 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 rounded-lg transition-colors"
-                          title="Complete consultation"
+              <AnimatePresence initial={false}>
+                {todayAppointments.length === 0 ? (
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-sm font-semibold text-slate-400 py-6 text-center"
+                  >
+                    No appointments scheduled today
+                  </motion.div>
+                ) : (
+                  todayAppointments.map((apt, index) => (
+                    <motion.div 
+                      key={apt._id}
+                      initial={{ opacity: 0, height: 0, y: 10 }}
+                      animate={{ opacity: 1, height: 'auto', y: 0 }}
+                      exit={{ opacity: 0, height: 0, x: -30 }}
+                      transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                      className="flex justify-between items-center p-3 rounded-xl border border-slate-100 dark:border-slate-850 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors overflow-hidden"
+                    >
+                      <div>
+                        <p className="font-extrabold text-sm text-slate-900 dark:text-white">{apt.patient?.name}</p>
+                        <p className="text-xs font-semibold text-slate-400 mt-0.5">{apt.timeSlot} • {apt.reason}</p>
+                      </div>
+                      <div className="flex gap-1">
+                        {apt.status !== 'completed' && (
+                          <button
+                            onClick={() => updateStatus.mutate({ id: apt._id, status: 'completed' })}
+                            className="p-1.5 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 rounded-lg transition-colors"
+                            title="Complete consultation"
+                          >
+                            <Check className="w-4 h-4" />
+                          </button>
+                        )}
+                        <Link 
+                          to={`/doctor/patients/${apt.patient?._id}`}
+                          className="p-1.5 text-slate-400 hover:text-primary-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
                         >
-                          <Check className="w-4 h-4" />
-                        </button>
-                      )}
-                      <Link 
-                        to={`/doctor/patients/${apt.patient?._id}`}
-                        className="p-1.5 text-slate-400 hover:text-primary-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-                      >
-                        <ChevronRight className="w-4.5 h-4.5" />
-                      </Link>
-                    </div>
-                  </div>
-                ))
-              )}
+                          <ChevronRight className="w-4.5 h-4.5" />
+                        </Link>
+                      </div>
+                    </motion.div>
+                  ))
+                )}
+              </AnimatePresence>
             </div>
           </div>
 
