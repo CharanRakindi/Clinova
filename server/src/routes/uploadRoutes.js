@@ -1,13 +1,13 @@
 import express from 'express';
 import { upload } from '../utils/upload.js';
-import { protect } from '../middleware/auth.js';
+import { authenticate } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
 // @desc    Upload a file
 // @route   POST /api/v1/upload
 // @access  Private
-router.post('/', protect, upload.single('file'), (req, res) => {
+router.post('/', authenticate, upload.single('file'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ success: false, message: 'Please upload a file' });
   }
@@ -30,7 +30,7 @@ router.post('/', protect, upload.single('file'), (req, res) => {
 // @desc    Upload multiple files
 // @route   POST /api/v1/upload/multiple
 // @access  Private
-router.post('/multiple', protect, upload.array('files', 5), (req, res) => {
+router.post('/multiple', authenticate, upload.array('files', 5), (req, res) => {
   if (!req.files || req.files.length === 0) {
     return res.status(400).json({ success: false, message: 'Please upload files' });
   }
