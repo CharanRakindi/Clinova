@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import api from '../../api/axios';
 import StatCard from '../../components/StatCard';
+import { SkeletonCard } from '../../components/SkeletonLoader';
 import { Calendar, FileText, Clock, HeartPulse, ShieldAlert, Heart, Activity, FileCheck, Pill } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
@@ -66,7 +67,7 @@ const PatientDashboard = () => {
     }
   });
 
-  if (isLoading) return <div className="p-8 flex justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div></div>;
+  if (isLoading) return <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4"><SkeletonCard /><SkeletonCard /><SkeletonCard /><SkeletonCard /></div>;
 
   // Extract vitals data for chart
   const vitalsChartData = records
@@ -82,7 +83,7 @@ const PatientDashboard = () => {
   return (
     <div className="space-y-8 pb-8 animate-fade-in">
       {/* Welcome Banner */}
-      <div className="relative rounded-3xl bg-gradient-to-r from-indigo-600 to-blue-700 p-8 shadow-lg shadow-blue-200 dark:shadow-blue-950/20 overflow-hidden text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="relative rounded-3xl bg-gradient-to-r from-indigo-600 to-blue-700 p-8 shadow-lg shadow-blue-200 overflow-hidden text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="absolute right-0 top-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-white opacity-10 blur-3xl"></div>
         <div className="absolute right-32 bottom-0 -mb-16 w-48 h-48 rounded-full bg-indigo-400 opacity-20 blur-2xl"></div>
         
@@ -121,12 +122,12 @@ const PatientDashboard = () => {
         <div className="glass-card p-6 flex flex-col justify-between border-t-4 border-t-pink-500 relative overflow-hidden group">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Health Status</h3>
-            <div className="p-2.5 rounded-xl bg-pink-50 dark:bg-pink-950/20 text-pink-600 dark:text-pink-400 border border-pink-100 dark:border-pink-900/50 shadow-sm">
+            <div className="p-2.5 rounded-xl bg-pink-50 text-pink-600 border border-pink-100 shadow-sm">
               <HeartPulse className="w-5 h-5" />
             </div>
           </div>
           <div className="mt-6">
-            <p className="text-2xl font-extrabold text-slate-800 dark:text-slate-200 tracking-tight">Good</p>
+            <p className="text-2xl font-extrabold text-slate-800 tracking-tight">Good</p>
             <p className="mt-2 text-sm text-slate-500 font-medium">Keep up the healthy habits!</p>
           </div>
         </div>
@@ -136,8 +137,8 @@ const PatientDashboard = () => {
         {/* Left Side: Profile Summary & Quick list */}
         <div className="lg:col-span-1 space-y-6">
           {/* Profile Card */}
-          <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-100 dark:border-slate-800/80 shadow-sm space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white pb-3 border-b border-slate-100 dark:border-slate-800">Health Profile</h3>
+          <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-4">
+            <h3 className="text-lg font-bold text-slate-900 pb-3 border-b border-slate-100">Health Profile</h3>
             
             <div className="space-y-3.5 text-sm font-semibold">
               <div className="flex justify-between">
@@ -146,26 +147,26 @@ const PatientDashboard = () => {
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-400">Emergency contact</span>
-                <span className="text-slate-700 dark:text-slate-350">{profile?.emergencyContact?.name || 'Mary Doe'} ({profile?.emergencyContact?.relationship || 'Spouse'})</span>
+                <span className="text-slate-700">{profile?.emergencyContact?.name || 'Mary Doe'} ({profile?.emergencyContact?.relationship || 'Spouse'})</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-400">Insurance provider</span>
-                <span className="text-slate-700 dark:text-slate-350">{profile?.insuranceProvider || 'MetLife Health'}</span>
+                <span className="text-slate-700">{profile?.insuranceProvider || 'MetLife Health'}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-400">Insurance number</span>
-                <span className="text-slate-700 dark:text-slate-350">{profile?.insuranceNumber || 'MET-8932'}</span>
+                <span className="text-slate-700">{profile?.insuranceNumber || 'MET-8932'}</span>
               </div>
             </div>
           </div>
 
           {/* Active Medical Alerts */}
-          <div className="bg-rose-50/50 dark:bg-rose-950/10 p-5 rounded-3xl border border-rose-100 dark:border-rose-900/50 space-y-4">
-            <h3 className="text-lg font-bold text-rose-700 dark:text-rose-400 flex items-center gap-2">
+          <div className="bg-rose-50/50 p-5 rounded-3xl border border-rose-100 space-y-4">
+            <h3 className="text-lg font-bold text-rose-700 flex items-center gap-2">
               <ShieldAlert className="w-5 h-5" />
               Medical Alerts
             </h3>
-            <div className="text-sm font-medium text-rose-800 dark:text-rose-350">
+            <div className="text-sm font-medium text-rose-800">
               <ul className="list-disc pl-5 space-y-1.5 font-bold">
                 <li>Allergy: Penicillin (Severe Reaction)</li>
                 <li>Allergy: Peanuts (Moderate Reaction)</li>
@@ -178,8 +179,8 @@ const PatientDashboard = () => {
         <div className="lg:col-span-2 space-y-6">
           {/* Vitals Charts */}
           {vitalsChartData.length > 0 && (
-            <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-5 rounded-3xl shadow-sm">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Vitals Trends</h3>
+            <div className="bg-white border border-slate-100 p-5 rounded-3xl shadow-sm">
+              <h3 className="text-lg font-bold text-slate-900 mb-4">Vitals Trends</h3>
               <div className="h-[230px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={vitalsChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -196,12 +197,12 @@ const PatientDashboard = () => {
           )}
 
           {/* Active Lists Tabs */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl shadow-sm overflow-hidden">
-            <div className="flex border-b border-slate-100 dark:border-slate-850 p-2 gap-1 bg-slate-50/50 dark:bg-slate-900/50">
+          <div className="bg-white border border-slate-100 rounded-3xl shadow-sm overflow-hidden">
+            <div className="flex border-b border-slate-100 p-2 gap-1 bg-slate-50/50">
               <button 
                 onClick={() => setActiveTab('overview')} 
                 className={`flex-1 py-2 px-3 text-xs font-bold rounded-xl transition-all ${
-                  activeTab === 'overview' ? 'bg-white dark:bg-slate-850 shadow-sm text-primary-600 dark:text-primary-400' : 'text-slate-500 hover:text-slate-800'
+                  activeTab === 'overview' ? 'bg-white shadow-sm text-primary-600' : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
                 Appointments
@@ -209,7 +210,7 @@ const PatientDashboard = () => {
               <button 
                 onClick={() => setActiveTab('prescriptions')} 
                 className={`flex-1 py-2 px-3 text-xs font-bold rounded-xl transition-all ${
-                  activeTab === 'prescriptions' ? 'bg-white dark:bg-slate-850 shadow-sm text-primary-600 dark:text-primary-400' : 'text-slate-500 hover:text-slate-800'
+                  activeTab === 'prescriptions' ? 'bg-white shadow-sm text-primary-600' : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
                 Prescriptions
@@ -217,7 +218,7 @@ const PatientDashboard = () => {
               <button 
                 onClick={() => setActiveTab('reports')} 
                 className={`flex-1 py-2 px-3 text-xs font-bold rounded-xl transition-all ${
-                  activeTab === 'reports' ? 'bg-white dark:bg-slate-850 shadow-sm text-primary-600 dark:text-primary-400' : 'text-slate-500 hover:text-slate-800'
+                  activeTab === 'reports' ? 'bg-white shadow-sm text-primary-600' : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
                 Lab Reports
@@ -233,9 +234,9 @@ const PatientDashboard = () => {
                     </div>
                   ) : (
                     appointments.map(apt => (
-                      <div key={apt._id} className="flex justify-between items-center p-3 rounded-xl bg-slate-50/50 dark:bg-slate-850 border border-slate-100 dark:border-slate-800">
+                      <div key={apt._id} className="flex justify-between items-center p-3 rounded-xl bg-slate-50/50 border border-slate-100">
                         <div>
-                          <p className="font-extrabold text-sm text-slate-900 dark:text-white">Dr. {apt.doctor?.name}</p>
+                          <p className="font-extrabold text-sm text-slate-900">Dr. {apt.doctor?.name}</p>
                           <p className="text-xs font-semibold text-slate-400 mt-0.5">{format(new Date(apt.appointmentDate), 'MMM dd, yyyy')} • {apt.timeSlot}</p>
                         </div>
                         <span className="px-2.5 py-0.5 rounded-lg text-xs font-bold uppercase tracking-wider border border-emerald-100 bg-emerald-50 text-emerald-700">
@@ -255,10 +256,10 @@ const PatientDashboard = () => {
                     </div>
                   ) : (
                     prescriptions.map(p => (
-                      <div key={p._id} className="p-4 rounded-xl bg-slate-50/50 dark:bg-slate-850 border border-slate-100 dark:border-slate-800 space-y-2">
+                      <div key={p._id} className="p-4 rounded-xl bg-slate-50/50 border border-slate-100 space-y-2">
                         <div className="flex justify-between items-start">
                           <div>
-                            <p className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-1">
+                            <p className="font-extrabold text-sm text-slate-900 flex items-center gap-1">
                               <Pill className="w-4 h-4 text-primary-500" />
                               {p.medicines?.[0]?.medicineName} {p.medicines?.length > 1 && `+${p.medicines.length - 1} more`}
                             </p>
@@ -283,9 +284,9 @@ const PatientDashboard = () => {
                     </div>
                   ) : (
                     labReports.map(report => (
-                      <div key={report._id} className="flex justify-between items-center p-3 rounded-xl bg-slate-50/50 dark:bg-slate-850 border border-slate-100 dark:border-slate-800">
+                      <div key={report._id} className="flex justify-between items-center p-3 rounded-xl bg-slate-50/50 border border-slate-100">
                         <div>
-                          <p className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-1">
+                          <p className="font-extrabold text-sm text-slate-900 flex items-center gap-1">
                             <FileCheck className="w-4 h-4 text-emerald-500" />
                             {report.testName}
                           </p>

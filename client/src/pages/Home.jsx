@@ -12,7 +12,7 @@ const Home = () => {
               <Activity className="h-6 w-6 text-white" />
             </div>
             <span className="text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700 tracking-tight">
-              MediVault
+              Clinova
             </span>
           </div>
           <div className="flex flex-1 justify-end gap-4 items-center">

@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../../api/axios';
 import StatCard from '../../components/StatCard';
 import InteractiveCalendar from '../../components/InteractiveCalendar';
+import { SkeletonCard } from '../../components/SkeletonLoader';
 import { Calendar, Users, CheckCircle, Clock, ChevronRight, PenTool, Check, ToggleLeft, ToggleRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
@@ -14,11 +15,11 @@ const DoctorDashboard = () => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const [isAvailable, setIsAvailable] = useState(true);
-  const [quickNote, setQuickNote] = useState(() => localStorage.getItem(`medivault_note_${user?._id}`) || '');
+  const [quickNote, setQuickNote] = useState(() => localStorage.getItem(`clinova_note_${user?._id}`) || '');
 
   useEffect(() => {
     if (user?._id) {
-      localStorage.setItem(`medivault_note_${user._id}`, quickNote);
+      localStorage.setItem(`clinova_note_${user._id}`, quickNote);
     }
   }, [quickNote, user?._id]);
 
@@ -53,7 +54,7 @@ const DoctorDashboard = () => {
     },
   });
 
-  if (isLoading) return <div className="p-8 flex justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div></div>;
+  if (isLoading) return <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-4"><SkeletonCard /><SkeletonCard /><SkeletonCard /><SkeletonCard /></div>;
 
   const todayStr = format(new Date(), 'yyyy-MM-dd');
   
@@ -76,7 +77,7 @@ const DoctorDashboard = () => {
   return (
     <div className="space-y-8 pb-8">
       {/* Welcome Banner */}
-      <div className="relative rounded-2xl bg-gradient-to-r from-teal-600 to-emerald-700 p-8 shadow-lg shadow-teal-200 dark:shadow-teal-900/20 overflow-hidden text-white animate-fade-in-up flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="relative rounded-2xl bg-gradient-to-r from-teal-600 to-emerald-700 p-8 shadow-lg shadow-teal-200 overflow-hidden text-white animate-fade-in-up flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         {/* Decorative elements */}
         <div className="absolute right-0 top-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-white opacity-10 blur-3xl"></div>
         
@@ -133,8 +134,8 @@ const DoctorDashboard = () => {
         {/* Patient Queue & Notes */}
         <div className="lg:col-span-1 space-y-6">
           {/* Today's Queue */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-5 rounded-2xl shadow-sm space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <div className="bg-white border border-slate-100 p-5 rounded-2xl shadow-sm space-y-4">
+            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
               <Clock className="w-5 h-5 text-primary-500" />
               Patient Queue
             </h3>
@@ -156,17 +157,17 @@ const DoctorDashboard = () => {
                       animate={{ opacity: 1, height: 'auto', y: 0 }}
                       exit={{ opacity: 0, height: 0, x: -30 }}
                       transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                      className="flex justify-between items-center p-3 rounded-xl border border-slate-100 dark:border-slate-850 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors overflow-hidden"
+                      className="flex justify-between items-center p-3 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors overflow-hidden"
                     >
                       <div>
-                        <p className="font-extrabold text-sm text-slate-900 dark:text-white">{apt.patient?.name}</p>
+                        <p className="font-extrabold text-sm text-slate-900">{apt.patient?.name}</p>
                         <p className="text-xs font-semibold text-slate-400 mt-0.5">{apt.timeSlot} • {apt.reason}</p>
                       </div>
                       <div className="flex gap-1">
                         {apt.status !== 'completed' && (
                           <button
                             onClick={() => updateStatus.mutate({ id: apt._id, status: 'completed' })}
-                            className="p-1.5 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 rounded-lg transition-colors"
+                            className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
                             title="Complete consultation"
                           >
                             <Check className="w-4 h-4" />
@@ -174,7 +175,7 @@ const DoctorDashboard = () => {
                         )}
                         <Link 
                           to={`/doctor/patients/${apt.patient?._id}`}
-                          className="p-1.5 text-slate-400 hover:text-primary-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                          className="p-1.5 text-slate-400 hover:text-primary-600 rounded-lg hover:bg-slate-50 transition-colors"
                         >
                           <ChevronRight className="w-4.5 h-4.5" />
                         </Link>
@@ -187,8 +188,8 @@ const DoctorDashboard = () => {
           </div>
 
           {/* Quick Notes Pad */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-5 rounded-2xl shadow-sm space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <div className="bg-white border border-slate-100 p-5 rounded-2xl shadow-sm space-y-4">
+            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
               <PenTool className="w-5 h-5 text-primary-500" />
               Quick Notes Pad
             </h3>
@@ -196,15 +197,15 @@ const DoctorDashboard = () => {
               rows={4}
               value={quickNote}
               onChange={(e) => setQuickNote(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-500/20 text-slate-700 dark:text-slate-200"
+              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-500/20 text-slate-700"
               placeholder="Jot down quick reminders or follow-ups. Saved locally..."
             />
           </div>
         </div>
 
         {/* Schedule Calendar */}
-        <div id="calendar-view" className="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-5 rounded-2xl shadow-sm">
-          <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Interactive Schedule</h3>
+        <div id="calendar-view" className="lg:col-span-2 bg-white border border-slate-100 p-5 rounded-2xl shadow-sm">
+          <h3 className="text-lg font-bold text-slate-900 mb-4">Interactive Schedule</h3>
           <InteractiveCalendar 
             events={allAppointments || []} 
             onSelectEvent={handleSelectEvent}

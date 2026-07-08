@@ -1,4 +1,4 @@
-# 🏥 MediVault
+# 🏥 Clinova
 
 A premium, full-featured **Electronic Health Record (EHR) and Medical Record Management System** built with the MERN stack. Designed with a modern healthcare SaaS aesthetic inspired by Linear, Stripe, and Apple HIG.
 
@@ -59,8 +59,8 @@ A premium, full-featured **Electronic Health Record (EHR) and Medical Record Man
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/CharanRakindi/MediVault.git
-cd MediVault
+git clone https://github.com/CharanRakindi/Clinova.git
+cd Clinova
 ```
 
 ### 2. Setup the Backend
@@ -116,8 +116,8 @@ After seeding, log in with:
 
 | Role | Email | Password |
 |------|-------|----------|
-| **Admin** | `admin@medivault.com` | `password123` |
-| **Doctor** | `sarah@medivault.com` | `password123` |
+| **Admin** | `admin@clinova.com` | `password123` |
+| **Doctor** | `sarah@clinova.com` | `password123` |
 | **Patient** | `john@example.com` | `password123` |
 
 ---
@@ -125,7 +125,7 @@ After seeding, log in with:
 ## 📁 Project Structure
 
 ```
-medivault/
+clinova/
 ├── client/                    # React frontend (Vite)
 │   ├── src/
 │   │   ├── api/               # Axios instance & interceptors

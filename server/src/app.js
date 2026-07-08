@@ -59,7 +59,7 @@ app.use('/api', limiter);
 
 // Basic route for testing
 app.get('/', (req, res) => {
-  res.send('MediVault API is running...');
+  res.send('Clinova API is running...');
 });
 
 // Routes

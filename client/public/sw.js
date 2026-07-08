@@ -1,4 +1,4 @@
-const CACHE_NAME = 'medivault-cache-v1';
+const CACHE_NAME = 'clinova-cache-v1';
 const urlsToCache = [
   '/',
   '/index.html',

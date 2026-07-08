@@ -1,6 +1,5 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  darkMode: 'class',
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -9,33 +8,43 @@ export default {
     extend: {
       colors: {
         primary: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#bae6fd',
-          300: '#7dd3fc',
-          400: '#38bdf8',
-          500: '#0ea5e9',
-          600: '#0284c7',
-          700: '#0369a1',
-          800: '#075985',
-          900: '#0c4a6e',
+          DEFAULT: '#2563EB',
+          50: '#eff6ff',
+          100: '#dbeafe',
+          200: '#bfdbfe',
+          300: '#93c5fd',
+          400: '#60a5fa',
+          500: '#3b82f6',
+          600: '#2563eb',
+          700: '#1d4ed8',
+          800: '#1e40af',
+          900: '#1e3a8a',
+          950: '#172554',
         },
-        brand: {
-          light: '#38bdf8',
-          DEFAULT: '#0ea5e9',
-          dark: '#0284c7',
-        }
+        accent: {
+          DEFAULT: '#38BDF8',
+        },
+        success: {
+          DEFAULT: '#22C55E',
+        },
+        warning: {
+          DEFAULT: '#F59E0B',
+        },
+        danger: {
+          DEFAULT: '#EF4444',
+        },
+        background: '#F8FAFC',
+        card: '#FFFFFF',
+        sidebar: '#0F172A',
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
       },
       boxShadow: {
         'premium': '0 8px 30px rgba(0, 0, 0, 0.03)',
-        'premium-dark': '0 8px 30px rgba(0, 0, 0, 0.4)',
-        'glow': '0 0 24px rgba(14, 165, 233, 0.12)',
-        'glow-green': '0 0 24px rgba(16, 185, 129, 0.12)',
+        'glow': '0 0 24px rgba(37, 99, 235, 0.12)',
+        'glow-green': '0 0 24px rgba(34, 197, 94, 0.12)',
         'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.05)',
-        'glass-dark': '0 8px 32px 0 rgba(0, 0, 0, 0.3)',
       },
       animation: {
         'fade-in': 'fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1)',

@@ -36,7 +36,7 @@ const seedData = async () => {
     // 1. Create Admins, Receptionists, Lab Techs
     const adminUser = await User.create({
       name: 'System Admin',
-      email: 'admin@medivault.com',
+      email: 'admin@clinova.com',
       password: 'password123',
       role: 'admin',
       gender: 'other',
@@ -44,7 +44,7 @@ const seedData = async () => {
 
     const receptionistUser = await User.create({
       name: 'Emily Rose',
-      email: 'receptionist@medivault.com',
+      email: 'receptionist@clinova.com',
       password: 'password123',
       role: 'receptionist',
       gender: 'female',
@@ -53,7 +53,7 @@ const seedData = async () => {
 
     const labtechUser = await User.create({
       name: 'Alex Vance',
-      email: 'labtech@medivault.com',
+      email: 'labtech@clinova.com',
       password: 'password123',
       role: 'lab_technician',
       gender: 'male',
@@ -67,8 +67,8 @@ const seedData = async () => {
 
     // 3. Create Doctors
     const doctorUsers = await User.create([
-      { name: 'Dr. Sarah Jenkins', email: 'sarah@medivault.com', password: 'password123', role: 'doctor', gender: 'female', phone: '555-1111' },
-      { name: 'Dr. Michael Chen', email: 'michael@medivault.com', password: 'password123', role: 'doctor', gender: 'male', phone: '555-2222' },
+      { name: 'Dr. Sarah Jenkins', email: 'sarah@clinova.com', password: 'password123', role: 'doctor', gender: 'female', phone: '555-1111' },
+      { name: 'Dr. Michael Chen', email: 'michael@clinova.com', password: 'password123', role: 'doctor', gender: 'male', phone: '555-2222' },
     ]);
 
     // 4. Create Patients

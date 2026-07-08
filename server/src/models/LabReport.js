@@ -27,8 +27,8 @@ const labReportSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['pending', 'completed', 'cancelled'],
-      default: 'pending',
+      enum: ['ordered', 'sample_collected', 'processing', 'completed', 'reviewed', 'cancelled'],
+      default: 'ordered',
     },
     resultSummary: String,
     referenceRange: String,

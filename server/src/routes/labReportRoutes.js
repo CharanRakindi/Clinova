@@ -1,5 +1,5 @@
 import express from 'express';
-import { orderLabTest, uploadLabResult, getLabReports, getLabReportById } from '../controllers/labReportController.js';
+import { orderLabTest, uploadLabResult, getLabReports, getLabReportById, updateLabReportStatus } from '../controllers/labReportController.js';
 import { authenticate, authorizeRoles } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -12,6 +12,9 @@ router.route('/')
 
 router.route('/:id')
   .get(getLabReportById);
+
+router.route('/:id/status')
+  .patch(authorizeRoles('lab_technician', 'admin', 'doctor'), updateLabReportStatus);
 
 router.route('/:id/results')
   .patch(authorizeRoles('lab_technician', 'admin'), uploadLabResult);

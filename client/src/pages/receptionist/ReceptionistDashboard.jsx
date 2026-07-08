@@ -116,8 +116,8 @@ export default function ReceptionistDashboard() {
   return (
     <div className="space-y-6 pb-8 animate-fade-in">
       {/* Welcome Banner */}
-      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
-        <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Receptionist Portal</h1>
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Receptionist Portal</h1>
         <p className="text-sm font-medium text-slate-500 mt-1">Register new patients, manage appointment check-ins, and schedule consultations</p>
       </div>
 
@@ -125,8 +125,8 @@ export default function ReceptionistDashboard() {
         {/* Left Side: Register and Book */}
         <div className="lg:col-span-1 space-y-6">
           {/* Patient Registration */}
-          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
               <UserPlus className="w-5 h-5 text-primary-500" />
               Register Patient
             </h3>
@@ -137,7 +137,7 @@ export default function ReceptionistDashboard() {
                   type="text"
                   value={registerData.name}
                   onChange={(e) => setRegisterData({...registerData, name: e.target.value})}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-500/20"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-500/20"
                   placeholder="John Doe"
                 />
               </div>
@@ -147,7 +147,7 @@ export default function ReceptionistDashboard() {
                   type="email"
                   value={registerData.email}
                   onChange={(e) => setRegisterData({...registerData, email: e.target.value})}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-500/20"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-500/20"
                   placeholder="john@example.com"
                 />
               </div>
@@ -157,7 +157,7 @@ export default function ReceptionistDashboard() {
                   type="text"
                   value={registerData.phone}
                   onChange={(e) => setRegisterData({...registerData, phone: e.target.value})}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-500/20"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-500/20"
                   placeholder="555-0101"
                 />
               </div>
@@ -167,7 +167,7 @@ export default function ReceptionistDashboard() {
                   <select
                     value={registerData.gender}
                     onChange={(e) => setRegisterData({...registerData, gender: e.target.value})}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-500/20"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-500/20"
                   >
                     <option value="male">Male</option>
                     <option value="female">Female</option>
@@ -186,8 +186,8 @@ export default function ReceptionistDashboard() {
           </div>
 
           {/* Book Appointment */}
-          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
               <Calendar className="w-5 h-5 text-primary-500" />
               Schedule Appointment
             </h3>
@@ -197,7 +197,7 @@ export default function ReceptionistDashboard() {
                 <select
                   value={aptData.patientId}
                   onChange={(e) => setAptData({...aptData, patientId: e.target.value})}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-500/20"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-500/20"
                 >
                   <option value="">Choose Patient...</option>
                   {patients?.map(p => (
@@ -211,7 +211,7 @@ export default function ReceptionistDashboard() {
                 <select
                   value={aptData.doctorId}
                   onChange={(e) => setAptData({...aptData, doctorId: e.target.value})}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-500/20"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-500/20"
                 >
                   <option value="">Choose Doctor...</option>
                   {doctors?.map(d => (
@@ -228,7 +228,7 @@ export default function ReceptionistDashboard() {
                     value={aptData.appointmentDate}
                     min={new Date().toISOString().split('T')[0]}
                     onChange={(e) => setAptData({...aptData, appointmentDate: e.target.value})}
-                    className="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-xl text-sm outline-none"
+                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none"
                   />
                 </div>
                 <div>
@@ -237,7 +237,7 @@ export default function ReceptionistDashboard() {
                     type="text"
                     value={aptData.timeSlot}
                     onChange={(e) => setAptData({...aptData, timeSlot: e.target.value})}
-                    className="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-xl text-sm outline-none"
+                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none"
                     placeholder="10:00 AM"
                   />
                 </div>
@@ -249,7 +249,7 @@ export default function ReceptionistDashboard() {
                   type="text"
                   value={aptData.reason}
                   onChange={(e) => setAptData({...aptData, reason: e.target.value})}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-xl text-sm outline-none"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none"
                   placeholder="Routine Health Check"
                 />
               </div>
@@ -257,7 +257,7 @@ export default function ReceptionistDashboard() {
               <button
                 type="submit"
                 disabled={bookAppointment.isPending}
-                className="w-full flex items-center justify-center gap-1.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-2.5 rounded-xl text-sm font-bold shadow-sm transition-colors disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-1.5 bg-slate-900 text-white py-2.5 rounded-xl text-sm font-bold shadow-sm transition-colors disabled:opacity-50"
               >
                 <Plus className="w-4 h-4" /> Book Appointment
               </button>
@@ -267,13 +267,13 @@ export default function ReceptionistDashboard() {
 
         {/* Right Side: Appointment Queue / List */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden p-5">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Patient Care Queue</h3>
+          <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden p-5">
+            <h3 className="text-lg font-bold text-slate-900 mb-4">Patient Care Queue</h3>
             
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-100 dark:border-slate-800 text-xs font-bold text-slate-400 uppercase tracking-wider bg-slate-50 dark:bg-slate-800/30">
+                  <tr className="border-b border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-wider bg-slate-50">
                     <th className="px-4 py-3">Patient</th>
                     <th className="px-4 py-3">Doctor</th>
                     <th className="px-4 py-3">Date / Time</th>
@@ -281,7 +281,7 @@ export default function ReceptionistDashboard() {
                     <th className="px-4 py-3 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-sm font-semibold">
+                <tbody className="divide-y divide-slate-100 text-sm font-semibold">
                   {!appointments || appointments.length === 0 ? (
                     <tr>
                       <td colSpan={5} className="px-4 py-8 text-center text-slate-400">
@@ -290,7 +290,7 @@ export default function ReceptionistDashboard() {
                     </tr>
                   ) : (
                     appointments.map((apt) => (
-                      <tr key={apt._id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+                      <tr key={apt._id} className="hover:bg-slate-50/50 transition-colors">
                         <td className="px-4 py-4">
                           <div className="flex flex-col">
                             <span>{apt.patient?.name}</span>

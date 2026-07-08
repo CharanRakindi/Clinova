@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
+import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import enUS from 'date-fns/locale/en-US';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
+import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import { cn } from '../utils/cn';
-import { useTheme } from 'next-themes';
 import './Calendar.css'; // Custom overrides for styling
 
 const locales = {
@@ -19,13 +20,12 @@ const localizer = dateFnsLocalizer({
   locales,
 });
 
-export default function InteractiveCalendar({ events = [], onSelectEvent }) {
-  const { theme } = useTheme();
+const DnDCalendar = withDragAndDrop(Calendar);
+
+export default function InteractiveCalendar({ events = [], onSelectEvent, onEventDrop }) {
   
   // Format our appointments into react-big-calendar events
   const calendarEvents = events.map(apt => {
-    // Basic string parsing to construct start/end dates
-    // Assuming appointmentDate is yyyy-MM-dd and timeSlot is like "09:00 AM"
     const dateStr = format(new Date(apt.appointmentDate), 'yyyy-MM-dd');
     const timeMatch = apt.timeSlot.match(/(\d+):(\d+)\s+(AM|PM)/);
     
@@ -78,9 +78,15 @@ export default function InteractiveCalendar({ events = [], onSelectEvent }) {
     };
   };
 
+  const handleEventDrop = (data) => {
+    if (onEventDrop) {
+      onEventDrop(data);
+    }
+  };
+
   return (
-    <div className={cn("bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-4 h-[600px] w-full", theme === 'dark' ? 'dark-calendar' : '')}>
-      <Calendar
+    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 h-[600px] w-full">
+      <DnDCalendar
         localizer={localizer}
         events={calendarEvents}
         startAccessor="start"
@@ -88,6 +94,8 @@ export default function InteractiveCalendar({ events = [], onSelectEvent }) {
         style={{ height: '100%', width: '100%' }}
         onSelectEvent={onSelectEvent}
         eventPropGetter={eventStyleGetter}
+        onEventDrop={handleEventDrop}
+        resizable={false}
         views={['month', 'week', 'day']}
         defaultView="month"
       />

@@ -1,6 +1,6 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { LogOut, Activity, LayoutDashboard, Users, Calendar, FileText, Menu, ChevronRight, Search, Sun, Moon, User, HelpCircle, Shield, FlaskConical, Clock } from 'lucide-react';
+import { LogOut, Activity, LayoutDashboard, Users, Calendar, FileText, Menu, Search, User, HelpCircle, Shield, FlaskConical, Clock } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { cn } from '../utils/cn';
 import CommandPalette from '../components/CommandPalette';
@@ -9,7 +9,6 @@ import OfflineBanner from '../components/OfflineBanner';
 import OnboardingTour from '../components/OnboardingTour';
 import KeyboardShortcutsHelp from '../components/KeyboardShortcutsHelp';
 import ErrorBoundary from '../components/ErrorBoundary';
-import { useTheme } from 'next-themes';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const RootLayout = () => {
@@ -17,7 +16,6 @@ const RootLayout = () => {
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { theme, setTheme } = useTheme();
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
@@ -64,7 +62,7 @@ const RootLayout = () => {
   const navItems = user ? navigation[user.role] || [] : [];
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 flex flex-col font-sans transition-colors duration-300">
+    <div className="min-h-screen bg-background flex flex-col font-sans transition-colors duration-300">
       <CommandPalette />
       <OfflineBanner />
       <OnboardingTour />
@@ -73,31 +71,31 @@ const RootLayout = () => {
       {/* Header */}
       <header className={cn(
         "sticky top-0 z-30 transition-all duration-300 border-b",
-        scrolled ? "bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-slate-200 dark:border-slate-800 shadow-sm" : "bg-white dark:bg-slate-900 border-transparent dark:border-transparent"
+        scrolled ? "bg-white/80 backdrop-blur-lg border-slate-200 shadow-sm" : "bg-white border-transparent"
       )}>
         <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 h-16">
           <div className="flex items-center gap-4">
             <button 
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="p-2 -ml-2 mr-2 text-slate-500 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg lg:hidden transition-colors"
+              className="p-2 -ml-2 mr-2 text-slate-500 hover:text-primary-600 hover:bg-primary-50 rounded-lg lg:hidden transition-colors"
             >
               <Menu className="w-5 h-5" />
             </button>
             <div className="flex items-center gap-2 lg:hidden">
-              <div className="bg-gradient-to-br from-primary-500 to-indigo-600 p-1.5 rounded-lg shadow-sm">
+              <div className="bg-gradient-to-br from-primary-600 to-accent p-1.5 rounded-lg shadow-sm">
                 <Activity className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300">
-                MediVault
+              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">
+                Clinova
               </span>
             </div>
 
             {/* Breadcrumb / Current Date for Large screens */}
-            <div className="hidden lg:flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
+            <div className="hidden lg:flex items-center gap-2 text-xs font-semibold text-slate-500">
               <Clock className="w-3.5 h-3.5 text-primary-500" />
               <span>{currentTime.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</span>
-              <span className="text-slate-300 dark:text-slate-700">•</span>
-              <span className="font-mono text-slate-600 dark:text-slate-300">
+              <span className="text-slate-300">•</span>
+              <span className="font-mono text-slate-600">
                 {currentTime.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
               </span>
             </div>
@@ -108,16 +106,16 @@ const RootLayout = () => {
             <button
               id="search-trigger"
               onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
-              className="hidden sm:flex items-center gap-2 text-sm text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700/50 transition-colors"
+              className="hidden sm:flex items-center gap-2 text-sm text-slate-400 bg-slate-50 hover:bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200 transition-colors"
             >
               <Search className="w-4 h-4" />
               <span>Search...</span>
-              <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono bg-white dark:bg-slate-700 rounded shadow-sm border border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-300">⌘K</kbd>
+              <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono bg-white rounded shadow-sm border border-slate-200 text-slate-500">⌘K</kbd>
             </button>
 
             {/* Mobile Search Icon */}
             <button 
-              className="sm:hidden p-2 text-slate-400 hover:text-primary-600 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg"
+              className="sm:hidden p-2 text-slate-400 hover:text-primary-600 hover:bg-slate-50 rounded-lg"
               onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
             >
               <Search className="w-5 h-5" />
@@ -125,33 +123,23 @@ const RootLayout = () => {
 
             <NotificationCenter />
 
-            {/* Theme Toggle */}
-            <button
-              id="theme-toggle"
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="p-2 text-slate-400 hover:text-amber-500 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors"
-              title="Toggle Theme"
-            >
-              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </button>
-
-            <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 hidden sm:block mx-1"></div>
+            <div className="w-px h-6 bg-slate-200 hidden sm:block mx-1"></div>
 
             <div className="flex items-center gap-3">
               <div className="hidden sm:flex flex-col items-end">
-                <span className="text-sm font-semibold text-slate-700 dark:text-slate-200 leading-none">{user?.name}</span>
-                <span className="text-[10px] font-bold text-primary-600 dark:text-primary-400 uppercase tracking-widest mt-1 bg-primary-50 dark:bg-primary-950/40 px-1.5 py-0.5 rounded border border-primary-100 dark:border-primary-900/50">
+                <span className="text-sm font-semibold text-slate-700 leading-none">{user?.name}</span>
+                <span className="text-[10px] font-bold text-primary-600 uppercase tracking-widest mt-1 bg-primary-50 px-1.5 py-0.5 rounded border border-primary-100">
                   {user?.role.replace('_', ' ')}
                 </span>
               </div>
-              <div className="w-9 h-9 bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/50 dark:to-primary-800/50 rounded-full flex items-center justify-center text-primary-700 dark:text-primary-300 font-bold shadow-inner ring-2 ring-white dark:ring-slate-800">
+              <div className="w-9 h-9 bg-gradient-to-br from-primary-100 to-primary-200 rounded-full flex items-center justify-center text-primary-700 font-bold shadow-inner ring-2 ring-white">
                 {user?.name?.charAt(0).toUpperCase()}
               </div>
             </div>
             
             <button 
               onClick={logout}
-              className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200"
+              className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200"
               title="Logout"
             >
               <LogOut className="w-5 h-5" />
@@ -171,7 +159,7 @@ const RootLayout = () => {
 
         {/* Dark Sidebar */}
         <aside className={cn(
-          "fixed inset-y-0 left-0 z-50 w-72 bg-gradient-sidebar flex flex-col transition-transform duration-300 ease-in-out shadow-2xl lg:shadow-none lg:translate-x-0 lg:static",
+          "fixed inset-y-0 left-0 z-50 w-72 bg-sidebar flex flex-col transition-transform duration-300 ease-in-out shadow-2xl lg:shadow-none lg:translate-x-0 lg:static",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}>
           {/* Sidebar Header (Logo) */}
@@ -181,7 +169,7 @@ const RootLayout = () => {
                 <Activity className="w-6 h-6 text-white" />
               </div>
               <span className="text-xl font-extrabold text-white tracking-tight">
-                MediVault
+                Clinova
               </span>
             </div>
           </div>
@@ -208,7 +196,7 @@ const RootLayout = () => {
                       "flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-200 group",
                       isActive 
                         ? "bg-white/10 text-white shadow-inner" 
-                        : "text-slate-350 hover:bg-white/5 hover:text-white"
+                        : "text-slate-400 hover:bg-white/5 hover:text-white"
                     )}
                   >
                     <div className="flex items-center gap-3">
@@ -234,7 +222,7 @@ const RootLayout = () => {
                 <div className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse" />
                 <span className="text-xs font-medium text-slate-300">System Online</span>
               </div>
-              <span className="text-[10px] font-bold text-slate-450 hover:text-white cursor-pointer transition-colors" onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: '?' }))}>
+              <span className="text-[10px] font-bold text-slate-500 hover:text-white cursor-pointer transition-colors" onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: '?' }))}>
                 Shortcuts (?)
               </span>
             </div>
@@ -242,7 +230,7 @@ const RootLayout = () => {
         </aside>
 
         {/* Main content */}
-        <main className="flex-1 overflow-y-auto bg-gradient-mesh dark:bg-[#030712]">
+        <main className="flex-1 overflow-y-auto bg-gradient-mesh">
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}

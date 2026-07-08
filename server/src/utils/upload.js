@@ -46,7 +46,7 @@ if (process.env.CLOUDINARY_CLOUD_NAME) {
         resource_type = 'raw';
       }
       return {
-        folder: 'medivault',
+        folder: 'clinova',
         resource_type: resource_type,
         public_id: `${Date.now()}-${path.parse(file.originalname).name}`,
       };

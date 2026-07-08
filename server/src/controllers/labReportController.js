@@ -93,6 +93,43 @@ export const uploadLabResult = async (req, res, next) => {
   }
 };
 
+// @desc    Update lab report status
+// @route   PATCH /api/v1/lab-reports/:id/status
+// @access  Private
+export const updateLabReportStatus = async (req, res, next) => {
+  try {
+    const { status } = req.body;
+    const labReport = await LabReport.findById(req.params.id);
+
+    if (!labReport) {
+      return res.status(404).json({ success: false, message: 'Lab report not found' });
+    }
+
+    const oldStatus = labReport.status;
+    labReport.status = status;
+    await labReport.save();
+
+    const populated = await LabReport.findById(labReport._id)
+      .populate('patient', 'name email')
+      .populate('doctor', 'name email');
+
+    await logAction(
+      req.user._id,
+      req.user.role,
+      'UPDATE',
+      'LabReport',
+      labReport._id,
+      req.ip,
+      req.headers['user-agent'],
+      { action: 'UPDATE_LAB_STATUS', oldStatus, newStatus: status, testName: labReport.testName }
+    );
+
+    res.status(200).json({ success: true, data: populated });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Get lab reports
 // @route   GET /api/v1/lab-reports
 // @access  Private

@@ -3,6 +3,7 @@ import api from '../../api/axios';
 import { useAuth } from '../../contexts/AuthContext';
 import { FileText, Heart, Thermometer, Activity, Calendar, Paperclip } from 'lucide-react';
 import { format } from 'date-fns';
+import { SkeletonTable } from '../../components/SkeletonLoader';
 
 const PatientMedicalRecords = () => {
   const { user } = useAuth();
@@ -16,7 +17,7 @@ const PatientMedicalRecords = () => {
     enabled: !!user?._id,
   });
 
-  if (isLoading) return <div className="p-8 flex justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div></div>;
+  if (isLoading) return <div className="p-8 bg-white rounded-2xl shadow-sm border border-slate-100"><SkeletonTable rows={5} /></div>;
 
   return (
     <div className="space-y-6 pb-8 animate-fade-in">

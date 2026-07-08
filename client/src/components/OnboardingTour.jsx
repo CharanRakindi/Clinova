@@ -3,7 +3,7 @@ import { HelpCircle, ChevronRight, X, Sparkles } from 'lucide-react';
 
 const steps = [
   {
-    title: "Welcome to MediVault 🏥",
+    title: "Welcome to Clinova 🏥",
     description: "Your next-gen Electronic Health Record & medical portfolio. Let's do a quick 45-second tour of the main features.",
     target: "body"
   },
@@ -34,7 +34,7 @@ export default function OnboardingTour() {
   const [currentStep, setCurrentStep] = useState(0);
 
   useEffect(() => {
-    const hasCompletedTour = localStorage.getItem('medivault_tour_completed');
+    const hasCompletedTour = localStorage.getItem('clinova_tour_completed');
     if (!hasCompletedTour) {
       // Open tour on first visit
       const timer = setTimeout(() => setIsOpen(true), 1500);
@@ -51,7 +51,7 @@ export default function OnboardingTour() {
   };
 
   const handleComplete = () => {
-    localStorage.setItem('medivault_tour_completed', 'true');
+    localStorage.setItem('clinova_tour_completed', 'true');
     setIsOpen(false);
   };
 
@@ -61,7 +61,7 @@ export default function OnboardingTour() {
         setCurrentStep(0);
         setIsOpen(true);
       }}
-      className="fixed bottom-6 left-6 z-[90] flex items-center gap-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 hover:border-primary-300 dark:hover:border-primary-800 px-3.5 py-2 rounded-full shadow-lg text-xs font-bold transition-all hover:scale-105 active:scale-95"
+      className="fixed bottom-6 left-6 z-[90] flex items-center gap-1.5 bg-white border border-slate-200 text-slate-600 hover:text-primary-600 hover:border-primary-300 px-3.5 py-2 rounded-full shadow-lg text-xs font-bold transition-all hover:scale-105 active:scale-95"
       title="Take onboarding tour"
     >
       <Sparkles className="w-3.5 h-3.5 text-primary-500 animate-pulse" />
@@ -73,41 +73,41 @@ export default function OnboardingTour() {
 
   return (
     <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4 animate-fade-in">
-      <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden transform animate-scale-in">
+      <div className="relative w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border border-slate-100 overflow-hidden transform animate-scale-in">
         {/* Gradients */}
         <div className="absolute top-0 right-0 -mr-16 -mt-16 w-36 h-36 bg-gradient-to-br from-primary-400 to-indigo-600 opacity-20 rounded-full blur-2xl"></div>
 
         <button 
           onClick={handleComplete} 
-          className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors"
         >
           <X className="w-4.5 h-4.5" />
         </button>
 
         <div className="flex items-center gap-2 mb-4">
-          <span className="px-2 py-0.5 bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 rounded-md text-[10px] font-bold tracking-wider uppercase">
+          <span className="px-2 py-0.5 bg-primary-100 text-primary-600 rounded-md text-[10px] font-bold tracking-wider uppercase">
             Step {currentStep + 1} of {steps.length}
           </span>
         </div>
 
-        <h3 className="text-xl font-extrabold text-slate-900 dark:text-white mb-2 pr-6">
+        <h3 className="text-xl font-extrabold text-slate-900 mb-2 pr-6">
           {step.title}
         </h3>
-        <p className="text-sm font-medium text-slate-600 dark:text-slate-400 leading-relaxed mb-6">
+        <p className="text-sm font-medium text-slate-600 leading-relaxed mb-6">
           {step.description}
         </p>
 
-        <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800">
+        <div className="flex items-center justify-between pt-4 border-t border-slate-100">
           <button 
             onClick={handleComplete} 
-            className="text-xs font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+            className="text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors"
           >
             Skip Tour
           </button>
           
           <button 
             onClick={handleNext} 
-            className="flex items-center gap-1 bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm"
+            className="flex items-center gap-1 bg-slate-900 text-white hover:bg-slate-800 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm"
           >
             <span>{currentStep === steps.length - 1 ? "Finish" : "Next"}</span>
             <ChevronRight className="w-3.5 h-3.5" />

@@ -11,6 +11,7 @@ const DoctorPatientDetail = () => {
   const { patientId } = useParams();
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('Overview');
   const [formData, setFormData] = useState({
     chiefComplaint: '',
     symptoms: '',
@@ -133,10 +134,22 @@ const DoctorPatientDetail = () => {
             </div>
             
             <div className="flex-1 w-full">
-              <h2 className="text-2xl font-extrabold text-slate-900 mb-1">{patient?.user?.name}</h2>
-              <div className="flex items-center gap-2 text-sm font-medium text-slate-500 mb-6">
-                <User className="w-4 h-4" /> {patient?.user?.gender || 'Unknown Gender'} • 
-                <span className="px-2 py-0.5 rounded bg-rose-50 text-rose-700 font-bold border border-rose-100">{patient?.bloodGroup || 'Blood Group N/A'}</span>
+              <div className="flex justify-between items-start">
+                <div>
+                  <h2 className="text-2xl font-extrabold text-slate-900 mb-1">{patient?.user?.name}</h2>
+                  <div className="flex items-center gap-2 text-sm font-medium text-slate-500 mb-6">
+                    <User className="w-4 h-4" /> {patient?.user?.gender || 'Unknown Gender'} • 
+                    <span className="px-2 py-0.5 rounded bg-rose-50 text-rose-700 font-bold border border-rose-100">{patient?.bloodGroup || 'Blood Group N/A'}</span>
+                  </div>
+                </div>
+                {/* Health Score Component */}
+                <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3 flex flex-col items-center">
+                  <span className="text-[10px] font-extrabold text-emerald-600 uppercase tracking-wider mb-1">Health Score</span>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl font-black text-emerald-600 leading-none">92</span>
+                    <span className="text-sm font-bold text-emerald-400">/100</span>
+                  </div>
+                </div>
               </div>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -165,128 +178,224 @@ const DoctorPatientDetail = () => {
         </div>
       </div>
 
-      {/* Medical Records Timeline */}
-      <div>
-        <h2 className="text-lg font-extrabold text-slate-900 mb-4 px-2">Medical History</h2>
-        
-        {(!records || records.length === 0) ? (
-          <div className="glass-card p-12 text-center flex flex-col items-center justify-center">
-            <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-              <FileText className="w-10 h-10 text-slate-300" />
-            </div>
-            <p className="text-slate-900 font-bold text-lg mb-1">No medical records</p>
-            <p className="text-slate-500 text-sm font-medium mb-6 max-w-md">This patient does not have any recorded medical history yet. Add a record to get started.</p>
+      {/* Structured Tabs */}
+      <div className="border-b border-slate-200">
+        <div className="flex gap-6 px-2">
+          {['Overview', 'Medical History', 'Lab Reports'].map(tab => (
             <button
-              onClick={() => setIsModalOpen(true)}
-              className="text-sm font-bold text-primary-600 bg-primary-50 px-5 py-2.5 rounded-xl hover:bg-primary-100 transition-colors shadow-sm"
+              key={tab}
+              className={`pb-3 text-sm font-bold transition-all relative ${
+                activeTab === tab 
+                  ? 'text-primary-600' 
+                  : 'text-slate-400 hover:text-slate-600'
+              }`}
+              onClick={() => setActiveTab(tab)}
             >
-              Add First Record
+              {tab}
+              {activeTab === tab && (
+                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-primary-600 rounded-t-full"></div>
+              )}
             </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Tab Content */}
+      <div className="mt-6">
+        {activeTab === 'Overview' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+               <h3 className="text-lg font-bold text-slate-900 mb-4">Latest Vitals</h3>
+               {records && records[0]?.vitals ? (
+                 <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-slate-50 p-4 rounded-xl">
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><Heart className="w-3.5 h-3.5" /> Pulse</p>
+                      <p className="text-xl font-extrabold text-slate-900">{records[0].vitals.pulse} <span className="text-sm text-slate-400">bpm</span></p>
+                    </div>
+                    <div className="bg-slate-50 p-4 rounded-xl">
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><Thermometer className="w-3.5 h-3.5" /> Temp</p>
+                      <p className="text-xl font-extrabold text-slate-900">{records[0].vitals.temperature}°C</p>
+                    </div>
+                    <div className="bg-slate-50 p-4 rounded-xl">
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><Activity className="w-3.5 h-3.5" /> BP</p>
+                      <p className="text-xl font-extrabold text-slate-900">{records[0].vitals.bloodPressureSystolic}/{records[0].vitals.bloodPressureDiastolic}</p>
+                    </div>
+                    <div className="bg-slate-50 p-4 rounded-xl">
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><span className="text-teal-500 font-black">O₂</span> SpO₂</p>
+                      <p className="text-xl font-extrabold text-slate-900">{records[0].vitals.oxygenSaturation}%</p>
+                    </div>
+                 </div>
+               ) : (
+                 <p className="text-sm font-medium text-slate-500">No vitals recorded yet.</p>
+               )}
+            </div>
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+               <h3 className="text-lg font-bold text-slate-900 mb-4">Recent Diagnosis</h3>
+               {records && records[0]?.diagnosis?.length > 0 ? (
+                  <div className="flex flex-col gap-3">
+                    {records[0].diagnosis.map((d, i) => (
+                      <div key={i} className="flex items-center gap-3 bg-indigo-50/50 p-3 rounded-xl border border-indigo-100">
+                        <div className="w-2 h-2 rounded-full bg-indigo-500"></div>
+                        <span className="font-bold text-indigo-900">{d}</span>
+                      </div>
+                    ))}
+                  </div>
+               ) : (
+                 <p className="text-sm font-medium text-slate-500">No recent diagnosis.</p>
+               )}
+            </div>
           </div>
-        ) : (
-          <div className="space-y-4">
-            {records.map((record) => (
-              <div key={record._id} className="glass-card p-6 relative group overflow-hidden hover:shadow-md transition-shadow">
-                <div className="absolute left-0 top-0 w-1.5 h-full bg-gradient-to-b from-primary-400 to-indigo-500"></div>
-                
-                <div className="flex flex-col sm:flex-row justify-between items-start gap-3 mb-5 pl-2">
-                  <div>
-                    <h3 className="text-lg font-extrabold text-slate-900">{record.chiefComplaint}</h3>
-                    <p className="text-sm font-medium text-slate-500 mt-1">
-                      {format(new Date(record.visitDate), 'MMMM dd, yyyy')} • Dr. {record.doctor?.name}
-                      {record.version > 1 && <span className="ml-2 text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md font-bold text-xs border border-amber-100">Amended v{record.version}</span>}
-                    </p>
-                  </div>
-                  <span className={`inline-flex px-3 py-1 text-xs font-bold rounded-lg uppercase tracking-wider border ${
-                    record.status === 'active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-50 text-slate-700 border-slate-200'
-                  }`}>
-                    {record.status}
-                  </span>
+        )}
+
+        {activeTab === 'Medical History' && (
+          <div className="animate-fade-in">
+            {(!records || records.length === 0) ? (
+              <div className="glass-card p-12 text-center flex flex-col items-center justify-center border border-slate-200 bg-white">
+                <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+                  <FileText className="w-10 h-10 text-slate-300" />
                 </div>
-
-                <div className="pl-2 space-y-4">
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    {record.diagnosis?.length > 0 && (
-                      <div className="flex-1">
-                        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Diagnosis</span>
-                        <div className="flex flex-wrap gap-2">
-                          {record.diagnosis.map((d, i) => (
-                            <span key={i} className="inline-flex px-2.5 py-1 text-xs font-bold rounded-md bg-indigo-50 text-indigo-700 border border-indigo-100">{d}</span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {record.symptoms?.length > 0 && (
-                      <div className="flex-1">
-                        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Symptoms</span>
-                        <div className="flex flex-wrap gap-2">
-                          {record.symptoms.map((s, i) => (
-                            <span key={i} className="inline-flex px-2.5 py-1 text-xs font-bold rounded-md bg-amber-50 text-amber-700 border border-amber-100">{s}</span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {record.clinicalNotes && (
-                    <div>
-                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Clinical Notes</span>
-                      <p className="text-sm font-medium text-slate-700 bg-slate-50 p-4 rounded-xl border border-slate-100">{record.clinicalNotes}</p>
-                    </div>
-                  )}
-
-                  {record.vitals && Object.keys(record.vitals).some(k => record.vitals[k]) && (
-                    <div>
-                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Vitals Recorded</span>
-                      <div className="flex flex-wrap gap-3">
-                        {record.vitals.pulse && (
-                          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 bg-white border border-slate-200 shadow-sm px-3 py-1.5 rounded-lg">
-                            <Heart className="w-3.5 h-3.5 text-rose-500" /> {record.vitals.pulse} bpm
-                          </div>
-                        )}
-                        {record.vitals.temperature && (
-                          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 bg-white border border-slate-200 shadow-sm px-3 py-1.5 rounded-lg">
-                            <Thermometer className="w-3.5 h-3.5 text-orange-500" /> {record.vitals.temperature}°C
-                          </div>
-                        )}
-                        {record.vitals.bloodPressureSystolic && (
-                          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 bg-white border border-slate-200 shadow-sm px-3 py-1.5 rounded-lg">
-                            <Activity className="w-3.5 h-3.5 text-blue-500" /> {record.vitals.bloodPressureSystolic}/{record.vitals.bloodPressureDiastolic} mmHg
-                          </div>
-                        )}
-                        {record.vitals.oxygenSaturation && (
-                          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 bg-white border border-slate-200 shadow-sm px-3 py-1.5 rounded-lg">
-                            <span className="text-teal-500 font-extrabold">O₂</span> {record.vitals.oxygenSaturation}%
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {record.treatmentPlan && (
-                    <div className="mt-4 p-4 bg-emerald-50/50 border border-emerald-100 rounded-xl relative overflow-hidden">
-                      <div className="absolute top-0 left-0 w-1 h-full bg-emerald-400"></div>
-                      <p className="text-xs font-bold text-emerald-800 uppercase tracking-wider mb-2">Treatment Plan</p>
-                      <p className="text-sm font-medium text-emerald-900">{record.treatmentPlan}</p>
-                    </div>
-                  )}
-
-                  {record.attachments && record.attachments.length > 0 && (
-                    <div>
-                       <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Attachments</span>
-                       <div className="flex flex-wrap gap-2">
-                         {record.attachments.map((att, idx) => (
-                           <a key={idx} href={att.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-sm font-medium text-primary-600 bg-primary-50 px-3 py-1.5 rounded-lg hover:bg-primary-100 border border-primary-100 transition-colors">
-                             <Paperclip className="w-4 h-4" /> {att.filename}
-                           </a>
-                         ))}
-                       </div>
-                    </div>
-                  )}
-                </div>
+                <p className="text-slate-900 font-bold text-lg mb-1">No medical records</p>
+                <p className="text-slate-500 text-sm font-medium mb-6 max-w-md">This patient does not have any recorded medical history yet. Add a record to get started.</p>
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  className="text-sm font-bold text-primary-600 bg-primary-50 px-5 py-2.5 rounded-xl hover:bg-primary-100 transition-colors shadow-sm"
+                >
+                  Add First Record
+                </button>
               </div>
-            ))}
+            ) : (
+              <div className="space-y-4">
+                {records.map((record) => (
+                  <div key={record._id} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 relative group overflow-hidden hover:shadow-md transition-shadow">
+                    <div className="absolute left-0 top-0 w-1.5 h-full bg-gradient-to-b from-primary-400 to-indigo-500"></div>
+                    
+                    <div className="flex flex-col sm:flex-row justify-between items-start gap-3 mb-5 pl-2">
+                      <div>
+                        <h3 className="text-lg font-extrabold text-slate-900">{record.chiefComplaint}</h3>
+                        <p className="text-sm font-medium text-slate-500 mt-1">
+                          {format(new Date(record.visitDate), 'MMMM dd, yyyy')} • Dr. {record.doctor?.name}
+                          {record.version > 1 && <span className="ml-2 text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md font-bold text-xs border border-amber-100">Amended v{record.version}</span>}
+                        </p>
+                      </div>
+                      <span className={`inline-flex px-3 py-1 text-xs font-bold rounded-lg uppercase tracking-wider border ${
+                        record.status === 'active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-50 text-slate-700 border-slate-200'
+                      }`}>
+                        {record.status}
+                      </span>
+                    </div>
+
+                    <div className="pl-2 space-y-5">
+                      {/* Subjective */}
+                      {(record.symptoms?.length > 0 || record.chiefComplaint) && (
+                        <div>
+                          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2 flex items-center gap-1">
+                            <div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div> Subjective (S)
+                          </span>
+                          <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                            <p className="text-sm font-semibold text-slate-800 mb-2">Chief Complaint: <span className="font-normal text-slate-600">{record.chiefComplaint}</span></p>
+                            {record.symptoms?.length > 0 && (
+                              <div className="flex flex-wrap gap-2">
+                                {record.symptoms.map((s, i) => (
+                                  <span key={i} className="inline-flex px-2.5 py-1 text-[11px] font-bold rounded-md bg-amber-50 text-amber-700 border border-amber-100">{s}</span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Objective */}
+                      {record.vitals && Object.keys(record.vitals).some(k => record.vitals[k]) && (
+                        <div>
+                          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2 flex items-center gap-1">
+                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400"></div> Objective (O)
+                          </span>
+                          <div className="flex flex-wrap gap-3">
+                            {record.vitals.pulse && (
+                              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 bg-white border border-slate-200 shadow-sm px-3 py-1.5 rounded-lg">
+                                <Heart className="w-3.5 h-3.5 text-rose-500" /> {record.vitals.pulse} bpm
+                              </div>
+                            )}
+                            {record.vitals.temperature && (
+                              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 bg-white border border-slate-200 shadow-sm px-3 py-1.5 rounded-lg">
+                                <Thermometer className="w-3.5 h-3.5 text-orange-500" /> {record.vitals.temperature}°C
+                              </div>
+                            )}
+                            {record.vitals.bloodPressureSystolic && (
+                              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 bg-white border border-slate-200 shadow-sm px-3 py-1.5 rounded-lg">
+                                <Activity className="w-3.5 h-3.5 text-blue-500" /> {record.vitals.bloodPressureSystolic}/{record.vitals.bloodPressureDiastolic} mmHg
+                              </div>
+                            )}
+                            {record.vitals.oxygenSaturation && (
+                              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 bg-white border border-slate-200 shadow-sm px-3 py-1.5 rounded-lg">
+                                <span className="text-teal-500 font-extrabold">O₂</span> {record.vitals.oxygenSaturation}%
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Assessment */}
+                      {(record.diagnosis?.length > 0 || record.clinicalNotes) && (
+                        <div>
+                          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2 flex items-center gap-1">
+                            <div className="w-1.5 h-1.5 rounded-full bg-purple-400"></div> Assessment (A)
+                          </span>
+                          <div className="bg-purple-50/30 p-3 rounded-xl border border-purple-100">
+                            {record.diagnosis?.length > 0 && (
+                              <div className="flex flex-wrap gap-2 mb-3">
+                                {record.diagnosis.map((d, i) => (
+                                  <span key={i} className="inline-flex px-2.5 py-1 text-[11px] font-bold rounded-md bg-purple-100 text-purple-700 border border-purple-200">{d}</span>
+                                ))}
+                              </div>
+                            )}
+                            {record.clinicalNotes && (
+                              <p className="text-sm font-medium text-slate-700">{record.clinicalNotes}</p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Plan */}
+                      {record.treatmentPlan && (
+                        <div>
+                          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2 flex items-center gap-1">
+                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400"></div> Plan (P)
+                          </span>
+                          <div className="p-4 bg-emerald-50/50 border border-emerald-100 rounded-xl relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-1 h-full bg-emerald-400"></div>
+                            <p className="text-sm font-medium text-emerald-900">{record.treatmentPlan}</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {record.attachments && record.attachments.length > 0 && (
+                        <div>
+                           <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Attachments</span>
+                           <div className="flex flex-wrap gap-2">
+                             {record.attachments.map((att, idx) => (
+                               <a key={idx} href={att.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-sm font-medium text-primary-600 bg-primary-50 px-3 py-1.5 rounded-lg hover:bg-primary-100 border border-primary-100 transition-colors">
+                                 <Paperclip className="w-4 h-4" /> {att.filename}
+                               </a>
+                             ))}
+                           </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'Lab Reports' && (
+          <div className="glass-card p-12 text-center flex flex-col items-center justify-center border border-slate-200 bg-white animate-fade-in">
+            <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+              <Activity className="w-10 h-10 text-slate-300" />
+            </div>
+            <p className="text-slate-900 font-bold text-lg mb-1">No lab reports found</p>
+            <p className="text-slate-500 text-sm font-medium mb-6 max-w-md">Laboratory reports for this patient will appear here once finalized by a Lab Technician.</p>
           </div>
         )}
       </div>

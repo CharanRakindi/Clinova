@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import { Plus, X, Calendar as CalendarIcon, Clock, Stethoscope, FileText, CheckCircle, List } from 'lucide-react';
 import { toast } from 'sonner';
 import InteractiveCalendar from '../../components/InteractiveCalendar';
+import { SkeletonTable } from '../../components/SkeletonLoader';
 
 const PatientAppointments = () => {
   const queryClient = useQueryClient();
@@ -83,27 +84,27 @@ const PatientAppointments = () => {
     });
   };
 
-  if (isLoading) return <div className="p-8 flex justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div></div>;
+  if (isLoading) return <div className="p-8 bg-white rounded-2xl shadow-sm border border-slate-100"><SkeletonTable rows={5} /></div>;
 
   return (
     <div className="space-y-6 pb-8 animate-fade-in">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">My Appointments</h1>
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-1">Manage your upcoming and past visits</p>
+          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">My Appointments</h1>
+          <p className="text-sm font-medium text-slate-500 mt-1">Manage your upcoming and past visits</p>
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <div className="flex items-center p-1 bg-slate-100 dark:bg-slate-800 rounded-lg">
+          <div className="flex items-center p-1 bg-slate-100 rounded-lg">
             <button
               onClick={() => setViewMode('list')}
-              className={`p-2 rounded-md flex items-center justify-center transition-colors ${viewMode === 'list' ? 'bg-white dark:bg-slate-700 shadow-sm text-primary-600 dark:text-primary-400' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+              className={`p-2 rounded-md flex items-center justify-center transition-colors ${viewMode === 'list' ? 'bg-white shadow-sm text-primary-600' : 'text-slate-500 hover:text-slate-700'}`}
               title="List View"
             >
               <List className="w-4 h-4" />
             </button>
             <button
               onClick={() => setViewMode('calendar')}
-              className={`p-2 rounded-md flex items-center justify-center transition-colors ${viewMode === 'calendar' ? 'bg-white dark:bg-slate-700 shadow-sm text-primary-600 dark:text-primary-400' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+              className={`p-2 rounded-md flex items-center justify-center transition-colors ${viewMode === 'calendar' ? 'bg-white shadow-sm text-primary-600' : 'text-slate-500 hover:text-slate-700'}`}
               title="Calendar View"
             >
               <CalendarIcon className="w-4 h-4" />
@@ -127,29 +128,29 @@ const PatientAppointments = () => {
       ) : (
         <div className="glass-card overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-100 dark:divide-slate-800/50">
-              <thead className="bg-slate-50/50 dark:bg-slate-800/50">
+            <table className="min-w-full divide-y divide-slate-100">
+              <thead className="bg-slate-50/50">
                 <tr>
-                  <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Date & Time</th>
-                  <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Doctor</th>
-                  <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Reason</th>
-                  <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
-                  <th scope="col" className="px-6 py-4 text-right text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Actions</th>
+                  <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Date & Time</th>
+                  <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Doctor</th>
+                  <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Reason</th>
+                  <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                  <th scope="col" className="px-6 py-4 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="bg-white dark:bg-slate-900 divide-y divide-slate-50 dark:divide-slate-800/50">
+              <tbody className="bg-white divide-y divide-slate-50">
                 {(!appointments || appointments.length === 0) ? (
                   <tr>
                     <td colSpan="5" className="px-6 py-12 text-center">
                       <div className="flex flex-col items-center justify-center">
-                        <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
-                          <CalendarIcon className="w-8 h-8 text-slate-300 dark:text-slate-600" />
+                        <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+                          <CalendarIcon className="w-8 h-8 text-slate-300" />
                         </div>
-                        <p className="text-slate-900 dark:text-slate-100 font-bold text-lg mb-1">No appointments yet</p>
-                        <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-4">You don't have any medical visits scheduled.</p>
+                        <p className="text-slate-900 font-bold text-lg mb-1">No appointments yet</p>
+                        <p className="text-slate-500 text-sm font-medium mb-4">You don't have any medical visits scheduled.</p>
                         <button 
                           onClick={() => setIsModalOpen(true)}
-                          className="text-sm font-bold text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20 px-4 py-2 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-colors"
+                          className="text-sm font-bold text-primary-600 bg-primary-50 px-4 py-2 rounded-lg hover:bg-primary-100 transition-colors"
                         >
                           Book your first appointment
                         </button>
@@ -158,38 +159,38 @@ const PatientAppointments = () => {
                   </tr>
                 ) : (
                   appointments.map((apt) => (
-                    <tr key={apt._id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors group">
+                    <tr key={apt._id} className="hover:bg-slate-50/80 transition-colors group">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-2">
-                          <CalendarIcon className="w-4 h-4 text-slate-400 dark:text-slate-500" />
-                          <div className="text-sm font-bold text-slate-900 dark:text-slate-200">{format(new Date(apt.appointmentDate), 'MMM dd, yyyy')}</div>
+                          <CalendarIcon className="w-4 h-4 text-slate-400" />
+                          <div className="text-sm font-bold text-slate-900">{format(new Date(apt.appointmentDate), 'MMM dd, yyyy')}</div>
                         </div>
                         <div className="flex items-center gap-2 mt-1 ml-6">
-                          <Clock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-                          <div className="text-sm font-medium text-slate-500 dark:text-slate-400">{apt.timeSlot}</div>
+                          <Clock className="w-3.5 h-3.5 text-slate-400" />
+                          <div className="text-sm font-medium text-slate-500">{apt.timeSlot}</div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-100 to-primary-100 dark:from-indigo-900/50 dark:to-primary-900/50 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-extrabold text-sm shadow-inner ring-1 ring-white dark:ring-slate-800">
+                          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-100 to-primary-100 text-indigo-700 flex items-center justify-center font-extrabold text-sm shadow-inner ring-1 ring-white">
                             <img src={`https://api.dicebear.com/7.x/initials/svg?seed=Dr ${apt.doctor?.name}`} alt="Doctor" className="w-full h-full rounded-xl" />
                           </div>
                           <div className="ml-3">
-                            <p className="text-sm font-bold text-slate-900 dark:text-slate-200 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">Dr. {apt.doctor?.name}</p>
-                            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">General</p>
+                            <p className="text-sm font-bold text-slate-900 group-hover:text-primary-600 transition-colors">Dr. {apt.doctor?.name}</p>
+                            <p className="text-xs font-medium text-slate-500">General</p>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <p className="text-sm font-medium text-slate-600 dark:text-slate-300 line-clamp-2 max-w-xs">{apt.reason}</p>
+                        <p className="text-sm font-medium text-slate-600 line-clamp-2 max-w-xs">{apt.reason}</p>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider border
-                          ${apt.status === 'confirmed' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800/50' : 
-                            apt.status === 'requested' ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800/50' : 
-                            apt.status === 'cancelled' ? 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-900/20 dark:text-rose-400 dark:border-rose-800/50' :
-                            apt.status === 'completed' ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/50' :
-                            'bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'}`}>
+                          ${apt.status === 'confirmed' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 
+                            apt.status === 'requested' ? 'bg-amber-50 text-amber-700 border-amber-200' : 
+                            apt.status === 'cancelled' ? 'bg-rose-50 text-rose-700 border-rose-200' :
+                            apt.status === 'completed' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                            'bg-slate-50 text-slate-700 border-slate-200'}`}>
                           {apt.status}
                         </span>
                       </td>
@@ -198,7 +199,7 @@ const PatientAppointments = () => {
                           <button
                             onClick={() => cancelAppointment.mutate(apt._id)}
                             disabled={cancelAppointment.isPending}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all border border-rose-200 dark:border-rose-800/50 text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/20 hover:bg-rose-100 dark:hover:bg-rose-900/40 shadow-sm disabled:opacity-50"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all border border-rose-200 text-rose-700 bg-rose-50 hover:bg-rose-100 shadow-sm disabled:opacity-50"
                           >
                             <X className="w-3.5 h-3.5" /> Cancel
                           </button>
@@ -215,7 +216,7 @@ const PatientAppointments = () => {
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden transform animate-scale-in">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden transform animate-scale-in">
             {/* Modal Header */}
             <div className="bg-gradient-to-r from-primary-600 to-indigo-700 px-6 py-4 flex justify-between items-center text-white">
               <h2 className="text-lg font-extrabold flex items-center gap-2">
@@ -229,14 +230,14 @@ const PatientAppointments = () => {
               </button>
             </div>
             
-            <form onSubmit={handleSubmit} className="p-6 space-y-5 bg-slate-50/50 dark:bg-slate-800/50">
+            <form onSubmit={handleSubmit} className="p-6 space-y-5 bg-slate-50/50">
               <div className="space-y-4">
                 <div>
-                  <label className="flex items-center gap-1.5 text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  <label className="flex items-center gap-1.5 text-sm font-bold text-slate-700 mb-1.5">
                     <Stethoscope className="w-4 h-4 text-primary-500" /> Select Doctor
                   </label>
                   <select 
-                    className="w-full pl-3 pr-8 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none appearance-none"
+                    className="w-full pl-3 pr-8 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none appearance-none"
                     value={formData.doctor}
                     onChange={(e) => setFormData({...formData, doctor: e.target.value})}
                   >
@@ -251,12 +252,12 @@ const PatientAppointments = () => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="flex items-center gap-1.5 text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label className="flex items-center gap-1.5 text-sm font-bold text-slate-700 mb-1.5">
                       <CalendarIcon className="w-4 h-4 text-primary-500" /> Date
                     </label>
                     <input 
                       type="date" 
-                      className="w-full px-3 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
+                      className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
                       value={formData.appointmentDate}
                       min={new Date().toISOString().split('T')[0]}
                       onChange={(e) => setFormData({...formData, appointmentDate: e.target.value})}
@@ -264,11 +265,11 @@ const PatientAppointments = () => {
                   </div>
 
                   <div>
-                    <label className="flex items-center gap-1.5 text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label className="flex items-center gap-1.5 text-sm font-bold text-slate-700 mb-1.5">
                       <Clock className="w-4 h-4 text-primary-500" /> Time
                     </label>
                     <select 
-                      className="w-full pl-3 pr-8 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none appearance-none"
+                      className="w-full pl-3 pr-8 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none appearance-none"
                       value={formData.timeSlot}
                       onChange={(e) => setFormData({...formData, timeSlot: e.target.value})}
                     >
@@ -284,11 +285,11 @@ const PatientAppointments = () => {
                 </div>
 
                 <div>
-                  <label className="flex items-center gap-1.5 text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  <label className="flex items-center gap-1.5 text-sm font-bold text-slate-700 mb-1.5">
                     <FileText className="w-4 h-4 text-primary-500" /> Reason for Visit
                   </label>
                   <textarea 
-                    className="w-full px-3 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none resize-none"
+                    className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none resize-none"
                     rows="3"
                     value={formData.reason}
                     onChange={(e) => setFormData({...formData, reason: e.target.value})}
@@ -297,11 +298,11 @@ const PatientAppointments = () => {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-700/50">
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
                 <button 
                   type="button" 
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-sm font-bold text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                  className="px-4 py-2 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors"
                 >
                   Cancel
                 </button>

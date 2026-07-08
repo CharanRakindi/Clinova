@@ -29,18 +29,18 @@ export default function NotificationCenter() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={handleToggle}
-        className="relative p-2 text-slate-400 hover:text-primary-600 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors"
+        className="relative p-2 text-slate-400 hover:text-primary-600 hover:bg-slate-50 rounded-lg transition-colors"
       >
         <Bell className="w-5 h-5" />
         {unreadCount > 0 && (
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white dark:ring-slate-900 animate-pulse" />
+          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white animate-pulse" />
         )}
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 overflow-hidden z-50 animate-scale-in origin-top-right">
-          <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/50">
-            <h3 className="font-semibold text-slate-900 dark:text-slate-100">Notifications</h3>
+        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden z-50 animate-scale-in origin-top-right">
+          <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <h3 className="font-semibold text-slate-900">Notifications</h3>
             {notifications.length > 0 && (
               <button
                 onClick={clearNotifications}
@@ -54,29 +54,29 @@ export default function NotificationCenter() {
 
           <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
             {notifications.length === 0 ? (
-              <div className="p-8 text-center text-slate-500 dark:text-slate-400 flex flex-col items-center">
+              <div className="p-8 text-center text-slate-500 flex flex-col items-center">
                 <Bell className="w-8 h-8 mb-3 opacity-20" />
                 <p className="text-sm">No new notifications</p>
               </div>
             ) : (
-              <div className="divide-y divide-slate-100 dark:divide-slate-800/50">
+              <div className="divide-y divide-slate-100">
                 {notifications.map((notification, index) => (
                   <div 
                     key={index} 
                     className={cn(
-                      "p-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50",
-                      !notification.read && "bg-primary-50/30 dark:bg-primary-900/10"
+                      "p-4 transition-colors hover:bg-slate-50",
+                      !notification.read && "bg-primary-50/30"
                     )}
                   >
                     <div className="flex gap-3">
                       <div className="flex-shrink-0 mt-0.5">
-                        <div className="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900/50 flex items-center justify-center text-primary-600 dark:text-primary-400">
+                        <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-600">
                           <Bell className="w-4 h-4" />
                         </div>
                       </div>
                       <div>
-                        <p className="text-sm text-slate-800 dark:text-slate-200">{notification.message}</p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                        <p className="text-sm text-slate-800">{notification.message}</p>
+                        <p className="text-xs text-slate-500 mt-1">
                           {new Date(notification.timestamp || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </p>
                       </div>

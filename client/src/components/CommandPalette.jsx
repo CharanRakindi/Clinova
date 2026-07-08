@@ -38,18 +38,18 @@ export default function CommandPalette() {
       />
       
       {/* Command Palette */}
-      <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-2xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-800 animate-scale-in">
+      <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200 animate-scale-in">
         <Command>
-          <div className="flex items-center border-b border-slate-200 dark:border-slate-800 px-4">
+          <div className="flex items-center border-b border-slate-200 px-4">
             <Search className="w-5 h-5 text-slate-400 mr-3 shrink-0" />
             <Command.Input 
               autoFocus
               placeholder="Type a command or search..." 
-              className="flex-1 h-14 bg-transparent outline-none text-slate-900 dark:text-slate-100 placeholder:text-slate-400 text-sm font-medium"
+              className="flex-1 h-14 bg-transparent outline-none text-slate-900 placeholder:text-slate-400 text-sm font-medium"
             />
             <button 
               onClick={() => setOpen(false)}
-              className="p-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400"
+              className="p-1 rounded-md hover:bg-slate-100 text-slate-400"
             >
               <X className="w-4 h-4" />
             </button>
@@ -65,13 +65,13 @@ export default function CommandPalette() {
                 <>
                   <Command.Item 
                     onSelect={() => runCommand(() => navigate('/admin/dashboard'))}
-                    className="flex items-center px-3 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-200 rounded-xl cursor-pointer aria-selected:bg-primary-50 dark:aria-selected:bg-primary-900/20 aria-selected:text-primary-700 dark:aria-selected:text-primary-300"
+                    className="flex items-center px-3 py-2.5 text-sm font-medium text-slate-700 rounded-xl cursor-pointer aria-selected:bg-primary-50:bg-primary-900/20 aria-selected:text-primary-700:text-primary-300"
                   >
                     <Settings className="w-4 h-4 mr-3 text-slate-400" /> Admin Dashboard
                   </Command.Item>
                   <Command.Item 
                     onSelect={() => runCommand(() => navigate('/admin/users'))}
-                    className="flex items-center px-3 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-200 rounded-xl cursor-pointer aria-selected:bg-primary-50 dark:aria-selected:bg-primary-900/20 aria-selected:text-primary-700 dark:aria-selected:text-primary-300"
+                    className="flex items-center px-3 py-2.5 text-sm font-medium text-slate-700 rounded-xl cursor-pointer aria-selected:bg-primary-50:bg-primary-900/20 aria-selected:text-primary-700:text-primary-300"
                   >
                     <Users className="w-4 h-4 mr-3 text-slate-400" /> Manage Users
                   </Command.Item>
@@ -82,13 +82,13 @@ export default function CommandPalette() {
                 <>
                   <Command.Item 
                     onSelect={() => runCommand(() => navigate('/doctor/dashboard'))}
-                    className="flex items-center px-3 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-200 rounded-xl cursor-pointer aria-selected:bg-primary-50 dark:aria-selected:bg-primary-900/20 aria-selected:text-primary-700 dark:aria-selected:text-primary-300"
+                    className="flex items-center px-3 py-2.5 text-sm font-medium text-slate-700 rounded-xl cursor-pointer aria-selected:bg-primary-50:bg-primary-900/20 aria-selected:text-primary-700:text-primary-300"
                   >
                     <Settings className="w-4 h-4 mr-3 text-slate-400" /> My Dashboard
                   </Command.Item>
                   <Command.Item 
                     onSelect={() => runCommand(() => navigate('/doctor/patients'))}
-                    className="flex items-center px-3 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-200 rounded-xl cursor-pointer aria-selected:bg-primary-50 dark:aria-selected:bg-primary-900/20 aria-selected:text-primary-700 dark:aria-selected:text-primary-300"
+                    className="flex items-center px-3 py-2.5 text-sm font-medium text-slate-700 rounded-xl cursor-pointer aria-selected:bg-primary-50:bg-primary-900/20 aria-selected:text-primary-700:text-primary-300"
                   >
                     <Users className="w-4 h-4 mr-3 text-slate-400" /> My Patients
                   </Command.Item>
@@ -99,19 +99,19 @@ export default function CommandPalette() {
                 <>
                   <Command.Item 
                     onSelect={() => runCommand(() => navigate('/patient/dashboard'))}
-                    className="flex items-center px-3 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-200 rounded-xl cursor-pointer aria-selected:bg-primary-50 dark:aria-selected:bg-primary-900/20 aria-selected:text-primary-700 dark:aria-selected:text-primary-300"
+                    className="flex items-center px-3 py-2.5 text-sm font-medium text-slate-700 rounded-xl cursor-pointer aria-selected:bg-primary-50:bg-primary-900/20 aria-selected:text-primary-700:text-primary-300"
                   >
                     <Settings className="w-4 h-4 mr-3 text-slate-400" /> My Dashboard
                   </Command.Item>
                   <Command.Item 
                     onSelect={() => runCommand(() => navigate('/patient/appointments'))}
-                    className="flex items-center px-3 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-200 rounded-xl cursor-pointer aria-selected:bg-primary-50 dark:aria-selected:bg-primary-900/20 aria-selected:text-primary-700 dark:aria-selected:text-primary-300"
+                    className="flex items-center px-3 py-2.5 text-sm font-medium text-slate-700 rounded-xl cursor-pointer aria-selected:bg-primary-50:bg-primary-900/20 aria-selected:text-primary-700:text-primary-300"
                   >
                     <Calendar className="w-4 h-4 mr-3 text-slate-400" /> Appointments
                   </Command.Item>
                   <Command.Item 
                     onSelect={() => runCommand(() => navigate('/patient/records'))}
-                    className="flex items-center px-3 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-200 rounded-xl cursor-pointer aria-selected:bg-primary-50 dark:aria-selected:bg-primary-900/20 aria-selected:text-primary-700 dark:aria-selected:text-primary-300"
+                    className="flex items-center px-3 py-2.5 text-sm font-medium text-slate-700 rounded-xl cursor-pointer aria-selected:bg-primary-50:bg-primary-900/20 aria-selected:text-primary-700:text-primary-300"
                   >
                     <FileText className="w-4 h-4 mr-3 text-slate-400" /> Medical Records
                   </Command.Item>
@@ -120,18 +120,18 @@ export default function CommandPalette() {
             </Command.Group>
           </Command.List>
           
-          <div className="border-t border-slate-100 dark:border-slate-800 px-4 py-3 flex items-center justify-between">
+          <div className="border-t border-slate-100 px-4 py-3 flex items-center justify-between">
             <div className="flex gap-2">
-              <span className="px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded text-xs font-mono text-slate-500">↑</span>
-              <span className="px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded text-xs font-mono text-slate-500">↓</span>
+              <span className="px-2 py-1 bg-slate-100 rounded text-xs font-mono text-slate-500">↑</span>
+              <span className="px-2 py-1 bg-slate-100 rounded text-xs font-mono text-slate-500">↓</span>
               <span className="text-xs text-slate-400 ml-1 flex items-center">to navigate</span>
             </div>
             <div className="flex gap-2">
-              <span className="px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded text-xs font-mono text-slate-500">Enter</span>
+              <span className="px-2 py-1 bg-slate-100 rounded text-xs font-mono text-slate-500">Enter</span>
               <span className="text-xs text-slate-400 ml-1 flex items-center">to select</span>
             </div>
             <div className="flex gap-2">
-              <span className="px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded text-xs font-mono text-slate-500">esc</span>
+              <span className="px-2 py-1 bg-slate-100 rounded text-xs font-mono text-slate-500">esc</span>
               <span className="text-xs text-slate-400 ml-1 flex items-center">to close</span>
             </div>
           </div>

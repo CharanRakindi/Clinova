@@ -3,6 +3,7 @@ import api from '../../api/axios';
 import { Search, UserPlus, Droplet, Users } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { SkeletonTable } from '../../components/SkeletonLoader';
 
 const DoctorPatients = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -21,7 +22,7 @@ const DoctorPatients = () => {
     p.patientId.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (isLoading) return <div className="p-8 flex justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div></div>;
+  if (isLoading) return <div className="p-8 bg-white rounded-2xl shadow-sm border border-slate-100"><SkeletonTable rows={5} /></div>;
 
   return (
     <div className="space-y-6 pb-8 animate-fade-in">

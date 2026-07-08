@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import api from '../../api/axios';
 import StatCard from '../../components/StatCard';
-import SkeletonLoader from '../../components/SkeletonLoader';
+import SkeletonLoader, { SkeletonCard } from '../../components/SkeletonLoader';
 import { Users, UserPlus, Stethoscope, Calendar, TrendingUp, ShieldAlert, Clock } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAuth } from '../../contexts/AuthContext';
@@ -34,7 +34,7 @@ const AdminDashboard = () => {
     }
   });
 
-  if (isLoading) return <div className="p-8 flex justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div></div>;
+  if (isLoading) return <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-4"><SkeletonCard /><SkeletonCard /><SkeletonCard /><SkeletonCard /></div>;
 
   // Process appointment chart data dynamically (past 7 days)
   const getWeeklyTrendData = () => {
@@ -62,7 +62,7 @@ const AdminDashboard = () => {
   return (
     <div className="space-y-8 pb-8 animate-fade-in">
       {/* Welcome Banner */}
-      <div className="relative rounded-2xl bg-gradient-to-r from-primary-600 to-indigo-700 p-8 shadow-lg shadow-indigo-200 dark:shadow-indigo-950/20 overflow-hidden text-white animate-fade-in-up">
+      <div className="relative rounded-2xl bg-gradient-to-r from-primary-600 to-indigo-700 p-8 shadow-lg shadow-indigo-200 overflow-hidden text-white animate-fade-in-up">
         <div className="absolute right-0 top-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-white opacity-10 blur-3xl"></div>
         <div className="absolute right-32 bottom-0 -mb-16 w-48 h-48 rounded-full bg-indigo-400 opacity-20 blur-2xl"></div>
         
@@ -115,13 +115,13 @@ const AdminDashboard = () => {
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Weekly Trend Bar Chart */}
-        <div className="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-6 rounded-2xl shadow-sm">
+        <div className="lg:col-span-2 bg-white border border-slate-100 p-6 rounded-2xl shadow-sm">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-lg font-bold text-slate-900 dark:text-white">Weekly Appointments Trend</h2>
-              <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Consultations over the last 7 days</p>
+              <h2 className="text-lg font-bold text-slate-900">Weekly Appointments Trend</h2>
+              <p className="text-sm text-slate-500 font-medium">Consultations over the last 7 days</p>
             </div>
-            <div className="bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+            <div className="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
               <TrendingUp className="w-3 h-3" />
               +12.5%
             </div>
@@ -149,20 +149,20 @@ const AdminDashboard = () => {
         </div>
 
         {/* Audit Log Overview Widget */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-6 rounded-2xl shadow-sm flex flex-col justify-between">
+        <div className="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm flex flex-col justify-between">
           <div>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-1.5">
+            <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-1.5">
               <ShieldAlert className="w-5 h-5 text-primary-500" />
               Recent Actions
             </h2>
             <div className="space-y-4">
               {auditLogs?.map((log) => (
                 <div key={log._id} className="flex gap-3 text-xs font-semibold">
-                  <div className="p-2 bg-slate-50 dark:bg-slate-850 rounded-xl text-slate-400 self-start shrink-0">
+                  <div className="p-2 bg-slate-50 rounded-xl text-slate-400 self-start shrink-0">
                     <Clock className="w-3.5 h-3.5" />
                   </div>
                   <div>
-                    <p className="text-slate-850 dark:text-slate-200">
+                    <p className="text-slate-850">
                       {log.actor?.name || 'System'} performed <span className="text-primary-650">{log.action}</span>
                     </p>
                     <p className="text-slate-400 mt-0.5 font-medium">
@@ -177,7 +177,7 @@ const AdminDashboard = () => {
           <div className="mt-6">
             <button 
               onClick={() => window.location.href = '/admin/audit-logs'}
-              className="w-full py-2.5 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700 transition-colors"
+              className="w-full py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-xl border border-slate-200 transition-colors"
             >
               View Full Logs
             </button>

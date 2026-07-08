@@ -44,7 +44,7 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex bg-gradient-mesh dark:bg-[#030712] transition-colors duration-300">
+    <div className="min-h-screen flex bg-gradient-mesh transition-colors duration-300">
       {/* Left side - Branding (Hidden on mobile) */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-sidebar flex-col justify-between p-12 relative overflow-hidden">
         {/* Decorative element */}
@@ -55,7 +55,7 @@ const Register = () => {
           <div className="bg-white/10 p-2.5 rounded-2xl backdrop-blur-md border border-white/15">
             <Activity className="h-8 w-8 text-white shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
           </div>
-          <span className="text-2xl font-extrabold text-white tracking-tight">MediVault</span>
+          <span className="text-2xl font-extrabold text-white tracking-tight">Clinova</span>
         </div>
         
         <div className="relative z-10 max-w-lg">
@@ -78,14 +78,14 @@ const Register = () => {
         </div>
         
         <div className="relative z-10 flex items-center gap-4 text-slate-500 text-sm font-semibold">
-          <span>&copy; {new Date().getFullYear()} MediVault Inc.</span>
+          <span>&copy; {new Date().getFullYear()} Clinova Inc.</span>
           <span>•</span>
           <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
         </div>
       </div>
 
       {/* Right side - Form */}
-      <div className="flex-1 flex flex-col justify-center px-6 py-12 lg:px-20 bg-white/40 dark:bg-slate-950/20 backdrop-blur-sm">
+      <div className="flex-1 flex flex-col justify-center px-6 py-12 lg:px-20 bg-white/40 backdrop-blur-sm">
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -98,15 +98,15 @@ const Register = () => {
               <div className="bg-gradient-to-br from-primary-500 to-indigo-650 p-2.5 rounded-2xl shadow-lg shadow-primary-500/10">
                 <Activity className="h-6 w-6 text-white" />
               </div>
-              <span className="text-2xl font-bold text-slate-900 dark:text-white">MediVault</span>
+              <span className="text-2xl font-bold text-slate-900">Clinova</span>
             </div>
           </div>
 
           <div>
-            <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
               Create an account
             </h2>
-            <p className="mt-2 text-sm font-semibold text-slate-400 dark:text-slate-500">
+            <p className="mt-2 text-sm font-semibold text-slate-400">
               Fill in your details below to get started.
             </p>
           </div>
@@ -114,7 +114,7 @@ const Register = () => {
           <div className="mt-8">
             <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
               <div>
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-350 mb-1.5">
+                <label className="block text-sm font-bold text-slate-700 mb-1.5">
                   Full Name
                 </label>
                 <div>
@@ -122,14 +122,14 @@ const Register = () => {
                     {...register('name')}
                     type="text"
                     placeholder="John Doe"
-                    className={`input ${errors.name ? 'border-red-500 bg-red-50 dark:bg-red-950/10' : 'bg-slate-50 dark:bg-slate-900 hover:bg-white dark:hover:bg-slate-900/60 focus:bg-white dark:focus:bg-slate-900'}`}
+                    className={`input ${errors.name ? 'border-red-500 bg-red-50' : 'bg-slate-50 hover:bg-white focus:bg-white'}`}
                   />
                   {errors.name && <p className="mt-1.5 text-xs font-semibold text-red-650">{errors.name.message}</p>}
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-350 mb-1.5">
+                <label className="block text-sm font-bold text-slate-700 mb-1.5">
                   Email address
                 </label>
                 <div>
@@ -137,14 +137,14 @@ const Register = () => {
                     {...register('email')}
                     type="email"
                     placeholder="john@example.com"
-                    className={`input ${errors.email ? 'border-red-500 bg-red-50 dark:bg-red-950/10' : 'bg-slate-50 dark:bg-slate-900 hover:bg-white dark:hover:bg-slate-900/60 focus:bg-white dark:focus:bg-slate-900'}`}
+                    className={`input ${errors.email ? 'border-red-500 bg-red-50' : 'bg-slate-50 hover:bg-white focus:bg-white'}`}
                   />
                   {errors.email && <p className="mt-1.5 text-xs font-semibold text-red-650">{errors.email.message}</p>}
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-350 mb-1.5">
+                <label className="block text-sm font-bold text-slate-700 mb-1.5">
                   Password
                 </label>
                 <div>
@@ -152,20 +152,20 @@ const Register = () => {
                     {...register('password')}
                     type="password"
                     placeholder="Min. 8 characters"
-                    className={`input ${errors.password ? 'border-red-500 bg-red-50 dark:bg-red-950/10' : 'bg-slate-50 dark:bg-slate-900 hover:bg-white dark:hover:bg-slate-900/60 focus:bg-white dark:focus:bg-slate-900'}`}
+                    className={`input ${errors.password ? 'border-red-500 bg-red-50' : 'bg-slate-50 hover:bg-white focus:bg-white'}`}
                   />
                   {errors.password && <p className="mt-1.5 text-xs font-semibold text-red-650">{errors.password.message}</p>}
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-350 mb-1.5">
+                <label className="block text-sm font-bold text-slate-700 mb-1.5">
                   I am a
                 </label>
                 <div>
                   <select
                     {...register('role')}
-                    className="input bg-slate-50 dark:bg-slate-900 hover:bg-white dark:hover:bg-slate-900/60 focus:bg-white dark:focus:bg-slate-900 cursor-pointer"
+                    className="input bg-slate-50 hover:bg-white focus:bg-white cursor-pointer"
                   >
                     <option value="patient">Patient</option>
                     <option value="doctor">Doctor</option>
@@ -191,9 +191,9 @@ const Register = () => {
               </div>
             </form>
 
-            <p className="mt-8 text-center text-sm font-semibold text-slate-650 dark:text-slate-450">
+            <p className="mt-8 text-center text-sm font-semibold text-slate-650">
               Already have an account?{' '}
-              <Link to="/login" className="font-bold text-primary-650 dark:text-primary-400 hover:text-primary-550 transition-colors">
+              <Link to="/login" className="font-bold text-primary-650 hover:text-primary-550 transition-colors">
                 Log in instead
               </Link>
             </p>

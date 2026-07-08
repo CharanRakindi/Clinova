@@ -34,7 +34,7 @@ export default function OfflineBanner() {
         <div className="flex-1">
           <h4 className="text-sm font-bold">Offline Connection</h4>
           <p className="text-xs font-medium text-slate-400 mt-1">
-            You are currently offline. MediVault will sync your updates once connectivity is restored.
+            You are currently offline. Clinova will sync your updates once connectivity is restored.
           </p>
         </div>
         <button 

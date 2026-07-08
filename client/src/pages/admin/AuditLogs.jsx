@@ -41,7 +41,7 @@ export default function AuditLogs() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `medivault_audit_logs_${Date.now()}.csv`);
+    link.setAttribute("download", `clinova_audit_logs_${Date.now()}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -49,9 +49,9 @@ export default function AuditLogs() {
 
   return (
     <div className="space-y-6 pb-8 animate-fade-in">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
             <ShieldAlert className="w-6 h-6 text-primary-500" />
             Security Audit Logs
           </h1>
@@ -60,14 +60,14 @@ export default function AuditLogs() {
         <button
           onClick={handleExportCSV}
           disabled={isLoading || !data?.data?.length}
-          className="flex items-center gap-2 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-4 py-2.5 rounded-xl text-sm font-bold border border-slate-200 dark:border-slate-700 transition-colors shadow-sm disabled:opacity-50"
+          className="flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 px-4 py-2.5 rounded-xl text-sm font-bold border border-slate-200 transition-colors shadow-sm disabled:opacity-50"
         >
           <Download className="w-4 h-4" /> Export CSV
         </button>
       </div>
 
       {/* Filters */}
-      <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 flex flex-col md:flex-row gap-4 items-center justify-between">
+      <div className="bg-white p-4 rounded-2xl border border-slate-100 flex flex-col md:flex-row gap-4 items-center justify-between">
         <div className="relative w-full md:max-w-xs">
           <Search className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
           <input
@@ -75,7 +75,7 @@ export default function AuditLogs() {
             placeholder="Search action, IP address..."
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            className="w-full pl-9 pr-4 py-2.5 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-700/60 rounded-xl text-sm font-medium focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
+            className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
           />
         </div>
 
@@ -85,7 +85,7 @@ export default function AuditLogs() {
             <select
               value={actionFilter}
               onChange={(e) => { setActionFilter(e.target.value); setPage(1); }}
-              className="bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-700/60 text-slate-700 dark:text-slate-300 text-sm font-bold rounded-xl px-4 py-2.5 outline-none w-full md:w-44"
+              className="bg-slate-50 border border-slate-200 text-slate-700 text-sm font-bold rounded-xl px-4 py-2.5 outline-none w-full md:w-44"
             >
               <option value="">All Actions</option>
               <option value="LOGIN">Login</option>
@@ -99,11 +99,11 @@ export default function AuditLogs() {
       </div>
 
       {/* Table container */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+      <div className="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50 dark:bg-slate-800/40 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider border-b border-slate-100 dark:border-slate-800">
+              <tr className="bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider border-b border-slate-100">
                 <th className="px-6 py-4">Timestamp</th>
                 <th className="px-6 py-4">Actor</th>
                 <th className="px-6 py-4">Role</th>
@@ -113,7 +113,7 @@ export default function AuditLogs() {
                 <th className="px-6 py-4">Details</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-850 text-slate-700 dark:text-slate-300 text-sm font-semibold">
+            <tbody className="divide-y divide-slate-100 text-slate-700 text-sm font-semibold">
               {isLoading ? (
                 Array.from({ length: 6 }).map((_, i) => (
                   <tr key={i}>
@@ -135,7 +135,7 @@ export default function AuditLogs() {
                 </tr>
               ) : (
                 data.data.map((log) => (
-                  <tr key={log._id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+                  <tr key={log._id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap text-xs font-mono text-slate-400">
                       {format(new Date(log.timestamp), 'yyyy-MM-dd HH:mm:ss')}
                     </td>
@@ -152,15 +152,15 @@ export default function AuditLogs() {
                     </td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider ${
-                        log.action === 'CREATE' ? 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400' :
-                        log.action === 'LOGIN' ? 'bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400' :
-                        log.action === 'UPDATE' ? 'bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400' :
-                        'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                        log.action === 'CREATE' ? 'bg-emerald-50 text-emerald-600' :
+                        log.action === 'LOGIN' ? 'bg-indigo-50 text-indigo-600' :
+                        log.action === 'UPDATE' ? 'bg-amber-50 text-amber-600' :
+                        'bg-slate-100 text-slate-600'
                       }`}>
                         {log.action}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-slate-500 dark:text-slate-400">
+                    <td className="px-6 py-4 whitespace-nowrap text-slate-500">
                       {log.resourceType}
                     </td>
                     <td className="px-6 py-4 font-mono text-xs text-slate-400">
@@ -178,7 +178,7 @@ export default function AuditLogs() {
 
         {/* Pagination controls */}
         {data?.pagination && data.pagination.pages > 1 && (
-          <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800/20 border-t border-slate-100 dark:border-slate-850 flex items-center justify-between">
+          <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500">
               Showing page {page} of {data.pagination.pages}
             </span>
@@ -186,16 +186,16 @@ export default function AuditLogs() {
               <button
                 disabled={page <= 1}
                 onClick={() => setPage(prev => prev - 1)}
-                className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 transition-colors"
+                className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-50 transition-colors"
               >
-                <ArrowLeft className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                <ArrowLeft className="w-4 h-4 text-slate-600" />
               </button>
               <button
                 disabled={page >= data.pagination.pages}
                 onClick={() => setPage(prev => prev + 1)}
-                className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 transition-colors"
+                className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-50 transition-colors"
               >
-                <ArrowRight className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                <ArrowRight className="w-4 h-4 text-slate-600" />
               </button>
             </div>
           </div>

@@ -84,15 +84,15 @@ export default function FileUpload({ onUploadSuccess, label = "Upload File", acc
 
   return (
     <div className="w-full">
-      <p className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">{label}</p>
+      <p className="text-sm font-bold text-slate-700 mb-2">{label}</p>
       
       {!file ? (
         <div 
           className={cn(
             "border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center transition-all cursor-pointer",
             isDragging 
-              ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20" 
-              : "border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800"
+              ? "border-primary-500 bg-primary-50" 
+              : "border-slate-300 bg-slate-50 hover:bg-slate-100"
           )}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -100,10 +100,10 @@ export default function FileUpload({ onUploadSuccess, label = "Upload File", acc
           onClick={() => fileInputRef.current?.click()}
         >
           <UploadCloud className={cn("w-10 h-10 mb-3 transition-colors", isDragging ? "text-primary-600" : "text-slate-400")} />
-          <p className="text-sm font-bold text-slate-700 dark:text-slate-300 text-center mb-1">
+          <p className="text-sm font-bold text-slate-700 text-center mb-1">
             Drag & drop your file here
           </p>
-          <p className="text-xs font-medium text-slate-500 dark:text-slate-500 text-center">
+          <p className="text-xs font-medium text-slate-500 text-center">
             or click to browse from your computer
           </p>
           <input 
@@ -115,15 +115,15 @@ export default function FileUpload({ onUploadSuccess, label = "Upload File", acc
           />
         </div>
       ) : (
-        <div className="border border-slate-200 dark:border-slate-700 rounded-xl p-4 bg-white dark:bg-slate-900 shadow-sm">
+        <div className="border border-slate-200 rounded-xl p-4 bg-white shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3 overflow-hidden">
-              <div className="w-10 h-10 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center shrink-0">
-                <FileIcon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+              <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center shrink-0">
+                <FileIcon className="w-5 h-5 text-indigo-600" />
               </div>
               <div className="overflow-hidden">
-                <p className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">{file.name}</p>
-                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                <p className="text-sm font-bold text-slate-900 truncate">{file.name}</p>
+                <p className="text-xs font-medium text-slate-500">
                   {(file.size / 1024 / 1024).toFixed(2)} MB
                 </p>
               </div>
@@ -132,7 +132,7 @@ export default function FileUpload({ onUploadSuccess, label = "Upload File", acc
             {!uploadedUrl && !isUploading && (
               <button 
                 onClick={clearFile}
-                className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors"
+                className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
                 title="Remove file"
               >
                 <X className="w-4 h-4" />
@@ -141,7 +141,7 @@ export default function FileUpload({ onUploadSuccess, label = "Upload File", acc
           </div>
           
           {uploadedUrl ? (
-            <div className="flex items-center justify-center gap-2 py-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 rounded-lg font-bold text-sm">
+            <div className="flex items-center justify-center gap-2 py-2 bg-emerald-50 text-emerald-700 rounded-lg font-bold text-sm">
               <CheckCircle className="w-4 h-4" />
               Upload Complete
             </div>
