@@ -77,7 +77,7 @@ const DoctorDashboard = () => {
   return (
     <div className="space-y-8 pb-8">
       {/* Welcome Banner */}
-      <div className="relative rounded-2xl bg-gradient-to-r from-teal-600 to-emerald-700 p-8 shadow-lg shadow-teal-200 overflow-hidden text-white animate-fade-in-up flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="relative rounded-2xl bg-gradient-to-r from-primary-600 to-primary-700 p-8 shadow-sm overflow-hidden text-white animate-fade-in-up flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         {/* Decorative elements */}
         <div className="absolute right-0 top-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-white opacity-10 blur-3xl"></div>
         
@@ -85,7 +85,7 @@ const DoctorDashboard = () => {
           <h1 className="text-3xl font-extrabold tracking-tight mb-2">
             Good morning, Dr. {user?.name.split(' ')[0]} 🩺
           </h1>
-          <p className="text-teal-50 font-medium max-w-xl">
+          <p className="text-primary-50 font-medium max-w-xl">
             You have {todayAppointments.length} appointments scheduled for today. Make it a great day!
           </p>
         </div>
@@ -99,7 +99,7 @@ const DoctorDashboard = () => {
           className="relative z-10 flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 px-4 py-2 rounded-xl text-sm font-bold transition-all"
         >
           <span>Availability: {isAvailable ? "Active" : "Offline"}</span>
-          {isAvailable ? <ToggleRight className="w-5 h-5 text-emerald-300" /> : <ToggleLeft className="w-5 h-5 text-slate-300" />}
+          {isAvailable ? <ToggleRight className="w-5 h-5 text-green-300" /> : <ToggleLeft className="w-5 h-5 text-slate-300" />}
         </button>
       </div>
       
@@ -109,7 +109,7 @@ const DoctorDashboard = () => {
           title="Today's Appointments" 
           value={todayAppointments.length} 
           icon={Calendar} 
-          className="border-t-4 border-t-blue-500"
+          className="border-t-4 border-t-primary-500"
           description="Scheduled for today"
         />
         <StatCard 
@@ -117,7 +117,7 @@ const DoctorDashboard = () => {
           title="My Patients" 
           value={stats?.totalAssignedPatients || 0} 
           icon={Users} 
-          className="border-t-4 border-t-emerald-500"
+          className="border-t-4 border-t-primary-500"
           description="Assigned to you"
         />
         <StatCard 
@@ -125,7 +125,7 @@ const DoctorDashboard = () => {
           title="Completed Consultations" 
           value={stats?.completedConsultations || 0} 
           icon={CheckCircle} 
-          className="border-t-4 border-t-purple-500"
+          className="border-t-4 border-t-primary-500"
           description="Total all time"
         />
       </div>
@@ -134,7 +134,7 @@ const DoctorDashboard = () => {
         {/* Patient Queue & Notes */}
         <div className="lg:col-span-1 space-y-6">
           {/* Today's Queue */}
-          <div className="bg-white border border-slate-100 p-5 rounded-2xl shadow-sm space-y-4">
+          <div className="glass-card p-5 space-y-4 border-slate-100/50">
             <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
               <Clock className="w-5 h-5 text-primary-500" />
               Patient Queue
@@ -145,7 +145,7 @@ const DoctorDashboard = () => {
                   <motion.div 
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="text-sm font-semibold text-slate-400 py-6 text-center"
+                    className="text-sm font-semibold text-slate-500 py-6 text-center"
                   >
                     No appointments scheduled today
                   </motion.div>
@@ -157,17 +157,17 @@ const DoctorDashboard = () => {
                       animate={{ opacity: 1, height: 'auto', y: 0 }}
                       exit={{ opacity: 0, height: 0, x: -30 }}
                       transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                      className="flex justify-between items-center p-3 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors overflow-hidden"
+                      className="flex justify-between items-center p-3 rounded-xl border border-slate-100 bg-slate-50 hover:border-primary-200 transition-colors overflow-hidden"
                     >
                       <div>
                         <p className="font-extrabold text-sm text-slate-900">{apt.patient?.name}</p>
-                        <p className="text-xs font-semibold text-slate-400 mt-0.5">{apt.timeSlot} • {apt.reason}</p>
+                        <p className="text-xs font-semibold text-slate-500 mt-0.5">{apt.timeSlot} • {apt.reason}</p>
                       </div>
                       <div className="flex gap-1">
                         {apt.status !== 'completed' && (
                           <button
                             onClick={() => updateStatus.mutate({ id: apt._id, status: 'completed' })}
-                            className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                            className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
                             title="Complete consultation"
                           >
                             <Check className="w-4 h-4" />
@@ -175,7 +175,7 @@ const DoctorDashboard = () => {
                         )}
                         <Link 
                           to={`/doctor/patients/${apt.patient?._id}`}
-                          className="p-1.5 text-slate-400 hover:text-primary-600 rounded-lg hover:bg-slate-50 transition-colors"
+                          className="p-1.5 text-slate-400 hover:text-primary-600 rounded-lg hover:bg-slate-100 transition-colors"
                         >
                           <ChevronRight className="w-4.5 h-4.5" />
                         </Link>
@@ -188,7 +188,7 @@ const DoctorDashboard = () => {
           </div>
 
           {/* Quick Notes Pad */}
-          <div className="bg-white border border-slate-100 p-5 rounded-2xl shadow-sm space-y-4">
+          <div className="glass-card p-5 space-y-4 border-slate-100/50">
             <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
               <PenTool className="w-5 h-5 text-primary-500" />
               Quick Notes Pad
@@ -197,14 +197,14 @@ const DoctorDashboard = () => {
               rows={4}
               value={quickNote}
               onChange={(e) => setQuickNote(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-500/20 text-slate-700"
+              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-500/20 text-slate-700 placeholder:text-slate-400 transition-all"
               placeholder="Jot down quick reminders or follow-ups. Saved locally..."
             />
           </div>
         </div>
 
         {/* Schedule Calendar */}
-        <div id="calendar-view" className="lg:col-span-2 bg-white border border-slate-100 p-5 rounded-2xl shadow-sm">
+        <div id="calendar-view" className="lg:col-span-2 glass-card p-5 border-slate-100/50 relative z-0">
           <h3 className="text-lg font-bold text-slate-900 mb-4">Interactive Schedule</h3>
           <InteractiveCalendar 
             events={allAppointments || []} 

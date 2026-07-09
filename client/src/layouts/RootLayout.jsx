@@ -21,7 +21,7 @@ const RootLayout = () => {
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll);
-    
+
     // Live clock update
     const clockInterval = setInterval(() => setCurrentTime(new Date()), 1000);
 
@@ -67,7 +67,7 @@ const RootLayout = () => {
       <OfflineBanner />
       <OnboardingTour />
       <KeyboardShortcutsHelp />
-      
+
       {/* Header */}
       <header className={cn(
         "sticky top-0 z-30 transition-all duration-300 border-b",
@@ -75,17 +75,17 @@ const RootLayout = () => {
       )}>
         <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 h-16">
           <div className="flex items-center gap-4">
-            <button 
+            <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               className="p-2 -ml-2 mr-2 text-slate-500 hover:text-primary-600 hover:bg-primary-50 rounded-lg lg:hidden transition-colors"
             >
               <Menu className="w-5 h-5" />
             </button>
             <div className="flex items-center gap-2 lg:hidden">
-              <div className="bg-gradient-to-br from-primary-600 to-accent p-1.5 rounded-lg shadow-sm">
-                <Activity className="w-5 h-5 text-white" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-slate-900">
+                <Activity className="w-4 h-4 text-white" strokeWidth={2.25} />
               </div>
-              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">
+              <span className="text-[17px] font-semibold tracking-tight text-slate-900">
                 Clinova
               </span>
             </div>
@@ -100,7 +100,7 @@ const RootLayout = () => {
               </span>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-3 sm:gap-5">
             {/* Search Trigger */}
             <button
@@ -114,7 +114,7 @@ const RootLayout = () => {
             </button>
 
             {/* Mobile Search Icon */}
-            <button 
+            <button
               className="sm:hidden p-2 text-slate-400 hover:text-primary-600 hover:bg-slate-50 rounded-lg"
               onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
             >
@@ -136,8 +136,8 @@ const RootLayout = () => {
                 {user?.name?.charAt(0).toUpperCase()}
               </div>
             </div>
-            
-            <button 
+
+            <button
               onClick={logout}
               className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200"
               title="Logout"
@@ -165,10 +165,10 @@ const RootLayout = () => {
           {/* Sidebar Header (Logo) */}
           <div className="h-16 flex items-center px-6 border-b border-white/10 hidden lg:flex">
             <div className="flex items-center gap-3">
-              <div className="bg-gradient-to-br from-primary-400 to-primary-600 p-1.5 rounded-lg shadow-lg shadow-primary-500/30">
-                <Activity className="w-6 h-6 text-white" />
+              <div className="relative flex h-8 w-8 items-center justify-center rounded-[10px] bg-white/10 ring-1 ring-white/10">
+                <Activity className="w-4 h-4 text-white" strokeWidth={2.25} />
               </div>
-              <span className="text-xl font-extrabold text-white tracking-tight">
+              <span className="text-[17px] font-semibold text-white tracking-tight">
                 Clinova
               </span>
             </div>
@@ -194,14 +194,14 @@ const RootLayout = () => {
                     onClick={() => setIsSidebarOpen(false)}
                     className={cn(
                       "flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-200 group",
-                      isActive 
-                        ? "bg-white/10 text-white shadow-inner" 
+                      isActive
+                        ? "bg-white/10 text-white shadow-inner"
                         : "text-slate-400 hover:bg-white/5 hover:text-white"
                     )}
                   >
                     <div className="flex items-center gap-3">
                       <Icon className={cn(
-                        "w-5 h-5 transition-colors duration-200", 
+                        "w-5 h-5 transition-colors duration-200",
                         isActive ? "text-primary-400" : "text-slate-400 group-hover:text-primary-400"
                       )} />
                       <span className="font-medium text-sm">{item.name}</span>
@@ -214,7 +214,7 @@ const RootLayout = () => {
               );
             })}
           </nav>
-          
+
           {/* Sidebar Footer */}
           <div className="p-4 border-t border-white/10">
             <div className="bg-white/5 rounded-xl p-4 flex items-center justify-between">

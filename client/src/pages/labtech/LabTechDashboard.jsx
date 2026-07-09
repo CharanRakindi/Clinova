@@ -189,7 +189,7 @@ export default function LabTechDashboard() {
       {selectedReport && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
           <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden transform animate-scale-in">
-            <div className="bg-gradient-to-r from-primary-600 to-indigo-700 px-6 py-4 flex justify-between items-center text-white">
+            <div className="bg-primary-600 px-6 py-4 flex justify-between items-center text-white">
               <h2 className="text-lg font-extrabold flex items-center gap-2">
                 <CheckCircle className="w-5 h-5" /> Finalize Lab Results
               </h2>
@@ -205,7 +205,7 @@ export default function LabTechDashboard() {
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-1.5">Result Summary <span className="text-rose-500">*</span></label>
+                <label className="block text-sm font-bold text-slate-700 mb-1.5">Result Summary <span className="text-red-500">*</span></label>
                 <textarea
                   rows={4}
                   value={resultSummary}

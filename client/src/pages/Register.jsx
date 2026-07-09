@@ -48,8 +48,8 @@ const Register = () => {
       {/* Left side - Branding (Hidden on mobile) */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-sidebar flex-col justify-between p-12 relative overflow-hidden">
         {/* Decorative element */}
-        <div className="absolute top-0 left-0 -ml-20 -mt-20 w-96 h-96 rounded-full bg-emerald-500/10 blur-3xl"></div>
-        <div className="absolute bottom-0 right-0 -mr-20 -mb-20 w-80 h-80 rounded-full bg-primary-500/10 blur-3xl"></div>
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-primary-500/10 blur-3xl"></div>
+      <div className="absolute top-0 left-0 -ml-20 -mt-20 w-96 h-96 rounded-full bg-primary-500/10 blur-3xl"></div>
         
         <div className="relative z-10 flex items-center gap-3">
           <div className="bg-white/10 p-2.5 rounded-2xl backdrop-blur-md border border-white/15">

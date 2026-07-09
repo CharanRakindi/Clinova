@@ -41,10 +41,10 @@ export default {
         sans: ['Inter', 'sans-serif'],
       },
       boxShadow: {
-        'premium': '0 8px 30px rgba(0, 0, 0, 0.03)',
+        'premium': '0 4px 20px rgba(0, 0, 0, 0.04)',
         'glow': '0 0 24px rgba(37, 99, 235, 0.12)',
         'glow-green': '0 0 24px rgba(34, 197, 94, 0.12)',
-        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.05)',
+        'glass': '0 4px 20px rgba(0, 0, 0, 0.04)',
       },
       animation: {
         'fade-in': 'fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1)',

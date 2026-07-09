@@ -62,9 +62,9 @@ const AdminDashboard = () => {
   return (
     <div className="space-y-8 pb-8 animate-fade-in">
       {/* Welcome Banner */}
-      <div className="relative rounded-2xl bg-gradient-to-r from-primary-600 to-indigo-700 p-8 shadow-lg shadow-indigo-200 overflow-hidden text-white animate-fade-in-up">
+      <div className="relative rounded-2xl bg-gradient-to-r from-primary-600 to-primary-700 p-8 shadow-sm overflow-hidden text-white animate-fade-in-up">
         <div className="absolute right-0 top-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-white opacity-10 blur-3xl"></div>
-        <div className="absolute right-32 bottom-0 -mb-16 w-48 h-48 rounded-full bg-indigo-400 opacity-20 blur-2xl"></div>
+        <div className="absolute right-32 bottom-0 -mb-16 w-48 h-48 rounded-full bg-primary-400 opacity-20 blur-2xl"></div>
         
         <div className="relative z-10">
           <h1 className="text-3xl font-extrabold tracking-tight mb-2">
@@ -83,7 +83,7 @@ const AdminDashboard = () => {
           title="Total Users" 
           value={stats?.totalUsers || 0} 
           icon={Users} 
-          className="border-t-4 border-t-indigo-500"
+          className="border-t-4 border-t-primary-500"
           description="Registered system-wide"
         />
         <StatCard 
@@ -91,7 +91,7 @@ const AdminDashboard = () => {
           title="Total Patients" 
           value={stats?.totalPatients || 0} 
           icon={UserPlus} 
-          className="border-t-4 border-t-emerald-500"
+          className="border-t-4 border-t-primary-500"
           description="Active patient records"
         />
         <StatCard 
@@ -99,7 +99,7 @@ const AdminDashboard = () => {
           title="Total Doctors" 
           value={stats?.totalDoctors || 0} 
           icon={Stethoscope} 
-          className="border-t-4 border-t-blue-500"
+          className="border-t-4 border-t-primary-500"
           description="Specialists & general"
         />
         <StatCard 
@@ -107,7 +107,7 @@ const AdminDashboard = () => {
           title="Total Appointments" 
           value={stats?.totalAppointments || 0} 
           icon={Calendar} 
-          className="border-t-4 border-t-orange-500"
+          className="border-t-4 border-t-primary-500"
           description="Across all departments"
         />
       </div>
@@ -139,8 +139,8 @@ const AdminDashboard = () => {
                 <Bar dataKey="appointments" fill="url(#colorUv)" radius={[6, 6, 0, 0]} barSize={40} />
                 <defs>
                   <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#38bdf8" stopOpacity={1}/>
-                    <stop offset="100%" stopColor="#0ea5e9" stopOpacity={1}/>
+                    <stop offset="0%" stopColor="#60a5fa" stopOpacity={1}/>
+                    <stop offset="100%" stopColor="#2563eb" stopOpacity={1}/>
                   </linearGradient>
                 </defs>
               </BarChart>
