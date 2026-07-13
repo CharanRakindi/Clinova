@@ -55,8 +55,8 @@ A full-stack **Electronic Health Record (EHR)** and medical operations platform 
 ### 1. Clone
 
 ```bash
-git clone https://github.com/CharanRakindi/MediVault.git
-cd MediVault
+git clone https://github.com/CharanRakindi/Clinova.git
+cd Clinova
 ```
 
 ### 2. Backend
@@ -145,7 +145,7 @@ After seeding:
 ## Project structure
 
 ```
-MediVault/
+Clinova/
 ├── client/                 # React (Vite) frontend
 │   ├── public/
 │   ├── src/
