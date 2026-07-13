@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import api from '../../api/axios';
-import { Search, UserPlus, Droplet, Users } from 'lucide-react';
+import { Search, Droplet, Users } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SkeletonTable } from '../../components/SkeletonLoader';
