@@ -17,9 +17,14 @@ function parseCookie(header = '') {
 }
 
 export const initSocket = (server) => {
+  const allowed = (process.env.CLIENT_URL || 'http://localhost:5173')
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
+
   io = new Server(server, {
     cors: {
-      origin: process.env.CLIENT_URL || 'http://localhost:5173',
+      origin: allowed.length === 1 ? allowed[0] : allowed,
       methods: ['GET', 'POST'],
       credentials: true,
     },
