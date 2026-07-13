@@ -6,15 +6,22 @@ const SocketContext = createContext();
 
 export const useSocket = () => useContext(SocketContext);
 
+/**
+ * Socket.IO origin:
+ * - VITE_SOCKET_URL if set
+ * - Same origin when using relative API (dev proxy / production nginx)
+ * - Derived from absolute VITE_API_URL otherwise
+ */
 function socketOrigin() {
   if (import.meta.env.VITE_SOCKET_URL) return import.meta.env.VITE_SOCKET_URL;
-  const api = import.meta.env.VITE_API_URL || 'http://localhost:5001/api/v1';
-  // Strip /api/v1 (or trailing path) so we connect to the Socket.IO server origin
+  const api = import.meta.env.VITE_API_URL;
+  if (!api || api.startsWith('/')) {
+    return typeof window !== 'undefined' ? window.location.origin : '';
+  }
   try {
-    const u = new URL(api);
-    return u.origin;
+    return new URL(api).origin;
   } catch {
-    return 'http://localhost:5001';
+    return typeof window !== 'undefined' ? window.location.origin : '';
   }
 }
 
