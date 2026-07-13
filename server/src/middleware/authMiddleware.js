@@ -39,6 +39,20 @@ export const authenticate = async (req, res, next) => {
   }
 };
 
+/** Optional auth — attaches req.user when a valid cookie is present; never fails. */
+export const optionalAuthenticate = async (req, res, next) => {
+  const token = req.cookies?.accessToken;
+  if (!token) return next();
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
+    const user = await User.findById(decoded.id).select('-password');
+    if (user && user.isActive) req.user = user;
+  } catch {
+    // ignore invalid token for optional auth
+  }
+  next();
+};
+
 export const authorizeRoles = (...roles) => {
   return (req, res, next) => {
     if (!req.user || !roles.includes(req.user.role)) {
@@ -73,8 +87,10 @@ export const authorizeDoctorPatientAccess = async (req, res, next) => {
         return res.status(404).json({ success: false, message: 'Profiles not found' });
       }
 
-      const isAssigned = patientProfile.assignedDoctors.includes(doctorProfile._id);
-      
+      const isAssigned = (patientProfile.assignedDoctors || []).some(
+        (id) => id.toString() === doctorProfile._id.toString()
+      );
+
       // OR check if there is an appointment history
       const hasAppointment = await Appointment.findOne({
         patient: patientId,
@@ -86,6 +102,11 @@ export const authorizeDoctorPatientAccess = async (req, res, next) => {
       }
 
       return res.status(403).json({ success: false, message: 'Forbidden: Doctor is not authorized for this patient' });
+    }
+
+    // Receptionist may view basic patient profiles for scheduling
+    if (req.user.role === 'receptionist') {
+      return next();
     }
 
     return res.status(403).json({ success: false, message: 'Forbidden' });

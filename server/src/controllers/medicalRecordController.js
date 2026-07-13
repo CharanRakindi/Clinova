@@ -86,19 +86,38 @@ export const amendMedicalRecord = async (req, res, next) => {
     oldRecord.status = 'amended';
     await oldRecord.save();
 
-    // Create new record with incremented version
-    const newRecordData = {
-      ...oldRecord.toObject(),
-      ...req.body,
-      _id: undefined,
+    // Whitelist only amendable clinical fields (never take patient/doctor/version from body)
+    const allowed = [
+      'chiefComplaint',
+      'symptoms',
+      'diagnosis',
+      'clinicalNotes',
+      'treatmentPlan',
+      'vitals',
+      'followUpDate',
+      'attachments',
+      'appointment',
+    ];
+    const patch = {};
+    for (const key of allowed) {
+      if (req.body[key] !== undefined) patch[key] = req.body[key];
+    }
+
+    const base = oldRecord.toObject();
+    delete base._id;
+    delete base.createdAt;
+    delete base.updatedAt;
+    delete base.__v;
+
+    const newRecord = await MedicalRecord.create({
+      ...base,
+      ...patch,
+      patient: oldRecord.patient,
+      doctor: oldRecord.doctor,
       status: 'active',
       version: oldRecord.version + 1,
       amendedFrom: oldRecord._id,
-    };
-    delete newRecordData.createdAt;
-    delete newRecordData.updatedAt;
-
-    const newRecord = await MedicalRecord.create(newRecordData);
+    });
 
     await AuditLog.create({
       actor: req.user._id,

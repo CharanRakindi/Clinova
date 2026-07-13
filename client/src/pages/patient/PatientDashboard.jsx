@@ -137,37 +137,49 @@ const PatientDashboard = () => {
             <h3 className="text-[14.5px] font-semibold text-slate-800 pb-3 border-b border-slate-100">Health Profile</h3>
             
             <div className="space-y-3.5 text-[13px] font-medium">
-              <div className="flex justify-between">
-                <span className="text-slate-400">Blood Group</span>
-                <span className="font-semibold text-red-600">{profile?.bloodGroup || 'O+'}</span>
+              <div className="flex justify-between gap-3">
+                <span className="text-slate-400">Blood group</span>
+                <span className="font-semibold text-slate-800">
+                  {profile?.bloodGroup || 'Not configured'}
+                </span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">Emergency Contact</span>
-                <span className="font-semibold text-slate-700">{profile?.emergencyContact?.name || 'Mary Doe'} ({profile?.emergencyContact?.relationship || 'Spouse'})</span>
+              <div className="flex justify-between gap-3">
+                <span className="text-slate-400">Emergency contact</span>
+                <span className="text-right font-semibold text-slate-700">
+                  {profile?.emergencyContact?.name
+                    ? `${profile.emergencyContact.name}${
+                        profile.emergencyContact.relationship
+                          ? ` (${profile.emergencyContact.relationship})`
+                          : ''
+                      }`
+                    : 'Not configured'}
+                </span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">Insurance Provider</span>
-                <span className="font-semibold text-slate-700">{profile?.insuranceProvider || 'MetLife Health'}</span>
+              <div className="flex justify-between gap-3">
+                <span className="text-slate-400">Insurance provider</span>
+                <span className="font-semibold text-slate-700">
+                  {profile?.insuranceProvider || 'Not configured'}
+                </span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">Policy Identifier</span>
-                <span className="font-semibold text-slate-700 font-mono">{profile?.insuranceNumber || 'MET-8932'}</span>
+              <div className="flex justify-between gap-3">
+                <span className="text-slate-400">Policy identifier</span>
+                <span className="font-mono font-semibold text-slate-700">
+                  {profile?.insuranceNumber || 'Not configured'}
+                </span>
               </div>
             </div>
           </div>
 
-          {/* Active Medical Alerts */}
-          <div className="border border-red-200 bg-red-50/40 p-5 rounded-xl space-y-3">
-            <h3 className="text-[14px] font-semibold text-red-800 flex items-center gap-2">
-              <ShieldAlert className="w-4 h-4 text-red-600" />
-              Critical Medical Alerts
+          {/* Allergies from API when present */}
+          <div className="card space-y-3 p-5">
+            <h3 className="flex items-center gap-2 text-[14px] font-medium text-slate-800">
+              <ShieldAlert className="h-4 w-4 text-slate-400" />
+              Medical alerts
             </h3>
-            <div className="text-[12.5px] font-medium text-red-800">
-              <ul className="list-disc pl-5 space-y-1.5 font-semibold">
-                <li>Allergy: Penicillin (Severe Anaphylaxis risk)</li>
-                <li>Allergy: Peanuts (Moderate Reaction)</li>
-              </ul>
-            </div>
+            <p className="text-[12.5px] font-normal text-slate-500">
+              Allergy and condition alerts appear here when recorded by your care team.
+              Update them with your doctor if anything is missing.
+            </p>
           </div>
         </div>
 

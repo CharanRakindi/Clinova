@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../../api/axios';
-import { UserPlus, Calendar, Plus, Search, Check, Trash } from 'lucide-react';
+import { UserPlus, Calendar, Plus, Check, Trash } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { formatDoctorName } from '../../utils/format';
@@ -10,14 +10,15 @@ export default function ReceptionistDashboard() {
   const queryClient = useQueryClient();
   const [patientSearch, setPatientSearch] = useState('');
   
-  // Registration form state
+  // Registration form state (no hardcoded password — server generates temp)
   const [registerData, setRegisterData] = useState({
-    name: '', email: '', password: 'password123', role: 'patient', phone: '', gender: 'male'
+    name: '', email: '', phone: '', gender: 'male',
   });
+  const [lastTempPassword, setLastTempPassword] = useState(null);
 
   // Appointment form state
   const [aptData, setAptData] = useState({
-    patientId: '', doctorId: '', appointmentDate: '', timeSlot: '09:00 AM', reason: ''
+    patientId: '', doctorId: '', appointmentDate: '', timeSlot: '09:00 AM', reason: '',
   });
 
   // Load doctors for appointments dropdown
@@ -26,16 +27,16 @@ export default function ReceptionistDashboard() {
     queryFn: async () => {
       const res = await api.get('/doctors');
       return res.data.data;
-    }
+    },
   });
 
-  // Load patients for selection
+  // Load patients for selection (staff endpoint — does not use public register)
   const { data: patients } = useQuery({
     queryKey: ['receptionistPatients'],
     queryFn: async () => {
       const res = await api.get('/patients');
       return res.data.data;
-    }
+    },
   });
 
   // Load all appointments
@@ -44,39 +45,56 @@ export default function ReceptionistDashboard() {
     queryFn: async () => {
       const res = await api.get('/appointments');
       return res.data.data;
-    }
+    },
   });
 
-  // Mutate: register new patient
+  // Mutate: register new patient without hijacking staff session
   const registerPatient = useMutation({
     mutationFn: async (data) => {
-      const res = await api.post('/auth/register', data);
+      const res = await api.post('/patients', data);
       return res.data.data;
     },
     onSuccess: (data) => {
-      toast.success(`Patient ${data.name} registered successfully`);
-      setRegisterData({ name: '', email: '', password: 'password123', role: 'patient', phone: '', gender: 'male' });
+      setLastTempPassword(data.temporaryPassword || null);
+      toast.success(
+        data.temporaryPassword
+          ? `Patient ${data.name} registered. Temp password: ${data.temporaryPassword}`
+          : `Patient ${data.name} registered successfully`
+      );
+      setRegisterData({ name: '', email: '', phone: '', gender: 'male' });
       queryClient.invalidateQueries({ queryKey: ['receptionistPatients'] });
     },
     onError: (err) => {
       toast.error(err.response?.data?.message || 'Failed to register patient');
-    }
+    },
   });
 
-  // Mutate: book new appointment
+  // Mutate: book new appointment (server expects patient / doctor)
   const bookAppointment = useMutation({
     mutationFn: async (data) => {
-      const res = await api.post('/appointments', data);
+      const res = await api.post('/appointments', {
+        patient: data.patientId,
+        doctor: data.doctorId,
+        appointmentDate: data.appointmentDate,
+        timeSlot: data.timeSlot,
+        reason: data.reason || 'Consultation',
+      });
       return res.data.data;
     },
     onSuccess: () => {
       toast.success('Appointment scheduled successfully');
-      setAptData({ patientId: '', doctorId: '', appointmentDate: '', timeSlot: '09:00 AM', reason: '' });
+      setAptData({
+        patientId: '',
+        doctorId: '',
+        appointmentDate: '',
+        timeSlot: '09:00 AM',
+        reason: '',
+      });
       queryClient.invalidateQueries({ queryKey: ['receptionistAppointments'] });
     },
     onError: (err) => {
       toast.error(err.response?.data?.message || 'Failed to schedule appointment');
-    }
+    },
   });
 
   // Mutate: confirm appointment
@@ -97,6 +115,7 @@ export default function ReceptionistDashboard() {
       toast.error('Name and email are required');
       return;
     }
+    setLastTempPassword(null);
     registerPatient.mutate(registerData);
   };
 
@@ -189,6 +208,15 @@ export default function ReceptionistDashboard() {
                 <Plus className="h-3.5 w-3.5" />
                 Register patient
               </button>
+              {lastTempPassword && (
+                <div className="rounded-xl border border-amber-100 bg-amber-50 p-3 text-[12.5px] text-amber-900">
+                  <p className="font-medium">Temporary password (share once):</p>
+                  <p className="mt-1 font-mono text-[13px]">{lastTempPassword}</p>
+                  <p className="mt-1 text-amber-800/80">
+                    Patient must change it on first login.
+                  </p>
+                </div>
+              )}
             </form>
           </div>
 

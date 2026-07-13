@@ -17,9 +17,11 @@ const DoctorPatients = () => {
     }
   });
 
-  const filteredPatients = patients?.filter(p => 
-    p.user?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.patientId.toLowerCase().includes(searchTerm.toLowerCase())
+  const q = searchTerm.toLowerCase();
+  const filteredPatients = patients?.filter(
+    (p) =>
+      (p.user?.name || '').toLowerCase().includes(q) ||
+      (p.patientId || '').toLowerCase().includes(q)
   );
 
   if (isLoading) return <div className="card p-8"><SkeletonTable rows={5} /></div>;

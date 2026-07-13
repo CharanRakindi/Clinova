@@ -1,19 +1,26 @@
 import Appointment from '../models/Appointment.js';
-import DoctorProfile from '../models/DoctorProfile.js';
+import User from '../models/User.js';
 import { sendToUser } from '../services/socketService.js';
 
-// @desc    Get all appointments
+const VALID_STATUSES = ['requested', 'confirmed', 'completed', 'cancelled', 'no-show'];
+
+// @desc    Get appointments (scoped by role)
 // @route   GET /api/v1/appointments
 // @access  Private
 export const getAppointments = async (req, res, next) => {
   try {
     let query = {};
+
     if (req.user.role === 'patient') {
       query.patient = req.user._id;
     } else if (req.user.role === 'doctor') {
       query.doctor = req.user._id;
+    } else if (req.user.role === 'receptionist' || req.user.role === 'admin') {
+      query = {};
+    } else {
+      // lab_technician and others: no appointment list access
+      return res.status(200).json({ success: true, data: [] });
     }
-    // admin gets all
 
     const appointments = await Appointment.find(query)
       .populate('patient', 'name email profileImage')
@@ -28,51 +35,80 @@ export const getAppointments = async (req, res, next) => {
 
 // @desc    Create appointment
 // @route   POST /api/v1/appointments
-// @access  Private
+// @access  Private (patient, doctor, receptionist, admin)
 export const createAppointment = async (req, res, next) => {
   try {
-    const { doctor, appointmentDate, timeSlot, reason } = req.body;
-    const patientId = req.user.role === 'patient' ? req.user._id : req.body.patient;
+    const allowed = ['patient', 'doctor', 'receptionist', 'admin'];
+    if (!allowed.includes(req.user.role)) {
+      return res.status(403).json({ success: false, message: 'Forbidden' });
+    }
 
-    if (!patientId || !doctor || !appointmentDate || !timeSlot || !reason) {
+    const { doctor, appointmentDate, timeSlot, reason } = req.body;
+    // Accept legacy patientId from older clients
+    const patientId =
+      req.user.role === 'patient'
+        ? req.user._id
+        : req.body.patient || req.body.patientId;
+    const doctorId = doctor || req.body.doctorId;
+
+    if (!patientId || !doctorId || !appointmentDate || !timeSlot || !reason) {
       return res.status(400).json({ success: false, message: 'All fields are required' });
     }
 
-    // Check for conflict
+    const patientUser = await User.findById(patientId);
+    if (!patientUser || patientUser.role !== 'patient') {
+      return res.status(400).json({ success: false, message: 'Invalid patient' });
+    }
+
+    const doctorUser = await User.findById(doctorId);
+    if (!doctorUser || doctorUser.role !== 'doctor') {
+      return res.status(400).json({ success: false, message: 'Invalid doctor' });
+    }
+
     const existing = await Appointment.findOne({
-      doctor,
+      doctor: doctorId,
       appointmentDate,
       timeSlot,
       status: { $in: ['requested', 'confirmed'] },
     });
 
     if (existing) {
-      return res.status(400).json({ success: false, message: 'Time slot is already booked for this doctor' });
+      return res.status(400).json({
+        success: false,
+        message: 'Time slot is already booked for this doctor',
+      });
     }
+
+    const status =
+      req.user.role === 'patient' ? 'requested' : req.body.status || 'confirmed';
 
     const appointment = await Appointment.create({
       patient: patientId,
-      doctor,
+      doctor: doctorId,
       appointmentDate,
       timeSlot,
       reason,
+      status: VALID_STATUSES.includes(status) ? status : 'requested',
       createdBy: req.user._id,
     });
 
-    // Notify the other party
     if (req.user.role === 'patient') {
-      sendToUser(doctor, 'notification', {
+      sendToUser(doctorId, 'notification', {
         message: `New appointment requested by ${req.user.name}`,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
-    } else if (req.user.role === 'doctor') {
+    } else {
       sendToUser(patientId, 'notification', {
-        message: `Dr. ${req.user.name} has scheduled an appointment with you`,
-        timestamp: new Date()
+        message: `An appointment was scheduled for you with Dr. ${doctorUser.name}`,
+        timestamp: new Date(),
       });
     }
 
-    res.status(201).json({ success: true, data: appointment });
+    const populated = await Appointment.findById(appointment._id)
+      .populate('patient', 'name email profileImage')
+      .populate('doctor', 'name email profileImage');
+
+    res.status(201).json({ success: true, data: populated });
   } catch (error) {
     next(error);
   }
@@ -84,42 +120,73 @@ export const createAppointment = async (req, res, next) => {
 export const updateAppointmentStatus = async (req, res, next) => {
   try {
     const { status, cancellationReason } = req.body;
-    const appointment = await Appointment.findById(req.params.id);
 
+    if (!VALID_STATUSES.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid status. Allowed: ${VALID_STATUSES.join(', ')}`,
+      });
+    }
+
+    const appointment = await Appointment.findById(req.params.id);
     if (!appointment) {
       return res.status(404).json({ success: false, message: 'Appointment not found' });
     }
 
-    // Auth check
-    if (req.user.role === 'patient' && appointment.patient.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ success: false, message: 'Forbidden' });
-    }
-    if (req.user.role === 'doctor' && appointment.doctor.toString() !== req.user._id.toString()) {
+    const role = req.user.role;
+    const userId = req.user._id.toString();
+
+    if (role === 'patient') {
+      if (appointment.patient.toString() !== userId) {
+        return res.status(403).json({ success: false, message: 'Forbidden' });
+      }
+      if (status !== 'cancelled') {
+        return res.status(403).json({
+          success: false,
+          message: 'Patients can only cancel appointments',
+        });
+      }
+    } else if (role === 'doctor') {
+      if (appointment.doctor.toString() !== userId) {
+        return res.status(403).json({ success: false, message: 'Forbidden' });
+      }
+    } else if (role === 'receptionist' || role === 'admin') {
+      // allowed
+    } else {
       return res.status(403).json({ success: false, message: 'Forbidden' });
     }
 
-    // Business rules
     if (appointment.status === 'cancelled' || appointment.status === 'completed') {
-      return res.status(400).json({ success: false, message: `Cannot change status from ${appointment.status}` });
-    }
-    if (req.user.role === 'patient' && status === 'completed') {
-      return res.status(403).json({ success: false, message: 'Patients cannot mark appointments as completed' });
+      return res.status(400).json({
+        success: false,
+        message: `Cannot change status from ${appointment.status}`,
+      });
     }
 
     appointment.status = status;
     if (status === 'cancelled') {
-      appointment.cancellationReason = cancellationReason;
+      appointment.cancellationReason = cancellationReason || 'Cancelled';
     }
 
     await appointment.save();
 
-    // Notify Patient
     sendToUser(appointment.patient, 'notification', {
       message: `Your appointment status was updated to ${status}`,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
-    res.status(200).json({ success: true, data: appointment });
+    if (appointment.doctor.toString() !== userId) {
+      sendToUser(appointment.doctor, 'notification', {
+        message: `Appointment status updated to ${status}`,
+        timestamp: new Date(),
+      });
+    }
+
+    const populated = await Appointment.findById(appointment._id)
+      .populate('patient', 'name email profileImage')
+      .populate('doctor', 'name email profileImage');
+
+    res.status(200).json({ success: true, data: populated });
   } catch (error) {
     next(error);
   }

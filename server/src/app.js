@@ -41,8 +41,8 @@ app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use(cookieParser());
 
-// Static Files
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+// NOTE: Local uploads are NOT served publicly.
+// Authenticated download: GET /api/v1/upload/files/:filename
 
 // Logging
 if (process.env.NODE_ENV === 'development') {

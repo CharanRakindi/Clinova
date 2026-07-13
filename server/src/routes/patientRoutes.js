@@ -1,6 +1,7 @@
 import express from 'express';
 import { 
-  getPatients, 
+  getPatients,
+  createPatientAccount,
   getPatientProfile, 
   updatePatientProfile,
   getPatientAllergies,
@@ -16,7 +17,8 @@ const router = express.Router();
 router.use(authenticate);
 
 router.route('/')
-  .get(authorizeRoles('admin', 'doctor'), getPatients);
+  .get(authorizeRoles('admin', 'doctor', 'receptionist'), getPatients)
+  .post(authorizeRoles('admin', 'receptionist'), createPatientAccount);
 
 router.route('/:patientId')
   .get(authorizeDoctorPatientAccess, getPatientProfile)

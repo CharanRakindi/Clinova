@@ -326,8 +326,8 @@ const DoctorDashboard = () => {
                 >
                   <option value="">Select patient</option>
                   {(patients || []).map((p) => (
-                    <option key={p._id} value={p._id || p.user?._id}>
-                      {p.name || p.user?.name}
+                    <option key={p._id} value={p.user?._id || p.user}>
+                      {p.user?.name || p.name} {p.patientId ? `(${p.patientId})` : ''}
                     </option>
                   ))}
                 </select>
@@ -344,7 +344,10 @@ const DoctorDashboard = () => {
                 >
                   <option value="">Select appointment</option>
                   {(allAppointments || [])
-                    .filter((a) => (a.patient?._id || a.patient) === labForm.patientId)
+                    .filter((a) => {
+                      const pid = a.patient?._id || a.patient;
+                      return String(pid) === String(labForm.patientId);
+                    })
                     .map((a) => (
                       <option key={a._id} value={a._id}>
                         {format(new Date(a.appointmentDate), 'MMM dd, yyyy')} at {a.timeSlot} (

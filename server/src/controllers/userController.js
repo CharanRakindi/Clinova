@@ -66,6 +66,10 @@ export const createUser = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Invalid staff role specified' });
     }
 
+    if (role === 'doctor' && !department) {
+      return res.status(400).json({ success: false, message: 'Department is required for doctors' });
+    }
+
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ success: false, message: 'User already exists with this email' });

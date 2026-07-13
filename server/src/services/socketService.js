@@ -8,29 +8,47 @@ let io;
 // Key: userId, Value: socketId
 const connectedUsers = new Map();
 
+function parseCookie(header = '') {
+  return header.split(';').reduce((acc, part) => {
+    const [k, ...v] = part.trim().split('=');
+    if (k) acc[k] = decodeURIComponent(v.join('=') || '');
+    return acc;
+  }, {});
+}
+
 export const initSocket = (server) => {
   io = new Server(server, {
     cors: {
       origin: process.env.CLIENT_URL || 'http://localhost:5173',
       methods: ['GET', 'POST'],
-      credentials: true
-    }
+      credentials: true,
+    },
   });
 
-  // Authentication middleware
+  // Authentication middleware — cookie or handshake auth token
   io.use(async (socket, next) => {
     try {
-      const token = socket.handshake.auth.token || socket.handshake.headers.token;
-      
+      let token = socket.handshake.auth?.token;
+
+      if (!token && socket.handshake.headers?.cookie) {
+        const cookies = parseCookie(socket.handshake.headers.cookie);
+        token = cookies.accessToken;
+      }
+
       if (!token) {
         return next(new Error('Authentication error: Token missing'));
       }
 
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const secret = process.env.JWT_ACCESS_SECRET;
+      if (!secret) {
+        return next(new Error('Authentication error: Server misconfigured'));
+      }
+
+      const decoded = jwt.verify(token, secret);
       const user = await User.findById(decoded.id).select('-password');
-      
-      if (!user) {
-        return next(new Error('Authentication error: User not found'));
+
+      if (!user || !user.isActive) {
+        return next(new Error('Authentication error: User not found or inactive'));
       }
 
       socket.user = user;
@@ -42,11 +60,8 @@ export const initSocket = (server) => {
 
   io.on('connection', (socket) => {
     console.log(`User connected: ${socket.user.name} (${socket.user._id})`);
-    
-    // Store user socket mapping
+
     connectedUsers.set(socket.user._id.toString(), socket.id);
-    
-    // Join a room specific to the user's role
     socket.join(socket.user.role);
 
     socket.on('disconnect', () => {
@@ -67,12 +82,9 @@ export const getIO = () => {
 
 /**
  * Send a notification to a specific user
- * @param {String} userId - The recipient user ID
- * @param {String} eventName - The event name
- * @param {Object} payload - The data payload
  */
 export const sendToUser = (userId, eventName, payload) => {
-  if (!io) return;
+  if (!io || !userId) return;
   const socketId = connectedUsers.get(userId.toString());
   if (socketId) {
     io.to(socketId).emit(eventName, payload);
@@ -81,9 +93,6 @@ export const sendToUser = (userId, eventName, payload) => {
 
 /**
  * Send a notification to all users with a specific role
- * @param {String} role - The role (e.g., 'admin', 'doctor', 'patient')
- * @param {String} eventName - The event name
- * @param {Object} payload - The data payload
  */
 export const sendToRole = (role, eventName, payload) => {
   if (!io) return;

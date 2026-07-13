@@ -28,13 +28,16 @@ export const getDashboardStats = async (req, res, next) => {
       const endOfDay = new Date();
       endOfDay.setHours(23, 59, 59, 999);
 
+      const doctorProfile = await DoctorProfile.findOne({ user: _id });
       const [todaysAppointments, totalAssignedPatients, completedConsultations] = await Promise.all([
-        Appointment.countDocuments({ 
+        Appointment.countDocuments({
           doctor: _id,
-          appointmentDate: { $gte: startOfDay, $lte: endOfDay }
+          appointmentDate: { $gte: startOfDay, $lte: endOfDay },
         }),
-        PatientProfile.countDocuments({ assignedDoctors: _id }),
-        Appointment.countDocuments({ doctor: _id, status: 'completed' })
+        doctorProfile
+          ? PatientProfile.countDocuments({ assignedDoctors: doctorProfile._id })
+          : Promise.resolve(0),
+        Appointment.countDocuments({ doctor: _id, status: 'completed' }),
       ]);
       data = { todaysAppointments, totalAssignedPatients, completedConsultations };
     } 

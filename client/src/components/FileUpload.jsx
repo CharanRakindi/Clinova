@@ -63,9 +63,10 @@ export default function FileUpload({
       });
 
       const data = res.data.data;
+      // Cloudinary absolute URLs stay as-is; local paths are authenticated API routes
       const fileUrl = data.url.startsWith('http')
         ? data.url
-        : `${import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'http://localhost:5001'}${data.url}`;
+        : `${import.meta.env.VITE_API_URL?.replace(/\/api\/v1\/?$/, '') || 'http://localhost:5001'}${data.url.startsWith('/') ? data.url : `/${data.url}`}`;
 
       setUploadedUrl(fileUrl);
       toast.success('File uploaded successfully');

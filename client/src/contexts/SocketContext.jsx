@@ -6,6 +6,18 @@ const SocketContext = createContext();
 
 export const useSocket = () => useContext(SocketContext);
 
+function socketOrigin() {
+  if (import.meta.env.VITE_SOCKET_URL) return import.meta.env.VITE_SOCKET_URL;
+  const api = import.meta.env.VITE_API_URL || 'http://localhost:5001/api/v1';
+  // Strip /api/v1 (or trailing path) so we connect to the Socket.IO server origin
+  try {
+    const u = new URL(api);
+    return u.origin;
+  } catch {
+    return 'http://localhost:5001';
+  }
+}
+
 export const SocketProvider = ({ children }) => {
   const { user } = useAuth();
   const [socket, setSocket] = useState(null);
@@ -16,21 +28,19 @@ export const SocketProvider = ({ children }) => {
     let newSocket;
 
     if (user) {
-      newSocket = io(import.meta.env.VITE_API_URL || 'http://localhost:5001', {
-        auth: {
-          token: localStorage.getItem('token')
-        }
+      newSocket = io(socketOrigin(), {
+        withCredentials: true, // send httpOnly accessToken cookie
+        transports: ['websocket', 'polling'],
       });
 
       newSocket.on('connect', () => {
-        console.log('Socket connected');
+        if (import.meta.env.DEV) console.log('Socket connected');
       });
 
       newSocket.on('connect_error', (err) => {
-        console.error('Socket connection error:', err.message);
+        if (import.meta.env.DEV) console.error('Socket connection error:', err.message);
       });
 
-      // Listen for notifications
       newSocket.on('notification', (data) => {
         setNotifications((prev) => [data, ...prev]);
         setUnreadCount((prev) => prev + 1);
@@ -40,16 +50,14 @@ export const SocketProvider = ({ children }) => {
     }
 
     return () => {
-      if (newSocket) {
-        newSocket.disconnect();
-      }
+      if (newSocket) newSocket.disconnect();
+      setSocket(null);
     };
-  }, [user]);
+  }, [user?._id]);
 
   const markAsRead = () => {
     setUnreadCount(0);
-    // Optionally update notifications array to set read: true
-    setNotifications((prev) => prev.map(n => ({ ...n, read: true })));
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   };
 
   const clearNotifications = () => {
@@ -58,7 +66,9 @@ export const SocketProvider = ({ children }) => {
   };
 
   return (
-    <SocketContext.Provider value={{ socket, notifications, unreadCount, markAsRead, clearNotifications }}>
+    <SocketContext.Provider
+      value={{ socket, notifications, unreadCount, markAsRead, clearNotifications }}
+    >
       {children}
     </SocketContext.Provider>
   );

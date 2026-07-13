@@ -2,17 +2,21 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5001/api/v1',
-  withCredentials: true, // Important for cookies
+  withCredentials: true,
 });
 
-// Response interceptor to handle token refresh
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    
-    // If error is 401 and we haven't tried refreshing yet
+
     if (error.response?.status === 401 && !originalRequest._retry) {
+      // Don't try to refresh the refresh/login endpoints themselves
+      const url = originalRequest?.url || '';
+      if (url.includes('/auth/login') || url.includes('/auth/refresh') || url.includes('/auth/register')) {
+        return Promise.reject(error);
+      }
+
       originalRequest._retry = true;
       try {
         await axios.post(
@@ -22,8 +26,7 @@ api.interceptors.response.use(
         );
         return api(originalRequest);
       } catch (refreshError) {
-        // Refresh token failed, user must log in again
-        // Could dispatch an event or redirect to login here
+        window.dispatchEvent(new Event('clinova:auth-expired'));
         return Promise.reject(refreshError);
       }
     }

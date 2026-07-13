@@ -1,4 +1,5 @@
 import User from '../models/User.js';
+import PatientProfile from '../models/PatientProfile.js';
 import { generateTokens, setTokenCookies, clearTokenCookies } from '../utils/generateToken.js';
 import jwt from 'jsonwebtoken';
 import { logAction } from '../utils/auditLogger.js';
@@ -8,7 +9,7 @@ import { logAction } from '../utils/auditLogger.js';
 // @access  Public
 export const register = async (req, res, next) => {
   try {
-    const { name, email, password, role, phone, gender } = req.body;
+    const { name, email, password, phone, gender } = req.body;
 
     const userExists = await User.findOne({ email });
 
@@ -16,6 +17,7 @@ export const register = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'User already exists' });
     }
 
+    // Public registration is always a patient (ignore any client-supplied role)
     const user = await User.create({
       name,
       email,
@@ -23,6 +25,11 @@ export const register = async (req, res, next) => {
       role: 'patient',
       phone,
       gender,
+    });
+
+    await PatientProfile.create({
+      user: user._id,
+      patientId: `PAT-${Date.now().toString().slice(-8)}`,
     });
 
     const { accessToken, refreshToken } = generateTokens(user._id);
@@ -53,6 +60,7 @@ export const register = async (req, res, next) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        mustChangePassword: !!user.mustChangePassword,
       },
     });
   } catch (error) {
@@ -104,6 +112,7 @@ export const login = async (req, res, next) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        mustChangePassword: !!user.mustChangePassword,
       },
     });
   } catch (error) {
@@ -204,8 +213,13 @@ export const updatePassword = async (req, res, next) => {
     user.password = newPassword;
     user.mustChangePassword = false;
     user.passwordChangedAt = Date.now();
+
+    // Rotate session: issue new tokens and invalidate prior refresh token
+    const { accessToken, refreshToken } = generateTokens(user._id);
+    user.refreshToken = refreshToken;
     await user.save();
-    
+    setTokenCookies(res, accessToken, refreshToken);
+
     // Audit log
     await logAction(
       user._id,

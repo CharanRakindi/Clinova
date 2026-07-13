@@ -126,6 +126,18 @@ export const updateLabReportStatus = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Lab report not found' });
     }
 
+    const allowedStatuses = ['ordered', 'sample_collected', 'processing', 'completed', 'reviewed', 'cancelled'];
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid status. Allowed: ${allowedStatuses.join(', ')}`,
+      });
+    }
+
+    if (req.user.role === 'doctor' && labReport.doctor?.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Forbidden' });
+    }
+
     const oldStatus = labReport.status;
     labReport.status = status;
     await labReport.save();
@@ -163,8 +175,13 @@ export const getLabReports = async (req, res, next) => {
 
     if (role === 'patient') {
       query.patient = _id;
-    } else if (patientId) {
-      query.patient = patientId;
+    } else if (role === 'doctor') {
+      query.doctor = _id;
+      if (patientId) query.patient = patientId;
+    } else if (role === 'lab_technician' || role === 'admin') {
+      if (patientId) query.patient = patientId;
+    } else {
+      return res.status(403).json({ success: false, message: 'Forbidden' });
     }
 
     const labReports = await LabReport.find(query)
@@ -193,9 +210,19 @@ export const getLabReportById = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Lab report not found' });
     }
 
-    // Check authorization: Patient can only view their own lab reports
-    if (req.user.role === 'patient' && labReport.patient._id.toString() !== req.user._id.toString()) {
+    const role = req.user.role;
+    const uid = req.user._id.toString();
+    const patientId = labReport.patient?._id?.toString() || labReport.patient?.toString();
+    const doctorId = labReport.doctor?._id?.toString() || labReport.doctor?.toString();
+
+    if (role === 'patient' && patientId !== uid) {
       return res.status(403).json({ success: false, message: 'Forbidden: Cannot view this lab report' });
+    }
+    if (role === 'doctor' && doctorId !== uid) {
+      return res.status(403).json({ success: false, message: 'Forbidden: Cannot view this lab report' });
+    }
+    if (!['patient', 'doctor', 'lab_technician', 'admin'].includes(role)) {
+      return res.status(403).json({ success: false, message: 'Forbidden' });
     }
 
     res.status(200).json({ success: true, data: labReport });

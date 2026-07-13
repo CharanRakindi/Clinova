@@ -1,19 +1,109 @@
+import crypto from 'crypto';
 import PatientProfile from '../models/PatientProfile.js';
 import User from '../models/User.js';
+import Appointment from '../models/Appointment.js';
+import DoctorProfile from '../models/DoctorProfile.js';
+import { logAction } from '../utils/auditLogger.js';
 
-// @desc    Get all patients
+// @desc    Get all patients (scoped by role)
 // @route   GET /api/v1/patients
-// @access  Private/Admin/Doctor
+// @access  Private/Admin/Doctor/Receptionist
 export const getPatients = async (req, res, next) => {
   try {
-    const query = {};
-    
-    // If doctor, only return assigned patients or patients they have seen. 
-    // For simplicity in this endpoint, we might let doctors search all patients to assign them, 
-    // or restrict it. Let's restrict to all for search, but viewing details is restricted by ABAC.
-    
-    const patients = await PatientProfile.find(query).populate('user', 'name email phone gender dateOfBirth profileImage');
+    let patients;
+
+    if (req.user.role === 'admin' || req.user.role === 'receptionist') {
+      patients = await PatientProfile.find({})
+        .populate('user', 'name email phone gender dateOfBirth profileImage isActive')
+        .sort({ createdAt: -1 });
+    } else if (req.user.role === 'doctor') {
+      const doctorProfile = await DoctorProfile.findOne({ user: req.user._id });
+      const appointmentPatientIds = await Appointment.distinct('patient', {
+        doctor: req.user._id,
+      });
+
+      const or = [{ user: { $in: appointmentPatientIds } }];
+      if (doctorProfile) {
+        or.push({ assignedDoctors: doctorProfile._id });
+      }
+
+      patients = await PatientProfile.find({ $or: or })
+        .populate('user', 'name email phone gender dateOfBirth profileImage isActive')
+        .sort({ createdAt: -1 });
+    } else {
+      return res.status(403).json({ success: false, message: 'Forbidden' });
+    }
+
     res.status(200).json({ success: true, data: patients });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Create a patient account without logging the staff session out
+// @route   POST /api/v1/patients
+// @access  Private/Admin/Receptionist
+// Does NOT set auth cookies — preserves the caller's session.
+export const createPatientAccount = async (req, res, next) => {
+  try {
+    const { name, email, phone, gender } = req.body;
+
+    if (!name || !email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Name and email are required',
+      });
+    }
+
+    const existing = await User.findOne({ email: email.toLowerCase().trim() });
+    if (existing) {
+      return res.status(400).json({
+        success: false,
+        message: 'A user with this email already exists',
+      });
+    }
+
+    // One-time temporary password; force change on first login
+    const temporaryPassword = crypto.randomBytes(4).toString('hex'); // 8 hex chars
+
+    const user = await User.create({
+      name: name.trim(),
+      email: email.toLowerCase().trim(),
+      password: temporaryPassword,
+      role: 'patient',
+      phone: phone || undefined,
+      gender: gender || undefined,
+      mustChangePassword: true,
+    });
+
+    const profile = await PatientProfile.create({
+      user: user._id,
+      patientId: `PAT-${Date.now().toString().slice(-8)}`,
+    });
+
+    await logAction(
+      req.user._id,
+      req.user.role,
+      'CREATE',
+      'User',
+      user._id,
+      req.ip,
+      req.headers['user-agent'],
+      { createdUserRole: 'patient', email: user.email }
+    );
+
+    res.status(201).json({
+      success: true,
+      message: 'Patient registered successfully',
+      data: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        patientId: profile.patientId,
+        temporaryPassword, // return once for staff to share securely
+      },
+    });
   } catch (error) {
     next(error);
   }

@@ -7,8 +7,14 @@ import Department from '../models/Department.js';
 // @access  Public/Private
 export const getDoctors = async (req, res, next) => {
   try {
+    // Public callers get limited fields; authenticated staff get contact info
+    const isAuthed = !!req.user;
+    const userFields = isAuthed
+      ? 'name email phone gender profileImage isActive'
+      : 'name profileImage isActive';
+
     const doctors = await DoctorProfile.find({})
-      .populate('user', 'name email phone gender profileImage isActive')
+      .populate('user', userFields)
       .populate('department', 'name');
     res.status(200).json({ success: true, data: doctors });
   } catch (error) {

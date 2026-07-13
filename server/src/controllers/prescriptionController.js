@@ -62,8 +62,13 @@ export const getPrescriptions = async (req, res, next) => {
 
     if (role === 'patient') {
       query.patient = _id;
-    } else if (patientId) {
-      query.patient = patientId;
+    } else if (role === 'doctor') {
+      query.doctor = _id;
+      if (patientId) query.patient = patientId;
+    } else if (role === 'admin') {
+      if (patientId) query.patient = patientId;
+    } else {
+      return res.status(403).json({ success: false, message: 'Forbidden' });
     }
 
     const prescriptions = await Prescription.find(query)
@@ -90,9 +95,19 @@ export const getPrescriptionById = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Prescription not found' });
     }
 
-    // Check authorization: Patient can only view their own prescriptions
-    if (req.user.role === 'patient' && prescription.patient._id.toString() !== req.user._id.toString()) {
+    const role = req.user.role;
+    const uid = req.user._id.toString();
+    const patientId = prescription.patient?._id?.toString() || prescription.patient?.toString();
+    const doctorId = prescription.doctor?._id?.toString() || prescription.doctor?.toString();
+
+    if (role === 'patient' && patientId !== uid) {
       return res.status(403).json({ success: false, message: 'Forbidden: Cannot view this prescription' });
+    }
+    if (role === 'doctor' && doctorId !== uid) {
+      return res.status(403).json({ success: false, message: 'Forbidden: Cannot view this prescription' });
+    }
+    if (!['patient', 'doctor', 'admin'].includes(role)) {
+      return res.status(403).json({ success: false, message: 'Forbidden' });
     }
 
     res.status(200).json({ success: true, data: prescription });

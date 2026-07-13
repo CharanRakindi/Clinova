@@ -1,11 +1,11 @@
 import express from 'express';
 import { getDoctors, getDoctorProfile, updateDoctorProfile } from '../controllers/doctorController.js';
-import { authenticate, authorizeRoles } from '../middleware/authMiddleware.js';
+import { authenticate, optionalAuthenticate } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// Public route for searching doctors
-router.get('/', getDoctors);
+// Public directory (limited fields) — staff cookies get fuller contact info
+router.get('/', optionalAuthenticate, getDoctors);
 
 // Get all departments
 router.get('/departments', async (req, res, next) => {

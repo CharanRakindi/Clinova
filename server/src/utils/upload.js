@@ -59,9 +59,10 @@ if (process.env.CLOUDINARY_CLOUD_NAME) {
       cb(null, path.join(__dirname, '../../uploads/'));
     },
     filename: function(req, file, cb) {
-      crypto.pseudoRandomBytes(16, function(err, raw) {
+      crypto.randomBytes(16, function(err, raw) {
         if (err) return cb(err);
-        cb(null, raw.toString('hex') + path.extname(file.originalname));
+        const ext = path.extname(file.originalname).toLowerCase();
+        cb(null, raw.toString('hex') + ext);
       });
     }
   });

@@ -7,6 +7,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Loader2, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
+import { roleHome } from '../utils/navigation';
 
 const HERO_BG =
   'https://cdn.sceneai.art/Hero%20Section%20Video/802fa01f-44ef-4ab4-ac73-62015fe06eef.png';
@@ -15,16 +16,7 @@ const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Invalid email address'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
-  role: z.enum(['patient', 'doctor', 'admin']).default('patient'),
 });
-
-const roleHome = (role) => {
-  if (role === 'admin') return '/admin/dashboard';
-  if (role === 'doctor') return '/doctor/dashboard';
-  if (role === 'receptionist') return '/receptionist/dashboard';
-  if (role === 'lab_technician') return '/labtech/dashboard';
-  return '/patient/dashboard';
-};
 
 const Register = () => {
   const { register: registerUser } = useAuth();
@@ -33,7 +25,6 @@ const Register = () => {
 
   const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: zodResolver(registerSchema),
-    defaultValues: { role: 'patient' },
   });
 
   const onSubmit = async (data) => {
