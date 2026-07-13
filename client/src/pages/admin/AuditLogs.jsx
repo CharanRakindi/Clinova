@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import api from '../../api/axios';
 import SkeletonLoader from '../../components/SkeletonLoader';
-import { FileText, Search, ShieldAlert, ArrowLeft, ArrowRight, Download, Filter } from 'lucide-react';
+import { FileText, Search, ArrowLeft, ArrowRight, Download, Filter } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function AuditLogs() {
