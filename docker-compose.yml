@@ -1,0 +1,104 @@
+# Clinova full stack — web (nginx SPA) + api + mongo
+# Usage:
+#   cp .env.docker.example .env.docker   # edit secrets
+#   docker compose --env-file .env.docker up --build -d
+#   open http://localhost
+
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - clinova
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 5001
+      HOST: 0.0.0.0
+      MONGO_URI: mongodb://mongo:27017/clinova
+      CLIENT_URL: ${CLIENT_URL:-http://localhost}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?Set JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?Set JWT_REFRESH_SECRET}
+      ACCESS_TOKEN_EXPIRES_IN: ${ACCESS_TOKEN_EXPIRES_IN:-15m}
+      REFRESH_TOKEN_EXPIRES_IN: ${REFRESH_TOKEN_EXPIRES_IN:-7d}
+      # Local compose is usually HTTP — cookies must not require Secure
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      COOKIE_SAMESITE: ${COOKIE_SAMESITE:-lax}
+      TRUST_PROXY: "1"
+      RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-200}
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-}
+    volumes:
+      - uploads_data:/app/uploads
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - clinova
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:5001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 25s
+
+  web:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-80}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - clinova
+
+  # One-shot seed (optional): docker compose --env-file .env.docker run --rm seed
+  seed:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    profiles: ["seed"]
+    environment:
+      NODE_ENV: production
+      ALLOW_SEED: "true"
+      MONGO_URI: mongodb://mongo:27017/clinova
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-seed_only_not_used}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-seed_only_not_used}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - clinova
+    command: ["node", "src/seeders/seed.js"]
+    restart: "no"
+
+volumes:
+  mongo_data:
+  uploads_data:
+
+networks:
+  clinova:
+    driver: bridge
