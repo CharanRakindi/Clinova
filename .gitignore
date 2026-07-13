@@ -1,30 +1,51 @@
-# Environment files
+# Environment files (never commit secrets)
 .env
 .env.local
 .env.*.local
 server/.env
 client/.env
+**/.env
+**/.env.local
 
 # Dependencies
 node_modules/
+**/node_modules/
 
 # Build output
 client/dist/
+dist/
+build/
 
-# Uploads (user content)
+# Uploads (user content) — keep folder via .gitkeep
 server/uploads/*
 !server/uploads/.gitkeep
 
 # Logs
 *.log
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
 # OS files
 .DS_Store
+**/.DS_Store
 Thumbs.db
+Desktop.ini
 
-# IDE
+# IDE / editor
 .vscode/
 .idea/
 *.swp
 *.swo
+*.sublime-*
+
+# Test / coverage
+coverage/
+.nyc_output/
+
+# Misc
+*.tgz
+.cache/
+.temp/
+tmp/

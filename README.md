@@ -1,6 +1,6 @@
-# 🏥 Clinova
+# Clinova
 
-A premium, full-featured **Electronic Health Record (EHR) and Medical Record Management System** built with the MERN stack. Designed with a modern healthcare SaaS aesthetic inspired by Linear, Stripe, and Apple HIG.
+A full-stack **Electronic Health Record (EHR)** and medical operations platform built with the MERN stack. Includes a cinematic marketing site, role-based workspaces for patients, doctors, reception, lab technicians, and admins, and JWT cookie authentication.
 
 ![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js&logoColor=white)
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)
@@ -9,100 +9,112 @@ A premium, full-featured **Electronic Health Record (EHR) and Medical Record Man
 
 ---
 
-## ✨ Features
+## Features
 
-### Core Platform
-- **Role-Based Access Control** — Separate interfaces and permissions for Patients, Doctors, and Admins
-- **Secure Authentication** — JWT access/refresh tokens in HttpOnly cookies, bcrypt hashing, rate limiting
-- **Dashboard Analytics** — Real-time stats with Recharts visualizations and animated counters
+### Platform
+- **Role-based access** — Patient, Doctor, Receptionist, Lab Technician, Admin
+- **Secure auth** — JWT access + refresh tokens in HttpOnly cookies, bcrypt passwords
+- **Dashboards** — Role-specific stats, queues, and clinical views
+- **Premium landing** — Responsive marketing UI with About, Services, Doctors, Blog
 
 ### Clinical
-- **Patient Management** — Doctors can view and manage assigned patients' records
-- **Appointment Scheduling** — Book, confirm, cancel, and complete appointments with conflict prevention
-- **Medical Records** — Full CRUD with amendment/versioning, vitals tracking, diagnosis tags, and treatment plans
-- **File Attachments** — Upload lab results, X-rays, and documents (local storage or Cloudinary)
+- Appointments (book, confirm, cancel, complete)
+- Medical records with vitals, diagnosis, amendments
+- Lab order pipeline and re-order from the doctor workspace
+- Prescriptions and file attachments (local disk or Cloudinary)
 
-### Enterprise Features
-- **Real-Time Notifications** — Socket.io powered notification system with live updates
-- **Interactive Calendar** — Full-featured calendar view (react-big-calendar) for appointments
-- **Command Palette** — `⌘K` / `Ctrl+K` quick navigation (cmdk)
-- **Premium landing** — Responsive marketing site with About, Services, Doctors, and Blog sections
-- **File Upload System** — Drag-and-drop uploads with Cloudinary integration
+### Product extras
+- Socket.io notifications (cookie-authenticated)
+- Command palette (`⌘K` / `Ctrl+K`)
+- Interactive calendar, audit logs (admin), onboarding tour
 
 ---
 
-## 🛠️ Tech Stack
+## Tech stack
 
-| Layer | Technologies |
-|-------|-------------|
-| **Frontend** | React 19, Vite, React Router 7, Tailwind CSS 3, TanStack React Query 5 |
-| **UI/UX** | Lucide Icons, Sonner (toasts), cmdk (command palette), react-big-calendar |
-| **Forms** | React Hook Form + Zod validation |
-| **Charts** | Recharts |
-| **Backend** | Node.js, Express 5, Mongoose 9 |
-| **Auth** | JWT (access + refresh), bcrypt, HttpOnly cookies |
-| **Real-time** | Socket.io |
-| **File Storage** | Multer + Cloudinary (with local disk fallback) |
-| **Security** | Helmet, CORS, express-rate-limit |
+| Layer | Stack |
+|-------|--------|
+| Frontend | React 19, Vite, React Router 7, Tailwind CSS 3, TanStack Query 5, Framer Motion |
+| Backend | Node.js, Express 5, Mongoose 9 |
+| Auth | JWT (access + refresh), bcrypt, HttpOnly cookies |
+| Realtime | Socket.io |
+| Uploads | Multer (+ optional Cloudinary) |
 
 ---
 
-## 💻 Prerequisites
+## Prerequisites
 
-- [Node.js](https://nodejs.org/) v18 or higher
-- [MongoDB](https://www.mongodb.com/) (local instance or Atlas URI)
-- (Optional) [Cloudinary](https://cloudinary.com/) account for cloud file storage
+- Node.js **18+**
+- MongoDB (local or [Atlas](https://www.mongodb.com/atlas))
+- Optional: [Cloudinary](https://cloudinary.com/) for cloud file storage
 
 ---
 
-## ⚙️ Installation & Setup
+## Setup
 
-### 1. Clone the repository
+### 1. Clone
+
 ```bash
-git clone https://github.com/CharanRakindi/Clinova.git
-cd Clinova
+git clone https://github.com/CharanRakindi/MediVault.git
+cd MediVault
 ```
 
-### 2. Setup the Backend
+### 2. Backend
+
 ```bash
 cd server
 npm install
-
-# Create environment file from example
 cp .env.example .env
 ```
 
-Edit `server/.env` and update:
-- `MONGO_URI` — your MongoDB connection string
-- `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` — strong random strings
-- (Optional) `CLOUDINARY_*` — for cloud file uploads
+Edit `server/.env`:
 
-### 3. Setup the Frontend
+| Variable | Purpose |
+|----------|---------|
+| `MONGO_URI` | MongoDB connection string |
+| `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` | Strong random secrets |
+| `CLIENT_URL` | Frontend origin (default `http://localhost:5173`) |
+| `PORT` | API port (default `5001`) |
+| `CLOUDINARY_*` | Optional cloud uploads |
+
+### 3. Frontend
+
 ```bash
 cd ../client
 npm install
+cp .env.example .env
+```
+
+`client/.env` (optional overrides):
+
+```env
+VITE_API_URL=http://localhost:5001/api/v1
 ```
 
 ---
 
-## 🚦 Running the Application
+## Run
 
-### Seed the Database (First Time)
-Populate the database with demo users, roles, and departments:
+### Seed demo data (first time)
+
 ```bash
 cd server
 npm run seed
 ```
 
-### Start Development Servers
+> Seeding is blocked when `NODE_ENV=production` unless `ALLOW_SEED=true`.
 
-**Backend** (runs on `http://localhost:5001`):
+### Dev servers
+
+**API** → `http://localhost:5001`
+
 ```bash
 cd server
 npm run dev
 ```
 
-**Frontend** (runs on `http://localhost:5173`):
+**Web** → `http://localhost:5173`
+
 ```bash
 cd client
 npm run dev
@@ -110,60 +122,83 @@ npm run dev
 
 ---
 
-## 🔑 Demo Credentials
+## Demo credentials
 
-After seeding, log in with:
+After seeding:
 
 | Role | Email | Password |
 |------|-------|----------|
-| **Admin** | `admin@clinova.com` | `password123` |
-| **Doctor** | `sarah@clinova.com` | `password123` |
-| **Patient** | `john@example.com` | `password123` |
+| Admin | `admin@clinova.com` | `password123` |
+| Doctor | `sarah@clinova.com` | `password123` |
+| Doctor | `michael@clinova.com` | `password123` |
+| Receptionist | `receptionist@clinova.com` | `password123` |
+| Lab technician | `labtech@clinova.com` | `password123` |
+| Patient | `john@example.com` | `password123` |
+| Patient | `jane@example.com` | `password123` |
+
+**Domain rules**
+- Public self-registration **cannot** use `@clinova.com` (hospital domain).
+- Staff (doctor / lab tech / receptionist) must be created by an **admin** with a `@clinova.com` email.
 
 ---
 
-## 📁 Project Structure
+## Project structure
 
 ```
-clinova/
-├── client/                    # React frontend (Vite)
+MediVault/
+├── client/                 # React (Vite) frontend
+│   ├── public/
 │   ├── src/
-│   │   ├── api/               # Axios instance & interceptors
-│   │   ├── components/        # Reusable UI components
-│   │   ├── contexts/          # Auth, Socket, Theme providers
-│   │   ├── layouts/           # Root & dashboard layouts
-│   │   ├── pages/             # Route pages (admin, doctor, patient)
-│   │   └── utils/             # Utility functions
-│   └── tailwind.config.js
-├── server/                    # Express backend
+│   │   ├── api/            # Axios client + refresh interceptor
+│   │   ├── components/
+│   │   ├── contexts/       # Auth, Socket, Theme
+│   │   ├── layouts/
+│   │   ├── pages/          # Landing + role dashboards
+│   │   └── utils/
+│   └── .env.example
+├── server/                 # Express API
 │   ├── src/
-│   │   ├── config/            # Database connection
-│   │   ├── controllers/       # Route handlers
-│   │   ├── middleware/        # Auth, error handling
-│   │   ├── models/            # Mongoose schemas
-│   │   ├── routes/            # API route definitions
-│   │   ├── seeders/           # Database seeder
-│   │   ├── services/          # Socket.io service
-│   │   ├── utils/             # Upload config, token helpers
-│   │   └── validators/        # Zod validation schemas
+│   │   ├── config/
+│   │   ├── controllers/
+│   │   ├── middleware/
+│   │   ├── models/
+│   │   ├── routes/
+│   │   ├── seeders/
+│   │   ├── services/       # Socket.io
+│   │   ├── utils/
+│   │   └── validators/
+│   ├── uploads/            # Local files (gitignored contents)
 │   └── .env.example
 └── README.md
 ```
 
 ---
 
-## 🔒 Security
+## Scripts
 
-- **ABAC**: Doctors can only access patients they are assigned to or have appointment history with
-- **HttpOnly Cookies**: Tokens stored securely — immune to XSS
-- **Record Versioning**: Medical records are never hard-deleted; amendments create new versions
-- **Helmet + CORS + Rate Limiting**: Production-ready API protection
-- **Input Validation**: Zod schemas on all endpoints
-
-> **⚠️ Compliance Note**: This is a portfolio/educational project and is **not automatically HIPAA or GDPR compliant**. Production deployment would require BAAs, security audits, encrypted-at-rest storage, and comprehensive access logging.
+| Location | Command | Description |
+|----------|---------|-------------|
+| `server` | `npm run dev` | API with nodemon |
+| `server` | `npm start` | Production API |
+| `server` | `npm run seed` | Seed demo data |
+| `client` | `npm run dev` | Vite dev server |
+| `client` | `npm run build` | Production build |
+| `client` | `npm run preview` | Preview production build |
 
 ---
 
-## 📝 License
+## Security notes
 
-ISC License © [Charan Rakindi](https://github.com/CharanRakindi)
+- HttpOnly cookies for tokens; CORS limited to `CLIENT_URL`
+- Role checks and patient-scoped clinical data where applicable
+- Local uploads served only via authenticated download routes
+- Helmet + rate limiting on the API
+- Seed wipe disabled in production by default
+
+> **Compliance:** This is a portfolio / educational project and is **not** HIPAA or GDPR certified. Real clinical use needs proper BAAs, audits, encryption-at-rest, and operational controls.
+
+---
+
+## License
+
+ISC © [Charan Rakindi](https://github.com/CharanRakindi)

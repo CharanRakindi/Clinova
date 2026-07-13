@@ -5,6 +5,7 @@ import api from '../../api/axios';
 import {
   ArrowLeft, Plus, X, FileText, Heart, Thermometer, Activity, User, Phone,
   CheckCircle, Paperclip, AlertTriangle, ShieldAlert, Stethoscope, Droplet,
+  RotateCcw,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -102,6 +103,30 @@ const DoctorPatientDetail = () => {
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to create record');
+    },
+  });
+
+  const reorderLab = useMutation({
+    mutationFn: async (report) => {
+      const res = await api.post('/lab-reports', {
+        patientId,
+        testName: report.testName,
+        testType: report.testType || 'Diagnostic',
+        priority: report.priority || 'Normal',
+        notes: report.notes
+          ? `Re-order of previous request. ${report.notes}`
+          : 'Re-ordered laboratory test',
+        appointmentId: report.appointment || undefined,
+      });
+      return res.data.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['patientLabReports', patientId] });
+      queryClient.invalidateQueries({ queryKey: ['doctorLabReports'] });
+      toast.success('Lab test re-ordered successfully');
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to re-order lab test');
     },
   });
 
@@ -522,15 +547,28 @@ const DoctorPatientDetail = () => {
                           Ordered: {format(new Date(report.orderedDate), 'MMM dd, yyyy')} • Practitioner: {formatDoctorName(report.doctor?.name)}
                         </p>
                       </div>
-                      <span className={`inline-flex px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-md border ${
-                        report.status === 'ordered' ? 'bg-amber-50 text-amber-600 border-amber-100' :
-                        report.status === 'sample_collected' ? 'bg-blue-50 text-blue-600 border-blue-100' :
-                        report.status === 'processing' ? 'bg-indigo-50 text-indigo-600 border-indigo-100' :
-                        report.status === 'completed' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
-                        'bg-slate-50 text-slate-600 border-slate-100'
-                      }`}>
-                        {report.status.replace('_', ' ')}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className={`inline-flex px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-md border ${
+                          report.status === 'ordered' ? 'bg-amber-50 text-amber-600 border-amber-100' :
+                          report.status === 'sample_collected' ? 'bg-blue-50 text-blue-600 border-blue-100' :
+                          report.status === 'processing' ? 'bg-indigo-50 text-indigo-600 border-indigo-100' :
+                          report.status === 'completed' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                          report.status === 'cancelled' ? 'bg-rose-50 text-rose-600 border-rose-100' :
+                          'bg-slate-50 text-slate-600 border-slate-100'
+                        }`}>
+                          {report.status.replace(/_/g, ' ')}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => reorderLab.mutate(report)}
+                          disabled={reorderLab.isPending}
+                          className="btn btn-secondary btn-sm"
+                          title="Submit a new order for the same test"
+                        >
+                          <RotateCcw className="h-3.5 w-3.5" />
+                          Re-order
+                        </button>
+                      </div>
                     </div>
 
                     <div className="pt-3.5 space-y-3 text-[13px]">

@@ -72,8 +72,8 @@ const seedData = async () => {
 
     // 3. Create Doctors
     const doctorUsers = await User.create([
-      { name: 'Dr. Sarah Jenkins', email: 'sarah@clinova.com', password: 'password123', role: 'doctor', gender: 'female', phone: '555-1111' },
-      { name: 'Dr. Michael Chen', email: 'michael@clinova.com', password: 'password123', role: 'doctor', gender: 'male', phone: '555-2222' },
+      { name: 'Sarah Jenkins', email: 'sarah@clinova.com', password: 'password123', role: 'doctor', gender: 'female', phone: '555-1111' },
+      { name: 'Michael Chen', email: 'michael@clinova.com', password: 'password123', role: 'doctor', gender: 'male', phone: '555-2222' },
     ]);
 
     // 4. Create Patients

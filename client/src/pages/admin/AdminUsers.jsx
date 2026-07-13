@@ -158,7 +158,7 @@ const AdminUsers = () => {
             className="btn btn-primary"
           >
             <Plus className="h-4 w-4" />
-            Create staff account
+            Add doctor / lab tech
           </button>
           <div className="badge badge-neutral gap-1.5 px-3 py-1.5 text-[12.5px]">
             <Shield className="h-3.5 w-3.5" />
@@ -302,7 +302,7 @@ const AdminUsers = () => {
             <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
               <h2 className="flex items-center gap-2 text-[15px] font-medium text-slate-900">
                 <Plus className="h-4 w-4 text-slate-400" />
-                Create staff account
+                Add hospital staff
               </h2>
               <button
                 type="button"
@@ -348,9 +348,12 @@ const AdminUsers = () => {
                     onChange={(e) => setCreateForm({ ...createForm, role: e.target.value })}
                   >
                     <option value="doctor">Doctor</option>
+                    <option value="lab_technician">Lab technician</option>
                     <option value="receptionist">Receptionist</option>
-                    <option value="lab_technician">Lab Technician</option>
                   </select>
+                  <p className="mt-1 text-[11px] text-slate-400">
+                    Staff must use a @clinova.com email
+                  </p>
                 </div>
               </div>
 
@@ -363,7 +366,7 @@ const AdminUsers = () => {
                     type="email"
                     required
                     className="input"
-                    placeholder="sarah@clinova.com"
+                    placeholder="name@clinova.com"
                     value={createForm.email}
                     onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
                   />

@@ -11,7 +11,17 @@ export const register = async (req, res, next) => {
   try {
     const { name, email, password, phone, gender } = req.body;
 
-    const userExists = await User.findOne({ email });
+    const normalizedEmail = String(email || '').toLowerCase().trim();
+    // Hospital domain is reserved for staff accounts provisioned by admin
+    if (normalizedEmail.endsWith('@clinova.com')) {
+      return res.status(400).json({
+        success: false,
+        message:
+          'Emails ending in @clinova.com are reserved for hospital staff. Please use a personal email, or contact an administrator.',
+      });
+    }
+
+    const userExists = await User.findOne({ email: normalizedEmail });
 
     if (userExists) {
       return res.status(400).json({ success: false, message: 'User already exists' });
@@ -20,7 +30,7 @@ export const register = async (req, res, next) => {
     // Public registration is always a patient (ignore any client-supplied role)
     const user = await User.create({
       name,
-      email,
+      email: normalizedEmail,
       password,
       role: 'patient',
       phone,

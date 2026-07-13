@@ -3,7 +3,7 @@ import api from '../../api/axios';
 import StatCard from '../../components/StatCard';
 import InteractiveCalendar from '../../components/InteractiveCalendar';
 import { SkeletonCard } from '../../components/SkeletonLoader';
-import { Calendar, Users, CheckCircle, Clock, ChevronRight, PenTool, Check, ToggleLeft, ToggleRight, FlaskConical, Plus, X } from 'lucide-react';
+import { Calendar, Users, CheckCircle, Clock, ChevronRight, PenTool, Check, ToggleLeft, ToggleRight, FlaskConical, Plus, X, RotateCcw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
@@ -57,6 +57,14 @@ const DoctorDashboard = () => {
     }
   });
 
+  const { data: labReports } = useQuery({
+    queryKey: ['doctorLabReports'],
+    queryFn: async () => {
+      const res = await api.get('/lab-reports');
+      return res.data.data;
+    },
+  });
+
   const orderLab = useMutation({
     mutationFn: async (data) => {
       const res = await api.post('/lab-reports', data);
@@ -67,10 +75,35 @@ const DoctorDashboard = () => {
       setIsLabModalOpen(false);
       setLabForm({ patientId: '', appointmentId: '', testName: '', priority: 'Normal', notes: '' });
       queryClient.invalidateQueries({ queryKey: ['doctorStats'] });
+      queryClient.invalidateQueries({ queryKey: ['doctorLabReports'] });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to request laboratory test');
     }
+  });
+
+  const reorderLab = useMutation({
+    mutationFn: async (report) => {
+      const patientId = report.patient?._id || report.patient;
+      const res = await api.post('/lab-reports', {
+        patientId,
+        testName: report.testName,
+        testType: report.testType || 'Diagnostic',
+        priority: report.priority || 'Normal',
+        notes: report.notes
+          ? `Re-order of previous request. ${report.notes}`
+          : 'Re-ordered laboratory test',
+        appointmentId: report.appointment || undefined,
+      });
+      return res.data.data;
+    },
+    onSuccess: () => {
+      toast.success('Lab test re-ordered successfully');
+      queryClient.invalidateQueries({ queryKey: ['doctorLabReports'] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to re-order lab test');
+    },
   });
 
   const updateStatus = useMutation({
@@ -271,6 +304,64 @@ const DoctorDashboard = () => {
               className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] outline-none focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 text-slate-700 placeholder:text-slate-400 transition-all font-sans resize-none"
               placeholder="Start typing reminders, code shortcuts, or clinical notes..."
             />
+          </div>
+
+          {/* Recent lab orders + re-order */}
+          <div className="card space-y-4 p-5">
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <h3 className="flex items-center gap-2 text-[14.5px] font-semibold text-slate-800">
+                  <FlaskConical className="h-4 w-4 text-slate-400" />
+                  Lab orders
+                </h3>
+                <p className="mt-0.5 text-[11.5px] font-medium text-slate-400">
+                  Recent requests — re-order if needed
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsLabModalOpen(true)}
+                className="btn btn-secondary btn-sm"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                New
+              </button>
+            </div>
+            <div className="max-h-[280px] space-y-2 overflow-y-auto pr-1">
+              {(!labReports || labReports.length === 0) ? (
+                <p className="py-6 text-center text-[12.5px] text-slate-400">
+                  No lab orders yet
+                </p>
+              ) : (
+                labReports.slice(0, 8).map((report) => (
+                  <div
+                    key={report._id}
+                    className="flex items-center justify-between gap-2 rounded-xl border border-slate-200/70 bg-white p-3"
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate text-[13px] font-medium text-slate-800">
+                        {report.testName}
+                      </p>
+                      <p className="mt-0.5 truncate text-[11px] text-slate-400">
+                        {report.patient?.name || 'Patient'} ·{' '}
+                        {format(new Date(report.orderedDate || report.createdAt), 'MMM dd')} ·{' '}
+                        <span className="capitalize">{String(report.status || '').replace(/_/g, ' ')}</span>
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => reorderLab.mutate(report)}
+                      disabled={reorderLab.isPending}
+                      className="btn btn-secondary btn-sm shrink-0"
+                      title="Re-order this lab test"
+                    >
+                      <RotateCcw className="h-3.5 w-3.5" />
+                      Re-do
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
 

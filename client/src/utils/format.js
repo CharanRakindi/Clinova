@@ -1,14 +1,31 @@
+/**
+ * Normalize a clinician display name to a single "Dr. First Last" form.
+ * Handles seed data already prefixed with Dr./Doctor and nested prefixes.
+ */
 export function formatDoctorName(name) {
-  if (!name) return 'Dr. Staff';
-  
-  let clean = name.trim();
-  
-  // Strip out "dr.", "dr", "Dr.", "Dr", "dr. ", etc. from the start
-  // Loop to catch multiple nested prefixes
-  while (/^(dr\.?)\s+/i.test(clean)) {
-    clean = clean.replace(/^(dr\.?)\s+/i, '').trim();
+  if (name == null) return 'Doctor';
+
+  // Support populated objects { name } or plain strings
+  const raw = typeof name === 'string' ? name : name?.name;
+  if (!raw || typeof raw !== 'string') return 'Doctor';
+
+  let clean = raw.trim().replace(/\s+/g, ' ');
+  if (!clean) return 'Doctor';
+
+  // Strip repeated leading titles: "Dr.", "Dr", "Doctor", with or without space
+  for (let i = 0; i < 5; i++) {
+    const next = clean.replace(/^(dr\.?|doctor)\.?\s*/i, '').trim();
+    if (next === clean) break;
+    clean = next;
   }
-  
-  // Prepend exactly "Dr. "
-  return `Dr. ${clean}`;
+
+  if (!clean) return 'Doctor';
+
+  // Capitalize first letter of each word for consistency
+  const pretty = clean
+    .split(' ')
+    .map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1) : w))
+    .join(' ');
+
+  return `Dr. ${pretty}`;
 }

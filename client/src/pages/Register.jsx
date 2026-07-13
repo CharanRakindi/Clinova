@@ -14,7 +14,13 @@ const HERO_BG =
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Invalid email address'),
+  email: z
+    .string()
+    .email('Invalid email address')
+    .refine(
+      (val) => !val.toLowerCase().endsWith('@clinova.com'),
+      'Hospital emails (@clinova.com) cannot be used for public registration'
+    ),
   password: z.string().min(8, 'Password must be at least 8 characters'),
 });
 
@@ -57,17 +63,17 @@ const Register = () => {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className="mb-4 text-[36px] font-medium leading-[1.15] tracking-tight"
+              className="mb-4 font-display text-[clamp(2rem,3vw,2.5rem)] font-normal leading-[1.12] tracking-[-0.02em]"
             >
               Join modern care,
               <br />
-              built around you.
+              <span className="italic text-white/80">built around you.</span>
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className="text-[15px] font-normal leading-relaxed text-white/75"
+              className="text-[15px] font-normal leading-[1.65] tracking-[-0.01em] text-white/70"
             >
               Create your account in seconds and step into a calm, secure health workspace.
             </motion.p>
@@ -93,10 +99,10 @@ const Register = () => {
           </div>
 
           <div>
-            <h2 className="text-[24px] font-medium tracking-tight text-slate-900">
+            <h2 className="text-[22px] font-medium tracking-[-0.025em] text-slate-900">
               Create an account
             </h2>
-            <p className="mt-1.5 text-[13.5px] font-normal text-slate-500">
+            <p className="mt-1.5 text-[13.5px] font-normal leading-snug tracking-[-0.01em] text-slate-500">
               Fill in your details below to get started.
             </p>
           </div>

@@ -55,7 +55,16 @@ export const createPatientAccount = async (req, res, next) => {
       });
     }
 
-    const existing = await User.findOne({ email: email.toLowerCase().trim() });
+    const normalizedEmail = String(email).toLowerCase().trim();
+    if (normalizedEmail.endsWith('@clinova.com')) {
+      return res.status(400).json({
+        success: false,
+        message:
+          'Emails ending in @clinova.com are reserved for hospital staff. Use a personal patient email.',
+      });
+    }
+
+    const existing = await User.findOne({ email: normalizedEmail });
     if (existing) {
       return res.status(400).json({
         success: false,
@@ -68,7 +77,7 @@ export const createPatientAccount = async (req, res, next) => {
 
     const user = await User.create({
       name: name.trim(),
-      email: email.toLowerCase().trim(),
+      email: normalizedEmail,
       password: temporaryPassword,
       role: 'patient',
       phone: phone || undefined,

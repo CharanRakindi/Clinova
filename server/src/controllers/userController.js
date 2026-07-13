@@ -70,14 +70,29 @@ export const createUser = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Department is required for doctors' });
     }
 
-    const userExists = await User.findOne({ email });
+    const normalizedEmail = String(email || '').toLowerCase().trim();
+    // Staff accounts should use the hospital domain
+    if (!normalizedEmail.endsWith('@clinova.com')) {
+      return res.status(400).json({
+        success: false,
+        message: 'Staff accounts must use a @clinova.com email address',
+      });
+    }
+
+    const userExists = await User.findOne({ email: normalizedEmail });
     if (userExists) {
       return res.status(400).json({ success: false, message: 'User already exists with this email' });
     }
 
+    // Strip accidental Dr. prefix; display layer formats titles
+    const cleanName = String(name || '')
+      .trim()
+      .replace(/^(dr\.?|doctor)\.?\s+/i, '')
+      .trim();
+
     const user = await User.create({
-      name,
-      email,
+      name: cleanName,
+      email: normalizedEmail,
       password,
       role,
       phone,

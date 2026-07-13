@@ -3,7 +3,13 @@ import { z } from 'zod';
 export const registerSchema = z.object({
   body: z.object({
     name: z.string().min(2, 'Name must be at least 2 characters'),
-    email: z.string().email('Invalid email address'),
+    email: z
+      .string()
+      .email('Invalid email address')
+      .refine(
+        (val) => !val.toLowerCase().endsWith('@clinova.com'),
+        'Emails ending in @clinova.com are reserved for hospital staff'
+      ),
     password: z.string().min(8, 'Password must be at least 8 characters'),
     // Role is never accepted from public registration
     phone: z.string().optional(),

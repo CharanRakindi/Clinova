@@ -57,17 +57,17 @@ const Login = () => {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className="mb-4 text-[36px] font-medium leading-[1.15] tracking-tight"
+              className="mb-4 font-display text-[clamp(2rem,3vw,2.5rem)] font-normal leading-[1.12] tracking-[-0.02em]"
             >
               Healthcare for Good.
               <br />
-              Today. Tomorrow. Always.
+              <span className="italic text-white/80">Today. Tomorrow. Always.</span>
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className="text-[15px] font-normal leading-relaxed text-white/75"
+              className="text-[15px] font-normal leading-[1.65] tracking-[-0.01em] text-white/70"
             >
               Access your records, connect with clinicians, and manage care from one secure workspace.
             </motion.p>
@@ -94,10 +94,10 @@ const Login = () => {
           </div>
 
           <div>
-            <h2 className="text-[24px] font-medium tracking-tight text-slate-900">
+            <h2 className="text-[22px] font-medium tracking-[-0.025em] text-slate-900">
               Sign in
             </h2>
-            <p className="mt-1.5 text-[13.5px] font-normal text-slate-500">
+            <p className="mt-1.5 text-[13.5px] font-normal leading-snug tracking-[-0.01em] text-slate-500">
               Welcome back. Enter your details to continue.
             </p>
           </div>
