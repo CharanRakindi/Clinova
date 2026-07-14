@@ -225,6 +225,35 @@ docker compose --env-file .env.docker --profile seed run --rm seed
 docker compose --env-file .env.docker down
 ```
 
+### Mongo unhealthy (`dependency mongo failed to start`)
+
+Common after enabling Mongo root auth on a volume that was created **without** credentials. Init scripts only run on an **empty** data directory, so the healthcheck auth fails forever.
+
+**Fix (demo-safe — wipes clinic DB only, keeps images):**
+
+```bash
+cd ~/Clinova   # or your clone path
+docker compose --env-file .env.docker stop
+docker compose --env-file .env.docker rm -f mongo api web
+# volume name is usually <project>_mongo_data (project folder name → clinova_mongo_data)
+docker volume ls | grep mongo
+docker volume rm clinova_mongo_data   # use the name from the previous line if different
+
+# ensure .env.docker has matching auth (or rely on compose defaults)
+# MONGO_ROOT_USER=clinova
+# MONGO_ROOT_PASSWORD=clinova_change_me
+# MONGO_URI=mongodb://clinova:clinova_change_me@mongo:27017/clinova?authSource=admin
+
+docker compose --env-file .env.docker up --build -d
+docker compose --env-file .env.docker ps
+docker compose --env-file .env.docker logs mongo --tail 40
+
+# optional demo data
+docker compose --env-file .env.docker --profile seed run --rm seed
+```
+
+Do **not** use `down -v` unless you also want to delete the `uploads_data` volume.
+
 ### Update after a git push (manual)
 
 ```bash

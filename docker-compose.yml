@@ -16,24 +16,19 @@ services:
       - mongo_data:/data/db
     networks:
       - clinova
+    # Uses container env ($$) so healthcheck matches init credentials.
+    # If this stays unhealthy after an auth change, the old volume has no/different
+    # root user — recreate only the mongo volume (see docs/DEPLOY-AWS.md).
     healthcheck:
       test:
         [
-          "CMD",
-          "mongosh",
-          "-u",
-          "${MONGO_ROOT_USER:-clinova}",
-          "-p",
-          "${MONGO_ROOT_PASSWORD:-clinova_change_me}",
-          "--authenticationDatabase",
-          "admin",
-          "--eval",
-          "db.adminCommand('ping')",
+          "CMD-SHELL",
+          'mongosh -u "$$MONGO_INITDB_ROOT_USERNAME" -p "$$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --quiet --eval "db.adminCommand({ ping: 1 }).ok" | grep -q 1',
         ]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 25s
+      interval: 10s
+      timeout: 8s
+      retries: 10
+      start_period: 40s
 
   api:
     build:
