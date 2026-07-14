@@ -33,7 +33,7 @@ const DoctorPatients = () => {
           <h1 className="page-title">Patient directory</h1>
           <p className="page-subtitle">Clinical records under your care</p>
         </div>
-        <div className="badge badge-neutral gap-1.5 px-3 py-1.5 text-[12px]">
+        <div className="badge badge-neutral gap-1.5 px-3 py-1.5 text-xs">
           <Users className="h-3.5 w-3.5" />
           {filteredPatients?.length || 0} patients
         </div>
@@ -59,10 +59,10 @@ const DoctorPatients = () => {
           <table className="min-w-full divide-y divide-slate-100">
             <thead className="bg-slate-50/60">
               <tr>
-                <th scope="col" className="px-6 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-400">Patient Details</th>
-                <th scope="col" className="px-6 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-400">Patient ID</th>
-                <th scope="col" className="px-6 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-400">Blood Group</th>
-                <th scope="col" className="px-6 py-3.5 text-right text-[11px] font-semibold uppercase tracking-wider text-slate-400">Actions</th>
+                <th scope="col" className="px-6 py-3.5 text-left text-2xs font-medium uppercase tracking-wider text-slate-400">Patient Details</th>
+                <th scope="col" className="px-6 py-3.5 text-left text-2xs font-medium uppercase tracking-wider text-slate-400">Patient ID</th>
+                <th scope="col" className="px-6 py-3.5 text-left text-2xs font-medium uppercase tracking-wider text-slate-400">Blood Group</th>
+                <th scope="col" className="px-6 py-3.5 text-right text-2xs font-medium uppercase tracking-wider text-slate-400">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50 bg-white">
@@ -73,8 +73,8 @@ const DoctorPatients = () => {
                       <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-slate-50">
                         <Search className="h-6 w-6 text-slate-300" />
                       </div>
-                      <p className="mb-1 text-[15px] font-semibold text-slate-900">No patients found</p>
-                      <p className="text-[13px] font-medium text-slate-500">Try adjusting your search query.</p>
+                      <p className="mb-1 text-md font-medium text-slate-900">No patients found</p>
+                      <p className="text-sm font-medium text-slate-500">Try adjusting your search query.</p>
                     </div>
                   </td>
                 </tr>
@@ -87,18 +87,18 @@ const DoctorPatients = () => {
                           <img src={`https://api.dicebear.com/7.x/initials/svg?seed=${patient.user?.name}`} alt="" className="h-full w-full" />
                         </div>
                         <div className="ml-3">
-                          <div className="text-[13.5px] font-semibold text-slate-900 group-hover:text-primary-600 transition-colors">{patient.user?.name}</div>
-                          <div className="text-[12.5px] font-medium text-slate-400">{patient.user?.email}</div>
+                          <div className="text-sm font-medium text-slate-900 group-hover:text-primary-600 transition-colors">{patient.user?.name}</div>
+                          <div className="text-xs font-medium text-slate-400">{patient.user?.email}</div>
                         </div>
                       </div>
                     </td>
                     <td className="whitespace-nowrap px-6 py-3.5">
-                      <span className="inline-flex rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-600 font-mono">
+                      <span className="inline-flex rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-2xs font-medium text-slate-600 font-mono">
                         {patient.patientId}
                       </span>
                     </td>
                     <td className="whitespace-nowrap px-6 py-3.5">
-                      <span className="inline-flex items-center gap-1 rounded-md border border-rose-100 bg-rose-50 px-2.5 py-1 text-[11px] font-semibold text-rose-700">
+                      <span className="inline-flex items-center gap-1 rounded-md border border-rose-100 bg-rose-50 px-2.5 py-1 text-2xs font-medium text-rose-700">
                         <Droplet className="w-3 h-3 text-rose-600" />
                         {patient.bloodGroup}
                       </span>
@@ -106,7 +106,7 @@ const DoctorPatients = () => {
                     <td className="whitespace-nowrap px-6 py-3.5 text-right">
                       <button
                         onClick={() => navigate(`/doctor/patients/${patient.user?._id}`)}
-                        className="btn btn-outline px-3.5 py-1.5 text-[12.5px]"
+                        className="btn btn-outline px-3.5 py-1.5 text-xs"
                       >
                         View Records
                       </button>

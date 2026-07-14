@@ -157,7 +157,7 @@ export default function Profile() {
                   />
                   <Lock className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
                 </div>
-                <p className="mt-1.5 flex items-start gap-1.5 text-[12px] leading-snug text-slate-400">
+                <p className="mt-1.5 flex items-start gap-1.5 text-xs leading-snug text-slate-400">
                   <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                   {isStaff
                     ? 'Staff email can only be changed by an administrator.'
@@ -282,11 +282,11 @@ export default function Profile() {
         </form>
 
         <div className="card flex flex-col items-center p-6 text-center">
-          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-900 text-[22px] font-medium text-white shadow-premium">
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-900 text-2xl font-medium text-white shadow-premium">
             {user.name?.charAt(0).toUpperCase()}
           </div>
-          <h3 className="text-[16px] font-medium tracking-[-0.02em] text-slate-900">{user.name}</h3>
-          <p className="mt-1 text-[13px] font-normal text-slate-500">{user.email}</p>
+          <h3 className="text-md font-medium tracking-[-0.02em] text-slate-900">{user.name}</h3>
+          <p className="mt-1 text-sm font-normal text-slate-500">{user.email}</p>
           <span className="badge badge-neutral mt-3 uppercase tracking-wider">
             {String(user.role || '').replace(/_/g, ' ')}
           </span>
@@ -309,7 +309,7 @@ export default function Profile() {
             {formatAddress(user.address) && (
               <div className="meta-row">
                 <span className="meta-label">Address</span>
-                <span className="meta-value max-w-[60%] text-[12.5px] leading-snug">
+                <span className="meta-value max-w-[60%] text-xs leading-snug">
                   {formatAddress(user.address)}
                 </span>
               </div>

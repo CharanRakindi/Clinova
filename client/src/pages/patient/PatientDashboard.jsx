@@ -174,7 +174,7 @@ const PatientDashboard = () => {
               </div>
               <div className="meta-row">
                 <span className="meta-label">Policy ID</span>
-                <span className="meta-value font-mono text-[12.5px]">
+                <span className="meta-value font-mono text-xs">
                   {profile?.insuranceNumber || 'Not configured'}
                 </span>
               </div>
@@ -186,7 +186,7 @@ const PatientDashboard = () => {
               <ShieldAlert className="h-4 w-4 text-slate-400" strokeWidth={1.75} />
               Medical alerts
             </h3>
-            <p className="text-[12.5px] leading-relaxed tracking-[-0.01em] text-slate-500">
+            <p className="text-xs leading-relaxed tracking-[-0.01em] text-slate-500">
               Allergy and condition alerts appear here when recorded by your care team.
             </p>
           </div>
@@ -266,10 +266,10 @@ const PatientDashboard = () => {
                     appointments.map((apt) => (
                       <div key={apt._id} className="list-row">
                         <div className="min-w-0">
-                          <p className="truncate text-[13px] font-medium tracking-[-0.01em] text-slate-900">
+                          <p className="truncate text-sm font-medium tracking-[-0.01em] text-slate-900">
                             {formatDoctorName(apt.doctor?.name)}
                           </p>
-                          <p className="mt-0.5 text-[12px] text-slate-400">
+                          <p className="mt-0.5 text-xs text-slate-400">
                             {format(new Date(apt.appointmentDate), 'MMM dd, yyyy')} · {apt.timeSlot}
                           </p>
                         </div>
@@ -290,16 +290,16 @@ const PatientDashboard = () => {
                     prescriptions.map((p) => (
                       <div key={p._id} className="list-row !items-start">
                         <div className="min-w-0 space-y-1">
-                          <p className="flex items-center gap-1.5 text-[13px] font-medium text-slate-900">
+                          <p className="flex items-center gap-1.5 text-sm font-medium text-slate-900">
                             <Pill className="h-3.5 w-3.5 shrink-0 text-slate-400" />
                             {p.medicines?.[0]?.medicineName}
                             {p.medicines?.length > 1 && ` +${p.medicines.length - 1} more`}
                           </p>
-                          <p className="text-[12px] text-slate-400">
+                          <p className="text-xs text-slate-400">
                             {formatDoctorName(p.doctor?.name)}
                           </p>
                           {p.instructions && (
-                            <p className="text-[12.5px] leading-snug text-slate-500">
+                            <p className="text-xs leading-snug text-slate-500">
                               {p.instructions}
                             </p>
                           )}
@@ -321,11 +321,11 @@ const PatientDashboard = () => {
                     labReports.map((report) => (
                       <div key={report._id} className="list-row">
                         <div className="min-w-0">
-                          <p className="flex items-center gap-1.5 text-[13px] font-medium text-slate-900">
+                          <p className="flex items-center gap-1.5 text-sm font-medium text-slate-900">
                             <FileCheck className="h-3.5 w-3.5 shrink-0 text-slate-400" />
                             {report.testName}
                           </p>
-                          <p className="mt-0.5 text-[12px] text-slate-400">
+                          <p className="mt-0.5 text-xs text-slate-400">
                             {report.resultDate
                               ? `Completed ${format(new Date(report.resultDate), 'MMM dd, yyyy')}`
                               : 'Pending results'}

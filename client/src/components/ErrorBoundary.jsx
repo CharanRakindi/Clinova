@@ -22,10 +22,10 @@ export default class ErrorBoundary extends React.Component {
           <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-rose-100 bg-rose-50 text-rose-500">
             <AlertOctagon className="h-6 w-6" />
           </div>
-          <h2 className="mb-2 text-[18px] font-medium tracking-tight text-slate-900">
+          <h2 className="mb-2 text-lg font-medium tracking-tight text-slate-900">
             Something went wrong
           </h2>
-          <p className="mb-7 max-w-md text-[13.5px] font-normal text-slate-500">
+          <p className="mb-7 max-w-md text-sm font-normal text-slate-500">
             An unexpected error occurred while loading this view. Try reloading the page.
           </p>
           <button

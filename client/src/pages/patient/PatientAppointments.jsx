@@ -184,8 +184,8 @@ const PatientAppointments = () => {
                         <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-slate-50">
                           <CalendarIcon className="h-6 w-6 text-slate-300" />
                         </div>
-                        <p className="text-[15px] font-medium text-slate-900">No appointments yet</p>
-                        <p className="mt-1 text-[13px] text-slate-500">
+                        <p className="text-md font-medium text-slate-900">No appointments yet</p>
+                        <p className="mt-1 text-sm text-slate-500">
                           You don&apos;t have any visits scheduled.
                         </p>
                         <button
@@ -226,7 +226,7 @@ const PatientAppointments = () => {
                             <p className="font-medium text-slate-900">
                               {formatDoctorName(apt.doctor?.name)}
                             </p>
-                            <p className="text-[12px] text-slate-400">General</p>
+                            <p className="text-xs text-slate-400">General</p>
                           </div>
                         </div>
                       </td>
@@ -264,7 +264,7 @@ const PatientAppointments = () => {
         <div className="modal-backdrop">
           <div className="modal-panel max-w-md">
             <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-              <h2 className="flex items-center gap-2 text-[15px] font-medium text-slate-900">
+              <h2 className="flex items-center gap-2 text-md font-medium text-slate-900">
                 <CalendarIcon className="h-4 w-4 text-slate-400" />
                 Book appointment
               </h2>
@@ -374,7 +374,7 @@ const PatientAppointments = () => {
                   {createAppointment.isPending ? 'Requesting…' : 'Request appointment'}
                 </button>
               </div>
-              <p className="text-center text-[12px] leading-snug text-slate-400">
+              <p className="text-center text-xs leading-snug text-slate-400">
                 You can book today or a future date. Your doctor will accept or decline the request.
               </p>
             </form>

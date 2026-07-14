@@ -75,7 +75,7 @@ const AdminDashboard = () => {
       <div className="page-header">
         <div>
           <h1 className="page-title">Admin console</h1>
-          <p className="page-subtitle">Users, schedule activity, and security audit overview</p>
+          <p className="page-subtitle">Operations overview — users and schedule activity</p>
         </div>
         <Link to="/admin/users" className="btn btn-primary">
           <UserPlus className="h-3.5 w-3.5" />
@@ -83,42 +83,32 @@ const AdminDashboard = () => {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* One focal metric + two supporting — not four equal cards */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <StatCard
-          index={0}
-          title="Total users"
-          value={stats?.totalUsers || 0}
-          icon={Users}
-          contextText="All registered accounts"
-          actionText="Manage users"
-          actionHref="/admin/users"
+          emphasis
+          title="Appointments"
+          value={stats?.totalAppointments || 0}
+          icon={Calendar}
+          contextText="All scheduled visits on record"
+          actionText="View audit activity"
+          actionHref="/admin/audit-logs"
         />
         <StatCard
-          index={1}
           title="Patients"
           value={stats?.totalPatients || 0}
-          icon={UserPlus}
-          contextText="Active patient accounts"
+          icon={Users}
+          contextText={`${stats?.totalUsers || 0} total accounts`}
           actionText="User directory"
           actionHref="/admin/users"
         />
         <StatCard
-          index={2}
           title="Practitioners"
           value={stats?.totalDoctors || 0}
           icon={Stethoscope}
           contextText="Credentialed doctors"
           actionText="Staff accounts"
           actionHref="/admin/users"
-        />
-        <StatCard
-          index={3}
-          title="Appointments"
-          value={stats?.totalAppointments || 0}
-          icon={Calendar}
-          contextText="All scheduled visits"
-          actionText="Audit activity"
-          actionHref="/admin/audit-logs"
         />
       </div>
 
@@ -174,17 +164,17 @@ const AdminDashboard = () => {
             ) : (
               auditLogs.map((log) => (
                 <div key={log._id} className="flex gap-3">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-100 bg-[#F7F6F3] text-slate-400">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-100 bg-surface-muted text-slate-400">
                     <Clock className="h-3.5 w-3.5" strokeWidth={1.75} />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[12.5px] leading-snug tracking-[-0.01em] text-slate-700">
+                    <p className="text-xs leading-snug tracking-[-0.01em] text-slate-700">
                       <span className="font-medium text-slate-900">
                         {log.actor?.name || 'System'}
                       </span>{' '}
                       · {log.action}
                     </p>
-                    <p className="mt-0.5 text-[11.5px] text-slate-400">
+                    <p className="mt-0.5 text-2xs text-slate-400">
                       {log.resourceType} ·{' '}
                       {format(new Date(log.timestamp), 'MMM dd, h:mm a')}
                     </p>

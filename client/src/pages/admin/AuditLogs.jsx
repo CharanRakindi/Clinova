@@ -104,7 +104,7 @@ export default function AuditLogs() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead className="bg-slate-50/60">
-              <tr className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+              <tr className="text-2xs font-medium text-slate-400 uppercase tracking-wider border-b border-slate-100">
                 <th className="px-6 py-3.5">Timestamp</th>
                 <th className="px-6 py-3.5">Actor</th>
                 <th className="px-6 py-3.5">Role</th>
@@ -114,7 +114,7 @@ export default function AuditLogs() {
                 <th className="px-6 py-3.5">Details</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-50 text-[13px] font-medium bg-white">
+            <tbody className="divide-y divide-slate-50 text-sm font-medium bg-white">
               {isLoading ? (
                 Array.from({ length: 6 }).map((_, i) => (
                   <tr key={i}>
@@ -129,7 +129,7 @@ export default function AuditLogs() {
                 ))
               ) : !data?.data || data.data.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-14 text-center text-slate-400 text-[12.5px]">
+                  <td colSpan={7} className="px-6 py-14 text-center text-slate-400 text-xs">
                     <FileText className="w-10 h-10 mx-auto mb-3 text-slate-300" />
                     No audit records match your query
                   </td>
@@ -137,22 +137,22 @@ export default function AuditLogs() {
               ) : (
                 data.data.map((log) => (
                   <tr key={log._id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="px-6 py-3.5 whitespace-nowrap text-[11px] font-mono text-slate-400">
+                    <td className="px-6 py-3.5 whitespace-nowrap text-2xs font-mono text-slate-400">
                       {format(new Date(log.timestamp), 'yyyy-MM-dd HH:mm:ss')}
                     </td>
                     <td className="px-6 py-3.5">
                       <div className="flex flex-col">
-                        <span className="font-semibold text-slate-800">{log.actor?.name || 'System'}</span>
-                        <span className="text-[11.5px] font-medium text-slate-400">{log.actor?.email || 'N/A'}</span>
+                        <span className="font-medium text-slate-800">{log.actor?.name || 'System'}</span>
+                        <span className="text-2xs font-medium text-slate-400">{log.actor?.email || 'N/A'}</span>
                       </div>
                     </td>
                     <td className="px-6 py-3.5 whitespace-nowrap">
-                      <span className="text-[11px] uppercase font-semibold text-slate-500 bg-slate-50 border border-slate-100 rounded px-1.5 py-0.5">
+                      <span className="text-2xs uppercase font-medium text-slate-500 bg-slate-50 border border-slate-100 rounded px-1.5 py-0.5">
                         {log.actorRole}
                       </span>
                     </td>
                     <td className="px-6 py-3.5 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-semibold border ${
+                      <span className={`inline-flex px-2 py-0.5 rounded text-2xs font-medium border ${
                         log.action === 'CREATE' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
                         log.action === 'LOGIN' ? 'bg-indigo-50 text-indigo-700 border-indigo-100' :
                         log.action === 'UPDATE' ? 'bg-amber-50 text-amber-700 border-amber-100' :
@@ -164,10 +164,10 @@ export default function AuditLogs() {
                     <td className="px-6 py-3.5 whitespace-nowrap text-slate-500">
                       {log.resourceType}
                     </td>
-                    <td className="px-6 py-3.5 font-mono text-[11.5px] text-slate-400">
+                    <td className="px-6 py-3.5 font-mono text-2xs text-slate-400">
                       {log.ipAddress}
                     </td>
-                    <td className="px-6 py-3.5 max-w-xs truncate text-[11.5px] text-slate-400" title={JSON.stringify(log.metadata)}>
+                    <td className="px-6 py-3.5 max-w-xs truncate text-2xs text-slate-400" title={JSON.stringify(log.metadata)}>
                       {JSON.stringify(log.metadata || {})}
                     </td>
                   </tr>
@@ -180,7 +180,7 @@ export default function AuditLogs() {
         {/* Pagination controls */}
         {data?.pagination && data.pagination.pages > 1 && (
           <div className="px-6 py-3.5 border-t border-slate-100 flex items-center justify-between">
-            <span className="text-[12.5px] font-medium text-slate-400">
+            <span className="text-xs font-medium text-slate-400">
               Showing page {page} of {data.pagination.pages}
             </span>
             <div className="flex gap-2">

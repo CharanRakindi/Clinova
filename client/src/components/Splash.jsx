@@ -49,7 +49,7 @@ const Splash = ({ onComplete }) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4, duration: 0.45 }}
-              className="mt-4 font-display text-[15px] italic tracking-[-0.01em] text-white/55"
+              className="mt-4 font-display text-md italic tracking-[-0.01em] text-white/55"
             >
               Healthcare for Good.
             </motion.p>

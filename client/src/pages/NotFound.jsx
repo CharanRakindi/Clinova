@@ -4,7 +4,7 @@ import BrandMark from '../components/BrandMark';
 
 export default function NotFound() {
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background px-6 text-center">
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-surface-muted px-6 text-center">
       <div className="pointer-events-none absolute inset-0 bg-gradient-mesh" />
 
       <div className="relative z-10 w-full max-w-md">
@@ -12,13 +12,13 @@ export default function NotFound() {
           <BrandMark size="md" tone="dark" asLink />
         </div>
         <div className="card p-8 sm:p-10">
-          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-slate-400">
+          <p className="text-2xs font-medium uppercase tracking-[0.2em] text-slate-400">
             Error 404
           </p>
-          <h1 className="mt-3 text-[28px] font-medium tracking-tight text-slate-900">
+          <h1 className="mt-3 text-3xl font-medium tracking-tight text-slate-900">
             Page not found
           </h1>
-          <p className="mt-2 text-[14px] font-normal leading-relaxed text-slate-500">
+          <p className="mt-2 text-base font-normal leading-relaxed text-slate-500">
             The page you&apos;re looking for doesn&apos;t exist, was moved, or you don&apos;t have access.
           </p>
 

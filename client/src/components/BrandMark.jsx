@@ -14,27 +14,27 @@ const sizeMap = {
   xs: {
     gap: 'gap-2',
     icon: 'h-7 w-7',
-    word: 'text-[15px]',
+    word: 'text-md',
   },
   sm: {
     gap: 'gap-2',
     icon: 'h-8 w-8',
-    word: 'text-[16px]',
+    word: 'text-md',
   },
   md: {
     gap: 'gap-2.5',
     icon: 'h-8 w-8 sm:h-9 sm:w-9',
-    word: 'text-[17px] sm:text-[18px]',
+    word: 'text-lg sm:text-lg',
   },
   lg: {
     gap: 'gap-3',
     icon: 'h-10 w-10',
-    word: 'text-[22px]',
+    word: 'text-2xl',
   },
   xl: {
     gap: 'gap-3.5',
     icon: 'h-12 w-12 sm:h-14 sm:w-14',
-    word: 'text-[26px] sm:text-[32px]',
+    word: 'text-3xl sm:text-[32px]',
   },
 };
 
@@ -134,7 +134,7 @@ export default function BrandMark({
       {showWordmark && (
         <span
           className={cn(
-            'font-brand font-semibold leading-none tracking-[-0.045em]',
+            'font-brand font-medium leading-none tracking-[-0.045em]',
             s.word,
             isLight ? 'text-white' : 'text-slate-900'
           )}

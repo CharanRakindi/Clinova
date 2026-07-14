@@ -36,7 +36,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
               position="top-right"
               richColors
               toastOptions={{
-                className: 'font-sans text-[13px]',
+                className: 'font-sans text-sm',
                 style: {
                   borderRadius: '14px',
                   border: '1px solid rgba(226, 232, 240, 0.9)',

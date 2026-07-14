@@ -230,7 +230,7 @@ function Reveal({ children, className = '', delay = 0, y = 24 }) {
 
 const Eyebrow = ({ children, light = false }) => (
   <p
-    className={`text-[11px] font-medium uppercase tracking-[0.18em] ${
+    className={`text-2xs font-medium uppercase tracking-[0.18em] ${
       light ? 'text-white/45' : 'text-slate-400'
     }`}
   >
@@ -289,7 +289,7 @@ const Home = () => {
   const navSolid = scrolled || menuOpen;
 
   return (
-    <div className="overflow-x-hidden bg-[#F7F6F3] text-slate-900 antialiased selection:bg-slate-900 selection:text-white">
+    <div className="overflow-x-hidden bg-surface-muted text-slate-900 antialiased selection:bg-slate-900 selection:text-white">
       {/* Scroll progress */}
       <motion.div
         className="fixed left-0 top-0 z-[100] h-[2px] origin-left bg-slate-900"
@@ -299,9 +299,9 @@ const Home = () => {
 
       {/* ── Nav ── */}
       <header
-        className={`fixed inset-x-0 top-0 z-50 pt-[env(safe-area-inset-top)] transition-[background,border,box-shadow] duration-300 ${
+        className={`fixed inset-x-0 top-0 z-50 pt-[env(safe-area-inset-top)] transition-[background,border,box-shadow] duration-product ${
           navSolid
-            ? 'border-b border-slate-200/70 bg-[#F7F6F3]/95 shadow-[0_1px_0_rgba(15,23,42,0.04)] backdrop-blur-xl'
+            ? 'border-b border-slate-200/70 bg-surface-muted/95 shadow-[0_1px_0_rgba(15,23,42,0.04)] backdrop-blur-xl'
             : 'border-b border-transparent bg-transparent'
         }`}
       >
@@ -311,7 +311,7 @@ const Home = () => {
         >
           <a
             href="#home"
-            className="min-w-0 shrink transition-opacity duration-300 hover:opacity-90"
+            className="min-w-0 shrink transition-opacity duration-product hover:opacity-90"
             onClick={() => setMenuOpen(false)}
           >
             <span className="sm:hidden">
@@ -327,7 +327,7 @@ const Home = () => {
               <a
                 key={link.label}
                 href={link.href}
-                className={`rounded-full px-3.5 py-1.5 text-[13px] font-normal tracking-[-0.01em] transition-colors duration-300 ${
+                className={`rounded-full px-3.5 py-1.5 text-sm font-normal tracking-[-0.01em] transition-colors duration-product ${
                   navSolid
                     ? 'text-slate-500 hover:bg-slate-900/[0.04] hover:text-slate-900'
                     : 'text-white/80 hover:bg-white/10 hover:text-white'
@@ -341,7 +341,7 @@ const Home = () => {
           <div className="flex shrink-0 items-center gap-2 sm:gap-3">
             <Link
               to="/login"
-              className={`hidden text-[13px] font-normal tracking-[-0.01em] transition-colors md:inline ${
+              className={`hidden text-sm font-normal tracking-[-0.01em] transition-colors md:inline ${
                 navSolid ? 'text-slate-500 hover:text-slate-900' : 'text-white/80 hover:text-white'
               }`}
             >
@@ -349,7 +349,7 @@ const Home = () => {
             </Link>
             <Link
               to="/register"
-              className={`group hidden items-center gap-1.5 rounded-full px-4 py-[7px] text-[13px] font-medium tracking-[-0.01em] transition-all md:inline-flex ${
+              className={`group hidden items-center gap-1.5 rounded-full px-4 py-[7px] text-sm font-medium tracking-[-0.01em] transition-all md:inline-flex ${
                 navSolid
                   ? 'bg-slate-900 text-white hover:bg-slate-800'
                   : 'bg-white text-slate-900 hover:bg-white/92'
@@ -380,7 +380,7 @@ const Home = () => {
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.28, ease: EASE }}
-              className="max-h-[min(70vh,28rem)] overflow-y-auto overscroll-contain border-t border-slate-200/70 bg-[#F7F6F3] md:hidden"
+              className="max-h-[min(70vh,28rem)] overflow-y-auto overscroll-contain border-t border-slate-200/70 bg-surface-muted md:hidden"
             >
               <div className="flex flex-col gap-0.5 px-4 py-3 safe-pb sm:px-5">
                 {NAV_LINKS.map((link, i) => (
@@ -391,7 +391,7 @@ const Home = () => {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: i * 0.03 }}
                     onClick={() => setMenuOpen(false)}
-                    className="rounded-xl px-3 py-3.5 text-[15px] font-medium tracking-[-0.01em] text-slate-800 active:bg-slate-100"
+                    className="rounded-xl px-3 py-3.5 text-md font-medium tracking-[-0.01em] text-slate-800 active:bg-slate-100"
                   >
                     {link.label}
                   </motion.a>
@@ -400,14 +400,14 @@ const Home = () => {
                   <Link
                     to="/login"
                     onClick={() => setMenuOpen(false)}
-                    className="btn btn-secondary w-full justify-center py-3 text-[13px]"
+                    className="btn btn-secondary w-full justify-center py-3 text-sm"
                   >
                     Sign in
                   </Link>
                   <Link
                     to="/register"
                     onClick={() => setMenuOpen(false)}
-                    className="btn btn-primary w-full justify-center py-3 text-[13px]"
+                    className="btn btn-primary w-full justify-center py-3 text-sm"
                   >
                     Book appointment
                     <ArrowRight className="h-3.5 w-3.5" />
@@ -457,10 +457,10 @@ const Home = () => {
               transition={{ delay: 0.12, duration: 0.55, ease: EASE }}
               className="mb-5 inline-flex max-w-full items-center gap-2 rounded-full border border-white/12 bg-white/[0.08] px-2 py-1 backdrop-blur-md sm:mb-6"
             >
-              <span className="shrink-0 rounded-full bg-white px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-slate-900 sm:text-[10.5px]">
+              <span className="shrink-0 rounded-full bg-white px-2 py-0.5 text-2xs font-medium uppercase tracking-[0.06em] text-slate-900 sm:text-2xs">
                 Trusted
               </span>
-              <span className="truncate pr-1.5 text-[12px] font-normal tracking-[-0.01em] text-white/90 sm:text-[13px]">
+              <span className="truncate pr-1.5 text-xs font-normal tracking-[-0.01em] text-white/90 sm:text-sm">
                 20,000+ Patients Worldwide
               </span>
             </motion.div>
@@ -485,11 +485,11 @@ const Home = () => {
                   lines={SUBTEXT_LINES}
                   delay={50}
                   step={36}
-                  className="text-[14px] font-normal leading-[1.65] tracking-[-0.01em] text-white/75 sm:text-[15px]"
+                  className="text-base font-normal leading-[1.65] tracking-[-0.01em] text-white/75 sm:text-md"
                   wordClassName="mr-[0.22em] last:mr-0"
                 />
               ) : (
-                <p className="text-[14px] leading-[1.65] text-transparent sm:text-[15px]" aria-hidden>
+                <p className="text-base leading-[1.65] text-transparent sm:text-md" aria-hidden>
                   Take charge of your well-being and explore the advantages of modern healthcare
                   through our trusted platform.
                 </p>
@@ -504,17 +504,17 @@ const Home = () => {
             >
               <Link
                 to="/register"
-                className="group inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-white px-5 py-3 text-[13px] font-medium tracking-[-0.01em] text-slate-900 shadow-[0_10px_32px_rgba(0,0,0,0.28)] transition-[box-shadow,background-color] duration-200 hover:bg-white/95 sm:w-auto sm:py-2.5"
+                className="group inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-white px-5 py-3 text-sm font-medium tracking-[-0.01em] text-slate-900 shadow-[0_10px_32px_rgba(0,0,0,0.28)] transition-[box-shadow,background-color] duration-product hover:bg-white/95 sm:w-auto sm:py-2.5"
               >
                 Book An Appointment
-                <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 ease-out group-hover:translate-x-0.5" />
+                <ArrowRight className="h-3.5 w-3.5 transition-transform duration-product ease-out group-hover:translate-x-0.5" />
               </Link>
               <a
                 href="#about"
-                className="group inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-white/45 bg-white/[0.06] px-5 py-3 text-[13px] font-medium tracking-[-0.01em] text-white backdrop-blur-sm transition-colors duration-200 hover:bg-white/12 sm:w-auto sm:py-2.5"
+                className="group inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-white/45 bg-white/[0.06] px-5 py-3 text-sm font-medium tracking-[-0.01em] text-white backdrop-blur-sm transition-colors duration-product hover:bg-white/12 sm:w-auto sm:py-2.5"
               >
                 About Us
-                <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 ease-out group-hover:translate-x-0.5" />
+                <ArrowRight className="h-3.5 w-3.5 transition-transform duration-product ease-out group-hover:translate-x-0.5" />
               </a>
             </motion.div>
           </div>
@@ -550,7 +550,7 @@ const Home = () => {
                     />
                   ))}
                 </div>
-                <p className="mt-0.5 text-[12.5px] font-normal tracking-[-0.01em] text-white/80">
+                <p className="mt-0.5 text-xs font-normal tracking-[-0.01em] text-white/80">
                   Based on 20K+ reviews
                 </p>
               </div>
@@ -558,7 +558,7 @@ const Home = () => {
 
             <a
               href="#about"
-              className="hidden items-center gap-2.5 text-[11px] font-medium uppercase tracking-[0.16em] text-white/55 transition-colors hover:text-white/80 sm:inline-flex"
+              className="hidden items-center gap-2.5 text-2xs font-medium uppercase tracking-[0.16em] text-white/55 transition-colors hover:text-white/80 sm:inline-flex"
             >
               Scroll
               <motion.span
@@ -579,7 +579,7 @@ const Home = () => {
           {[...MARQUEE, ...MARQUEE].map((item, i) => (
             <span
               key={`${item}-${i}`}
-              className="inline-flex items-center gap-2 text-[10.5px] font-medium uppercase tracking-[0.12em] text-slate-400 sm:gap-2.5 sm:text-[11.5px] sm:tracking-[0.14em]"
+              className="inline-flex items-center gap-2 text-2xs font-medium uppercase tracking-[0.12em] text-slate-400 sm:gap-2.5 sm:text-2xs sm:tracking-[0.14em]"
             >
               <Sparkles className="h-3 w-3 shrink-0 text-slate-300" strokeWidth={1.75} />
               {item}
@@ -603,7 +603,7 @@ const Home = () => {
               </h2>
             </Reveal>
             <Reveal delay={0.08} className="lg:col-span-6 lg:col-start-7">
-              <p className="max-w-xl text-[14.5px] font-normal leading-[1.7] tracking-[-0.01em] text-slate-600 sm:text-[15.5px]">
+              <p className="max-w-xl text-base font-normal leading-[1.7] tracking-[-0.01em] text-slate-600 sm:text-md">
                 Clinova brings appointments, medical records, labs, and team workflows into one
                 premium workspace — so clinicians spend less time on software and more time with
                 patients.
@@ -616,7 +616,7 @@ const Home = () => {
                 ].map(({ icon: Icon, label }) => (
                   <span
                     key={label}
-                    className="inline-flex items-center gap-2 rounded-full border border-slate-200/90 bg-white px-3.5 py-1.5 text-[12.5px] font-medium tracking-[-0.01em] text-slate-600 shadow-sm"
+                    className="inline-flex items-center gap-2 rounded-full border border-slate-200/90 bg-white px-3.5 py-1.5 text-xs font-medium tracking-[-0.01em] text-slate-600 shadow-sm"
                   >
                     <Icon className="h-3.5 w-3.5 text-slate-400" strokeWidth={1.75} />
                     {label}
@@ -633,14 +633,14 @@ const Home = () => {
               { value: '5 roles', label: 'One workspace', sub: 'Patient to admin' },
             ].map((stat, i) => (
               <Reveal key={stat.label} delay={i * 0.06}>
-                <div className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-premium transition-all duration-400 hover:-translate-y-0.5 hover:shadow-premium-lg sm:p-7">
+                <div className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-premium transition-all duration-product hover:-translate-y-0.5 hover:shadow-premium-lg sm:p-7">
                   <p className="font-display text-[2.35rem] leading-none tracking-[-0.03em] text-slate-900 sm:text-[3rem]">
                     {stat.value}
                   </p>
-                  <p className="mt-2.5 text-[13.5px] font-medium tracking-[-0.01em] text-slate-800 sm:mt-3">
+                  <p className="mt-2.5 text-sm font-medium tracking-[-0.01em] text-slate-800 sm:mt-3">
                     {stat.label}
                   </p>
-                  <p className="mt-0.5 text-[12.5px] leading-snug text-slate-500">{stat.sub}</p>
+                  <p className="mt-0.5 text-xs leading-snug text-slate-500">{stat.sub}</p>
                 </div>
               </Reveal>
             ))}
@@ -672,7 +672,7 @@ const Home = () => {
                       whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true }}
                       transition={{ delay: 0.08 + i * 0.05, ease: EASE }}
-                      className="flex items-start gap-3 text-[14px] leading-snug tracking-[-0.01em] text-white/70"
+                      className="flex items-start gap-3 text-base leading-snug tracking-[-0.01em] text-white/70"
                     >
                       <span className="mt-[0.4rem] h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400/90" />
                       {item}
@@ -696,7 +696,7 @@ const Home = () => {
             <h2 className="mt-3 font-display text-[clamp(1.85rem,6.5vw,3.15rem)] font-normal leading-[1.1] tracking-[-0.02em] text-slate-900 text-balance sm:mt-4">
               Everything a modern care team needs
             </h2>
-            <p className="mx-auto mt-3 max-w-lg text-[14.5px] leading-[1.7] tracking-[-0.01em] text-slate-600 sm:mt-4 sm:text-[15px]">
+            <p className="mx-auto mt-3 max-w-lg text-base leading-[1.7] tracking-[-0.01em] text-slate-600 sm:mt-4 sm:text-md">
               One platform covering the full clinical journey — from booking to follow-up.
             </p>
           </Reveal>
@@ -704,14 +704,14 @@ const Home = () => {
           <div className="mt-8 grid grid-cols-1 gap-3 sm:mt-12 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
             {SERVICES.map(({ icon: Icon, title, body }, i) => (
               <Reveal key={title} delay={i * 0.05}>
-                <article className="group flex h-full flex-col rounded-2xl border border-slate-200/80 bg-[#F7F6F3] p-5 transition-all duration-400 hover:-translate-y-0.5 hover:border-slate-300/90 hover:bg-white hover:shadow-premium-lg sm:p-6">
-                  <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/90 bg-white text-slate-700 shadow-sm transition-transform duration-400 group-hover:scale-[1.04] sm:mb-7">
+                <article className="group flex h-full flex-col rounded-2xl border border-slate-200/80 bg-surface-muted p-5 transition-all duration-product hover:-translate-y-0.5 hover:border-slate-300/90 hover:bg-white hover:shadow-premium-lg sm:p-6">
+                  <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/90 bg-white text-slate-700 shadow-sm transition-transform duration-product group-hover:scale-[1.04] sm:mb-7">
                     <Icon className="h-[18px] w-[18px]" strokeWidth={1.6} />
                   </div>
-                  <h3 className="text-[15px] font-medium tracking-[-0.015em] text-slate-900">
+                  <h3 className="text-md font-medium tracking-[-0.015em] text-slate-900">
                     {title}
                   </h3>
-                  <p className="mt-2 text-[13.5px] leading-[1.65] tracking-[-0.01em] text-slate-600">
+                  <p className="mt-2 text-sm leading-[1.65] tracking-[-0.01em] text-slate-600">
                     {body}
                   </p>
                 </article>
@@ -730,17 +730,17 @@ const Home = () => {
               <h2 className="mt-3 font-display text-[clamp(1.85rem,6.5vw,3.15rem)] font-normal leading-[1.1] tracking-[-0.02em] text-slate-900 sm:mt-4">
                 Meet our specialists
               </h2>
-              <p className="mt-3 max-w-md text-[14.5px] leading-[1.65] tracking-[-0.01em] text-slate-600 sm:text-[15px]">
+              <p className="mt-3 max-w-md text-base leading-[1.65] tracking-[-0.01em] text-slate-600 sm:text-md">
                 Experienced clinicians focused on clear communication and outcomes.
               </p>
             </Reveal>
             <Reveal delay={0.06} className="w-full sm:w-auto">
               <Link
                 to="/register"
-                className="group inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-slate-900 px-5 py-3 text-[13px] font-medium tracking-[-0.01em] text-white transition-colors duration-200 hover:bg-slate-800 sm:w-auto sm:py-2.5"
+                className="group inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-slate-900 px-5 py-3 text-sm font-medium tracking-[-0.01em] text-white transition-colors duration-product hover:bg-slate-800 sm:w-auto sm:py-2.5"
               >
                 Book a visit
-                <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 ease-out group-hover:translate-x-0.5" />
+                <ArrowRight className="h-3.5 w-3.5 transition-transform duration-product ease-out group-hover:translate-x-0.5" />
               </Link>
             </Reveal>
           </div>
@@ -753,7 +753,7 @@ const Home = () => {
                 delay={i * 0.05}
                 className="w-[78vw] max-w-[280px] shrink-0 snap-center sm:w-auto sm:max-w-none"
               >
-                <article className="group h-full overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-premium transition-all duration-400 hover:-translate-y-0.5 hover:shadow-premium-lg">
+                <article className="group h-full overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-premium transition-all duration-product hover:-translate-y-0.5 hover:shadow-premium-lg">
                   <div className="relative aspect-[4/5] overflow-hidden bg-slate-100 sm:aspect-[3/4]">
                     <img
                       src={doc.img}
@@ -763,13 +763,13 @@ const Home = () => {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent" />
                     <div className="absolute inset-x-0 bottom-0 p-4 text-white sm:p-5">
-                      <p className="text-[10.5px] font-medium uppercase tracking-[0.14em] text-white/60">
+                      <p className="text-2xs font-medium uppercase tracking-[0.14em] text-white/60">
                         {doc.role}
                       </p>
-                      <h3 className="mt-1 text-[15px] font-medium tracking-[-0.015em] sm:text-[16px]">
+                      <h3 className="mt-1 text-md font-medium tracking-[-0.015em] sm:text-md">
                         Dr. {doc.name}
                       </h3>
-                      <p className="mt-1.5 text-[12.5px] leading-snug tracking-[-0.01em] text-white/70">
+                      <p className="mt-1.5 text-xs leading-snug tracking-[-0.01em] text-white/70">
                         {doc.bio}
                       </p>
                     </div>
@@ -792,7 +792,7 @@ const Home = () => {
             <h2 className="mt-3 font-display text-[clamp(1.85rem,6.5vw,3.15rem)] font-normal leading-[1.1] tracking-[-0.02em] text-slate-900 text-balance sm:mt-4">
               Insights for better care
             </h2>
-            <p className="mx-auto mt-3 max-w-md text-[14.5px] leading-[1.7] tracking-[-0.01em] text-slate-600 sm:mt-4 sm:text-[15px]">
+            <p className="mx-auto mt-3 max-w-md text-base leading-[1.7] tracking-[-0.01em] text-slate-600 sm:mt-4 sm:text-md">
               Practical guidance on health, clinical workflows, and digital care.
             </p>
           </Reveal>
@@ -800,20 +800,20 @@ const Home = () => {
           <div className="mt-8 grid grid-cols-1 gap-3 sm:mt-12 sm:gap-4 md:grid-cols-3">
             {BLOG_POSTS.map((post, i) => (
               <Reveal key={post.title} delay={i * 0.06}>
-                <article className="group flex h-full flex-col rounded-2xl border border-slate-200/80 bg-[#F7F6F3] p-5 transition-all duration-400 hover:-translate-y-0.5 hover:border-slate-300/90 hover:bg-white hover:shadow-premium-lg sm:p-7">
+                <article className="group flex h-full flex-col rounded-2xl border border-slate-200/80 bg-surface-muted p-5 transition-all duration-product hover:-translate-y-0.5 hover:border-slate-300/90 hover:bg-white hover:shadow-premium-lg sm:p-7">
                   <div className="flex items-center justify-between gap-3">
-                    <span className="rounded-full border border-slate-200/90 bg-white px-2.5 py-0.5 text-[10.5px] font-medium uppercase tracking-[0.1em] text-slate-500">
+                    <span className="rounded-full border border-slate-200/90 bg-white px-2.5 py-0.5 text-2xs font-medium uppercase tracking-[0.1em] text-slate-500">
                       {post.tag}
                     </span>
-                    <span className="inline-flex items-center gap-1 text-[11.5px] tabular-nums text-slate-400">
+                    <span className="inline-flex items-center gap-1 text-2xs tabular-nums text-slate-400">
                       <Clock className="h-3 w-3" strokeWidth={1.75} />
                       {post.date}
                     </span>
                   </div>
-                  <h3 className="mt-5 text-[16.5px] font-medium leading-snug tracking-[-0.02em] text-slate-900">
+                  <h3 className="mt-5 text-md font-medium leading-snug tracking-[-0.02em] text-slate-900">
                     {post.title}
                   </h3>
-                  <p className="mt-2.5 flex-1 text-[13.5px] leading-[1.65] tracking-[-0.01em] text-slate-600">
+                  <p className="mt-2.5 flex-1 text-sm leading-[1.65] tracking-[-0.01em] text-slate-600">
                     {post.excerpt}
                   </p>
                 </article>
@@ -839,21 +839,21 @@ const Home = () => {
               <br />
               <span className="italic text-white/65">healthcare for good?</span>
             </h2>
-            <p className="mx-auto mt-4 max-w-md text-[14.5px] leading-[1.7] tracking-[-0.01em] text-white/55 sm:mt-5 sm:text-[15px]">
+            <p className="mx-auto mt-4 max-w-md text-base leading-[1.7] tracking-[-0.01em] text-white/55 sm:mt-5 sm:text-md">
               Create your account in minutes and join a calmer way to manage care — for patients and
               clinical teams.
             </p>
             <div className="mt-8 flex w-full flex-col items-stretch justify-center gap-2.5 sm:mt-9 sm:flex-row sm:flex-wrap sm:items-center">
               <Link
                 to="/register"
-                className="group inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-white px-6 py-3 text-[13.5px] font-medium tracking-[-0.01em] text-slate-900 shadow-lg transition-[box-shadow,background-color] duration-200 hover:bg-white/95 hover:shadow-xl sm:w-auto"
+                className="group inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-white px-6 py-3 text-sm font-medium tracking-[-0.01em] text-slate-900 shadow-lg transition-[box-shadow,background-color] duration-product hover:bg-white/95 hover:shadow-xl sm:w-auto"
               >
                 Create free account
-                <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 ease-out group-hover:translate-x-0.5" />
+                <ArrowRight className="h-3.5 w-3.5 transition-transform duration-product ease-out group-hover:translate-x-0.5" />
               </Link>
               <Link
                 to="/login"
-                className="inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-white/25 px-6 py-3 text-[13.5px] font-medium tracking-[-0.01em] text-white transition-colors duration-200 hover:bg-white/10 sm:w-auto"
+                className="inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-white/25 px-6 py-3 text-sm font-medium tracking-[-0.01em] text-white transition-colors duration-product hover:bg-white/10 sm:w-auto"
               >
                 Sign in to portal
               </Link>
@@ -868,11 +868,11 @@ const Home = () => {
           <div className="flex flex-col gap-7 lg:flex-row lg:items-start lg:justify-between lg:gap-9">
             <div>
               <BrandMark size="sm" tone="light" />
-              <p className="mt-3 max-w-[16rem] text-[13px] leading-[1.6] tracking-[-0.01em] text-white/40">
+              <p className="mt-3 max-w-[16rem] text-sm leading-[1.6] tracking-[-0.01em] text-white/40">
                 Healthcare for Good. Today. Tomorrow. Always.
               </p>
             </div>
-            <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-[13px] tracking-[-0.01em] text-white/45 sm:flex sm:flex-wrap sm:gap-x-8">
+            <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm tracking-[-0.01em] text-white/45 sm:flex sm:flex-wrap sm:gap-x-8">
               {NAV_LINKS.map((link) => (
                 <a
                   key={link.label}
@@ -891,10 +891,10 @@ const Home = () => {
             </div>
           </div>
           <div className="mt-8 flex flex-col items-start justify-between gap-2 border-t border-white/[0.08] pt-5 sm:mt-10 sm:flex-row sm:items-center sm:pt-6">
-            <p className="text-[11.5px] tracking-[-0.01em] text-white/30">
+            <p className="text-2xs tracking-[-0.01em] text-white/30">
               © {new Date().getFullYear()} Clinova. All rights reserved.
             </p>
-            <p className="text-[11.5px] tracking-[-0.01em] text-white/25">
+            <p className="text-2xs tracking-[-0.01em] text-white/25">
               Designed for modern care teams
             </p>
           </div>

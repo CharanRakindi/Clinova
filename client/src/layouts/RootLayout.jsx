@@ -106,16 +106,16 @@ const RootLayout = () => {
 
   if (user && user.mustChangePassword) {
     return (
-      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-background p-4">
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-surface-muted p-4">
         <div className="card w-full max-w-md space-y-6 p-8 animate-scale-in">
           <div className="text-center">
             <div className="mx-auto mb-4 flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-700">
               <Lock className="h-4.5 w-4.5" />
             </div>
-            <h1 className="text-[18px] font-medium tracking-tight text-slate-900">
+            <h1 className="text-lg font-medium tracking-tight text-slate-900">
               Reset your password
             </h1>
-            <p className="mt-1.5 text-[13px] font-normal text-slate-500">
+            <p className="mt-1.5 text-sm font-normal text-slate-500">
               This is your first login. Set a new password to secure your account.
             </p>
           </div>
@@ -177,7 +177,7 @@ const RootLayout = () => {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#F7F6F3] font-sans">
+    <div className="flex min-h-screen flex-col bg-surface-muted font-sans text-ink">
       <CommandPalette />
       <OfflineBanner />
       <OnboardingTour />
@@ -186,10 +186,10 @@ const RootLayout = () => {
       {/* Top bar */}
       <header
         className={cn(
-          'sticky top-0 z-30 border-b transition-all duration-300',
+          'sticky top-0 z-30 border-b transition-all duration-product',
           scrolled
-            ? 'border-slate-200/70 bg-[#F7F6F3]/90 shadow-sm backdrop-blur-xl'
-            : 'border-slate-200/40 bg-[#F7F6F3]/75 backdrop-blur-md'
+            ? 'border-slate-200/70 bg-surface-muted/90 shadow-sm backdrop-blur-xl'
+            : 'border-slate-200/40 bg-surface-muted/75 backdrop-blur-md'
         )}
       >
         <div className="flex h-14 items-center justify-between gap-2 px-3 sm:px-6 lg:px-8">
@@ -207,7 +207,7 @@ const RootLayout = () => {
               <BrandMark size="sm" tone="dark" asLink />
             </div>
 
-            <div className="hidden items-center gap-2 text-[12px] font-normal text-slate-500 lg:flex">
+            <div className="hidden items-center gap-2 text-xs font-normal text-slate-500 lg:flex">
               <Clock className="h-3.5 w-3.5 text-slate-400" />
               <span>
                 {currentTime.toLocaleDateString(undefined, {
@@ -236,11 +236,11 @@ const RootLayout = () => {
                   new KeyboardEvent('keydown', { key: 'k', metaKey: true })
                 )
               }
-              className="hidden items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[12.5px] font-normal text-slate-400 transition-colors hover:bg-slate-100 sm:flex"
+              className="hidden items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-normal text-slate-400 transition-colors hover:bg-slate-100 sm:flex"
             >
               <Search className="h-3.5 w-3.5" />
               <span>Search</span>
-              <kbd className="rounded-md border border-slate-200 bg-white px-1.5 py-0.5 font-mono text-[10px] text-slate-500">
+              <kbd className="rounded-md border border-slate-200 bg-white px-1.5 py-0.5 font-mono text-2xs text-slate-500">
                 ⌘K
               </kbd>
             </button>
@@ -263,14 +263,14 @@ const RootLayout = () => {
 
             <div className="flex items-center gap-2.5">
               <div className="hidden flex-col items-end sm:flex">
-                <span className="text-[13px] font-medium leading-none text-slate-800">
+                <span className="text-sm font-medium leading-none text-slate-800">
                   {user?.name}
                 </span>
-                <span className="mt-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-slate-500">
+                <span className="mt-1 rounded-full bg-slate-100 px-2 py-0.5 text-2xs font-medium uppercase tracking-wider text-slate-500">
                   {user?.role?.replace('_', ' ')}
                 </span>
               </div>
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-[12px] font-medium text-white ring-2 ring-white">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-xs font-medium text-white ring-2 ring-white">
                 {user?.name?.charAt(0).toUpperCase()}
               </div>
             </div>
@@ -298,7 +298,7 @@ const RootLayout = () => {
         {/* Sidebar */}
         <aside
           className={cn(
-            'fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-sidebar shadow-premium-lg transition-transform duration-300 ease-out lg:static lg:translate-x-0 lg:shadow-none',
+            'fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-sidebar shadow-premium-lg transition-transform duration-product ease-out lg:static lg:translate-x-0 lg:shadow-none',
             isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
           )}
         >
@@ -319,7 +319,7 @@ const RootLayout = () => {
           </div>
 
           <nav className="custom-scrollbar flex-1 space-y-0.5 overflow-y-auto px-3 py-5">
-            <p className="mb-3 px-3 text-[10px] font-medium uppercase tracking-[0.16em] text-white/30">
+            <p className="mb-3 px-3 text-2xs font-medium uppercase tracking-[0.16em] text-white/30">
               Workspace
             </p>
             {navItems.map((item, index) => {
@@ -338,7 +338,7 @@ const RootLayout = () => {
                     to={item.href}
                     onClick={() => setIsSidebarOpen(false)}
                     className={cn(
-                      'group flex items-center justify-between rounded-xl px-3 py-2.5 transition-colors duration-200',
+                      'group flex items-center justify-between rounded-xl px-3 py-2.5 transition-colors duration-product',
                       isActive
                         ? 'bg-white/[0.12] text-white'
                         : 'text-white/50 hover:bg-white/[0.06] hover:text-white'
@@ -352,7 +352,7 @@ const RootLayout = () => {
                         )}
                         strokeWidth={1.75}
                       />
-                      <span className="text-[13px] font-normal tracking-[-0.01em]">
+                      <span className="text-sm font-normal tracking-[-0.01em]">
                         {item.name}
                       </span>
                     </div>
@@ -369,13 +369,13 @@ const RootLayout = () => {
             <div className="flex items-center justify-between rounded-xl bg-white/[0.04] px-3.5 py-3">
               <div className="flex items-center gap-2.5">
                 <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400/90" />
-                <span className="text-[11.5px] font-normal tracking-[-0.01em] text-white/50">
+                <span className="text-2xs font-normal tracking-[-0.01em] text-white/50">
                   System online
                 </span>
               </div>
               <button
                 type="button"
-                className="text-[10px] font-medium text-white/35 transition-colors hover:text-white"
+                className="text-2xs font-medium text-white/35 transition-colors hover:text-white"
                 onClick={() =>
                   document.dispatchEvent(new KeyboardEvent('keydown', { key: '?' }))
                 }

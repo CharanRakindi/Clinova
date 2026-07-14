@@ -108,10 +108,10 @@ export default function FileUpload({
             )}
             strokeWidth={1.5}
           />
-          <p className="mb-1 text-center text-[13px] font-medium text-slate-700">
+          <p className="mb-1 text-center text-sm font-medium text-slate-700">
             Drag & drop your file here
           </p>
-          <p className="text-center text-[12px] font-normal text-slate-400">
+          <p className="text-center text-xs font-normal text-slate-400">
             or click to browse · PDF, images, documents
           </p>
           <input
@@ -130,8 +130,8 @@ export default function FileUpload({
                 <FileIcon className="h-4.5 w-4.5 text-slate-500" strokeWidth={1.75} />
               </div>
               <div className="overflow-hidden">
-                <p className="truncate text-[13px] font-medium text-slate-900">{file.name}</p>
-                <p className="text-[12px] font-normal text-slate-400">
+                <p className="truncate text-sm font-medium text-slate-900">{file.name}</p>
+                <p className="text-xs font-normal text-slate-400">
                   {(file.size / 1024 / 1024).toFixed(2)} MB
                 </p>
               </div>
@@ -150,7 +150,7 @@ export default function FileUpload({
           </div>
 
           {uploadedUrl ? (
-            <div className="flex items-center justify-center gap-2 rounded-xl bg-emerald-50 py-2.5 text-[13px] font-medium text-emerald-700">
+            <div className="flex items-center justify-center gap-2 rounded-xl bg-emerald-50 py-2.5 text-sm font-medium text-emerald-700">
               <CheckCircle className="h-4 w-4" />
               Upload complete
             </div>

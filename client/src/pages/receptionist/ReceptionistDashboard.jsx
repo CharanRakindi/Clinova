@@ -136,7 +136,7 @@ export default function ReceptionistDashboard() {
             Register patients, schedule visits, and manage the check-in queue
           </p>
         </div>
-        <div className="badge badge-neutral px-3 py-1.5 text-[12px]">
+        <div className="badge badge-neutral px-3 py-1.5 text-xs">
           {appointments?.length || 0} appointments
         </div>
       </div>
@@ -206,9 +206,9 @@ export default function ReceptionistDashboard() {
                 Register patient
               </button>
               {lastTempPassword && (
-                <div className="rounded-xl border border-amber-100 bg-amber-50 p-3 text-[12.5px] text-amber-900">
+                <div className="rounded-xl border border-amber-100 bg-amber-50 p-3 text-xs text-amber-900">
                   <p className="font-medium">One-time activation link (48h — share securely):</p>
-                  <p className="mt-1 break-all font-mono text-[12px]">{lastTempPassword}</p>
+                  <p className="mt-1 break-all font-mono text-xs">{lastTempPassword}</p>
                   <p className="mt-1 text-amber-800/80">
                     Patient sets their own password via this link. It is not a login password.
                   </p>
@@ -323,10 +323,10 @@ export default function ReceptionistDashboard() {
                     <th className="table-head text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-50 text-[13px] font-medium">
+                <tbody className="divide-y divide-slate-50 text-sm font-medium">
                   {!appointments || appointments.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="px-4 py-12 text-center text-slate-400 text-[12.5px]">
+                      <td colSpan={5} className="px-4 py-12 text-center text-slate-400 text-xs">
                         No appointments currently scheduled
                       </td>
                     </tr>
@@ -335,21 +335,21 @@ export default function ReceptionistDashboard() {
                       <tr key={apt._id} className="hover:bg-slate-50/50 transition-colors group">
                         <td className="px-4 py-3.5">
                           <div className="flex flex-col">
-                            <span className="font-semibold text-slate-800">{apt.patient?.name}</span>
-                            <span className="text-[11.5px] font-medium text-slate-400">{apt.patient?.email}</span>
+                            <span className="font-medium text-slate-800">{apt.patient?.name}</span>
+                            <span className="text-2xs font-medium text-slate-400">{apt.patient?.email}</span>
                           </div>
                         </td>
-                        <td className="px-4 py-3.5 text-slate-600 font-semibold">
+                        <td className="px-4 py-3.5 text-slate-600 font-medium">
                           <span>{formatDoctorName(apt.doctor?.name)}</span>
                         </td>
                         <td className="px-4 py-3.5 text-slate-500">
                           <div className="flex flex-col">
                             <span>{format(new Date(apt.appointmentDate), 'MMM dd, yyyy')}</span>
-                            <span className="text-[11px] font-medium text-slate-400">{apt.timeSlot}</span>
+                            <span className="text-2xs font-medium text-slate-400">{apt.timeSlot}</span>
                           </div>
                         </td>
                         <td className="px-4 py-3.5">
-                          <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider border ${
+                          <span className={`inline-flex px-2 py-0.5 rounded text-2xs font-medium uppercase tracking-wider border ${
                             apt.status === 'confirmed' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
                             apt.status === 'requested' ? 'bg-amber-50 text-amber-700 border-amber-100' :
                             'bg-slate-50 text-slate-700 border-slate-200'

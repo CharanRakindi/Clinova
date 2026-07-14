@@ -34,7 +34,7 @@ const PatientMedicalRecords = () => {
           <h1 className="page-title">My medical records</h1>
           <p className="page-subtitle">Consultation history, notes, and vitals</p>
         </div>
-        <div className="badge badge-neutral gap-1.5 px-3 py-1.5 text-[12.5px]">
+        <div className="badge badge-neutral gap-1.5 px-3 py-1.5 text-xs">
           <FileText className="h-3.5 w-3.5" />
           {records?.length || 0} records
         </div>
@@ -45,8 +45,8 @@ const PatientMedicalRecords = () => {
           <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-slate-50 ring-4 ring-white">
             <FileText className="h-7 w-7 text-slate-300" />
           </div>
-          <h2 className="text-[17px] font-medium text-slate-900">No records yet</h2>
-          <p className="mt-1.5 max-w-sm text-[13.5px] font-normal text-slate-500">
+          <h2 className="text-lg font-medium text-slate-900">No records yet</h2>
+          <p className="mt-1.5 max-w-sm text-sm font-normal text-slate-500">
             Your medical records and doctor notes will appear here after consultations.
           </p>
         </div>
@@ -55,16 +55,16 @@ const PatientMedicalRecords = () => {
           {records.map((record) => (
             <div
               key={record._id}
-              className="card relative overflow-hidden transition-all duration-300 hover:shadow-premium-lg"
+              className="card relative overflow-hidden transition-all duration-product hover:shadow-premium-lg"
             >
               <div className="absolute left-0 top-0 h-full w-1 bg-slate-900" />
 
               <div className="flex flex-col items-start justify-between gap-4 border-b border-slate-100 px-6 py-5 sm:flex-row sm:items-center">
                 <div className="pl-2">
-                  <h3 className="text-[17px] font-medium text-slate-900">
+                  <h3 className="text-lg font-medium text-slate-900">
                     {record.chiefComplaint}
                   </h3>
-                  <div className="mt-1.5 flex flex-wrap items-center gap-2.5 text-[13px] text-slate-500">
+                  <div className="mt-1.5 flex flex-wrap items-center gap-2.5 text-sm text-slate-500">
                     <span className="inline-flex items-center gap-1.5">
                       <Calendar className="h-3.5 w-3.5 text-slate-400" />
                       {format(new Date(record.visitDate), 'MMMM dd, yyyy')}
@@ -92,7 +92,7 @@ const PatientMedicalRecords = () => {
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                   {record.diagnosis?.length > 0 && (
                     <div>
-                      <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-slate-400">
+                      <p className="mb-2 text-2xs font-medium uppercase tracking-wider text-slate-400">
                         Diagnosis
                       </p>
                       <div className="flex flex-wrap gap-1.5">
@@ -106,7 +106,7 @@ const PatientMedicalRecords = () => {
                   )}
                   {record.symptoms?.length > 0 && (
                     <div>
-                      <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-slate-400">
+                      <p className="mb-2 text-2xs font-medium uppercase tracking-wider text-slate-400">
                         Symptoms
                       </p>
                       <div className="flex flex-wrap gap-1.5">
@@ -123,42 +123,42 @@ const PatientMedicalRecords = () => {
                 {record.vitals &&
                   Object.keys(record.vitals).some((k) => record.vitals[k]) && (
                     <div>
-                      <p className="mb-2.5 text-[11px] font-medium uppercase tracking-wider text-slate-400">
+                      <p className="mb-2.5 text-2xs font-medium uppercase tracking-wider text-slate-400">
                         Vitals
                       </p>
                       <div className="flex flex-wrap gap-2">
                         {record.vitals.pulse && (
-                          <div className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[12px] font-medium text-slate-700">
+                          <div className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700">
                             <Heart className="h-3.5 w-3.5 text-rose-500" />
                             {record.vitals.pulse} bpm
                           </div>
                         )}
                         {record.vitals.temperature && (
-                          <div className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[12px] font-medium text-slate-700">
+                          <div className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700">
                             <Thermometer className="h-3.5 w-3.5 text-orange-500" />
                             {record.vitals.temperature}°C
                           </div>
                         )}
                         {record.vitals.bloodPressureSystolic && (
-                          <div className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[12px] font-medium text-slate-700">
+                          <div className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700">
                             <Activity className="h-3.5 w-3.5 text-blue-500" />
                             {record.vitals.bloodPressureSystolic}/
                             {record.vitals.bloodPressureDiastolic} mmHg
                           </div>
                         )}
                         {record.vitals.oxygenSaturation && (
-                          <div className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[12px] font-medium text-slate-700">
-                            <span className="font-semibold text-teal-600">O₂</span>
+                          <div className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700">
+                            <span className="font-medium text-teal-600">O₂</span>
                             {record.vitals.oxygenSaturation}%
                           </div>
                         )}
                         {record.vitals.height && (
-                          <div className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[12px] font-medium text-slate-700">
+                          <div className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700">
                             Height: {record.vitals.height} cm
                           </div>
                         )}
                         {record.vitals.weight && (
-                          <div className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[12px] font-medium text-slate-700">
+                          <div className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700">
                             Weight: {record.vitals.weight} kg
                           </div>
                         )}
@@ -168,10 +168,10 @@ const PatientMedicalRecords = () => {
 
                 {record.clinicalNotes && (
                   <div>
-                    <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-slate-400">
+                    <p className="mb-2 text-2xs font-medium uppercase tracking-wider text-slate-400">
                       Clinical notes
                     </p>
-                    <p className="soft-panel text-[13.5px] font-normal text-slate-700">
+                    <p className="soft-panel text-sm font-normal text-slate-700">
                       {record.clinicalNotes}
                     </p>
                   </div>
@@ -180,10 +180,10 @@ const PatientMedicalRecords = () => {
                 {record.treatmentPlan && (
                   <div className="relative overflow-hidden rounded-xl border border-emerald-100 bg-emerald-50/50 p-4">
                     <div className="absolute left-0 top-0 h-full w-1 bg-emerald-400" />
-                    <p className="mb-1.5 text-[11px] font-medium uppercase tracking-wider text-emerald-800">
+                    <p className="mb-1.5 text-2xs font-medium uppercase tracking-wider text-emerald-800">
                       Treatment plan
                     </p>
-                    <p className="pl-1 text-[13.5px] font-normal text-emerald-900">
+                    <p className="pl-1 text-sm font-normal text-emerald-900">
                       {record.treatmentPlan}
                     </p>
                   </div>
@@ -191,7 +191,7 @@ const PatientMedicalRecords = () => {
 
                 {record.attachments?.length > 0 && (
                   <div>
-                    <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-slate-400">
+                    <p className="mb-2 text-2xs font-medium uppercase tracking-wider text-slate-400">
                       Attachments
                     </p>
                     <div className="flex flex-wrap gap-2">
@@ -201,7 +201,7 @@ const PatientMedicalRecords = () => {
                           href={att.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[12.5px] font-medium text-slate-700 transition-colors hover:bg-slate-100"
+                          className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-100"
                         >
                           <Paperclip className="h-3.5 w-3.5" />
                           {att.filename}
@@ -214,7 +214,7 @@ const PatientMedicalRecords = () => {
                 {record.followUpDate && (
                   <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3.5 py-1.5">
                     <Calendar className="h-3.5 w-3.5 text-slate-400" />
-                    <span className="text-[13px] font-normal text-slate-700">
+                    <span className="text-sm font-normal text-slate-700">
                       <span className="font-medium">Follow-up:</span>{' '}
                       {format(new Date(record.followUpDate), 'MMMM dd, yyyy')}
                     </span>

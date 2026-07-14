@@ -32,8 +32,8 @@ export default function OfflineBanner() {
           <WifiOff className="h-4.5 w-4.5" />
         </div>
         <div className="flex-1">
-          <h4 className="text-[13.5px] font-medium">You&apos;re offline</h4>
-          <p className="mt-1 text-[12px] font-normal text-white/55">
+          <h4 className="text-sm font-medium">You&apos;re offline</h4>
+          <p className="mt-1 text-xs font-normal text-white/55">
             Clinova will sync your updates once connectivity is restored.
           </p>
         </div>

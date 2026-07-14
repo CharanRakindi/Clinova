@@ -65,19 +65,19 @@ export default function Activate() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4 py-12">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-surface-muted px-4 py-12">
       <div className="mb-8">
         <BrandMark size="md" tone="dark" asLink />
       </div>
       <div className="card w-full max-w-md p-6 sm:p-8">
-        <h1 className="text-[22px] font-medium tracking-[-0.025em] text-slate-900">
+        <h1 className="text-2xl font-medium tracking-[-0.025em] text-slate-900">
           Activate your account
         </h1>
-        <p className="mt-1.5 text-[13.5px] text-slate-500">
+        <p className="mt-1.5 text-sm text-slate-500">
           Set a password using the one-time invite from your clinic. The link expires in 48 hours.
         </p>
         {!token && (
-          <p className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-[13px] text-rose-700">
+          <p className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
             This page requires a valid invite link.
           </p>
         )}
@@ -101,7 +101,7 @@ export default function Activate() {
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Activate <ArrowRight className="h-3.5 w-3.5" /></>}
           </button>
         </form>
-        <p className="mt-6 text-center text-[13px] text-slate-500">
+        <p className="mt-6 text-center text-sm text-slate-500">
           Already activated?{' '}
           <Link to="/login" className="font-medium text-slate-900 underline-offset-4 hover:underline">
             Sign in

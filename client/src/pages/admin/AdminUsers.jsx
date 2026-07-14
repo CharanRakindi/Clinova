@@ -17,7 +17,7 @@ const RoleBadge = ({ role }) => {
   const meta = ROLE_META[role] || ROLE_META.patient;
   const Icon = meta.icon;
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[11px] font-semibold ${meta.className}`}>
+    <span className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-2xs font-medium ${meta.className}`}>
       <Icon className="h-3 w-3" />
       {meta.label}
     </span>
@@ -30,7 +30,7 @@ const SortHeader = ({ label, sortKey, sortConfig, onSort }) => {
   return (
     <th
       scope="col"
-      className="cursor-pointer select-none whitespace-nowrap px-6 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-400 transition-colors hover:text-slate-600"
+      className="cursor-pointer select-none whitespace-nowrap px-6 py-3.5 text-left text-2xs font-medium uppercase tracking-wider text-slate-400 transition-colors hover:text-slate-600"
       onClick={() => onSort(sortKey)}
     >
       <span className="inline-flex items-center gap-1.5">
@@ -189,7 +189,7 @@ const AdminUsers = () => {
             <Plus className="h-4 w-4" />
             Add doctor / lab tech
           </button>
-          <div className="badge badge-neutral gap-1.5 px-3 py-1.5 text-[12.5px]">
+          <div className="badge badge-neutral gap-1.5 px-3 py-1.5 text-xs">
             <Shield className="h-3.5 w-3.5" />
             {filteredUsers?.length || 0} / {users?.length || 0} users
           </div>
@@ -232,7 +232,7 @@ const AdminUsers = () => {
                 <SortHeader label="Role" sortKey="role" sortConfig={sortConfig} onSort={handleSort} />
                 <SortHeader label="Status" sortKey="isActive" sortConfig={sortConfig} onSort={handleSort} />
                 <SortHeader label="Joined date" sortKey="createdAt" sortConfig={sortConfig} onSort={handleSort} />
-                <th scope="col" className="px-6 py-3.5 text-right text-[11px] font-semibold uppercase tracking-wider text-slate-400">Actions</th>
+                <th scope="col" className="px-6 py-3.5 text-right text-2xs font-medium uppercase tracking-wider text-slate-400">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50 bg-white">
@@ -243,8 +243,8 @@ const AdminUsers = () => {
                       <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-slate-50">
                         <Search className="h-6 w-6 text-slate-300" />
                       </div>
-                      <p className="mb-1 text-[15px] font-semibold text-slate-900">No users found</p>
-                      <p className="text-[13px] font-medium text-slate-400">Try adjusting your search or filters.</p>
+                      <p className="mb-1 text-md font-medium text-slate-900">No users found</p>
+                      <p className="text-sm font-medium text-slate-400">Try adjusting your search or filters.</p>
                     </div>
                   </td>
                 </tr>
@@ -257,8 +257,8 @@ const AdminUsers = () => {
                           <img src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.name}`} alt="" className="h-full w-full" />
                         </div>
                         <div className="ml-3">
-                          <div className="text-[13.5px] font-semibold text-slate-900">{user.name}</div>
-                          <div className="text-[12.5px] font-medium text-slate-400">{user.email}</div>
+                          <div className="text-sm font-medium text-slate-900">{user.name}</div>
+                          <div className="text-xs font-medium text-slate-400">{user.email}</div>
                         </div>
                       </div>
                     </td>
@@ -266,7 +266,7 @@ const AdminUsers = () => {
                       <RoleBadge role={user.role} />
                     </td>
                     <td className="whitespace-nowrap px-6 py-3.5">
-                      <span className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-[11px] font-semibold ${user.isActive
+                      <span className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-2xs font-medium ${user.isActive
                         ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
                         : 'border-red-200 bg-red-50 text-red-700'
                         }`}>
@@ -274,7 +274,7 @@ const AdminUsers = () => {
                         {user.isActive ? 'Active' : 'Suspended'}
                       </span>
                     </td>
-                    <td className="whitespace-nowrap px-6 py-3.5 text-[12.5px] font-medium text-slate-500">
+                    <td className="whitespace-nowrap px-6 py-3.5 text-xs font-medium text-slate-500">
                       {new Date(user.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                     </td>
                     <td className="whitespace-nowrap px-6 py-3.5 text-right">
@@ -282,7 +282,7 @@ const AdminUsers = () => {
                         <button
                           type="button"
                           onClick={() => openEdit(user)}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[12px] font-medium text-slate-700 transition-colors hover:bg-slate-50"
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50"
                           title="Edit name, email, phone"
                         >
                           <Pencil className="h-3.5 w-3.5" />
@@ -292,7 +292,7 @@ const AdminUsers = () => {
                           type="button"
                           onClick={() => toggleStatus.mutate({ id: user._id, isActive: !user.isActive })}
                           disabled={toggleStatus.isPending}
-                          className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[12px] font-medium transition-colors disabled:opacity-50 ${user.isActive
+                          className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50 ${user.isActive
                             ? 'border-red-200 bg-white text-red-600 hover:bg-red-50'
                             : 'border-emerald-200 bg-white text-emerald-700 hover:bg-emerald-50'
                             }`}
@@ -315,21 +315,21 @@ const AdminUsers = () => {
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex items-center justify-between border-t border-slate-100 px-6 py-3.5">
-            <span className="text-[12.5px] font-medium text-slate-400">
+            <span className="text-xs font-medium text-slate-400">
               Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, sortedUsers?.length || 0)} of {sortedUsers?.length || 0} entries
             </span>
             <div className="flex gap-2">
               <button
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                className="btn btn-outline px-3.5 py-1.5 text-[12.5px]"
+                className="btn btn-outline px-3.5 py-1.5 text-xs"
               >
                 Previous
               </button>
               <button
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                className="btn btn-outline px-3.5 py-1.5 text-[12.5px]"
+                className="btn btn-outline px-3.5 py-1.5 text-xs"
               >
                 Next
               </button>
@@ -341,7 +341,7 @@ const AdminUsers = () => {
         <div className="modal-backdrop items-start overflow-y-auto">
           <div className="modal-panel my-8 max-w-lg">
             <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-              <h2 className="flex items-center gap-2 text-[15px] font-medium text-slate-900">
+              <h2 className="flex items-center gap-2 text-md font-medium text-slate-900">
                 <Plus className="h-4 w-4 text-slate-400" />
                 Add hospital staff
               </h2>
@@ -392,7 +392,7 @@ const AdminUsers = () => {
                     <option value="lab_technician">Lab technician</option>
                     <option value="receptionist">Receptionist</option>
                   </select>
-                  <p className="mt-1 text-[11px] text-slate-400">
+                  <p className="mt-1 text-2xs text-slate-400">
                     Staff must use a @clinova.com email
                   </p>
                 </div>
@@ -485,7 +485,7 @@ const AdminUsers = () => {
                 )}
               </div>
 
-              <div className="flex gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3.5 text-[12.5px] font-normal text-slate-600">
+              <div className="flex gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3.5 text-xs font-normal text-slate-600">
                 <span className="font-medium text-slate-800">Note:</span>
                 <span>
                   New accounts must change their password on first login to Clinova.
@@ -517,7 +517,7 @@ const AdminUsers = () => {
         <div className="modal-backdrop">
           <div className="modal-panel max-w-md">
             <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-              <h2 className="flex items-center gap-2 text-[15px] font-medium tracking-[-0.015em] text-slate-900">
+              <h2 className="flex items-center gap-2 text-md font-medium tracking-[-0.015em] text-slate-900">
                 <Pencil className="h-4 w-4 text-slate-400" />
                 Edit user
               </h2>
@@ -565,7 +565,7 @@ const AdminUsers = () => {
                   onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
                   required
                 />
-                <p className="mt-1.5 text-[12px] text-slate-400">
+                <p className="mt-1.5 text-xs text-slate-400">
                   Only admins can change user emails. Staff cannot change their own.
                 </p>
               </div>

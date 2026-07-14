@@ -49,10 +49,10 @@ export default function KeyboardShortcutsHelp() {
             <Command className="h-4.5 w-4.5" />
           </div>
           <div>
-            <h3 className="text-[16px] font-medium leading-none text-slate-900">
+            <h3 className="text-md font-medium leading-none text-slate-900">
               Keyboard shortcuts
             </h3>
-            <p className="mt-1.5 text-[12px] font-normal text-slate-400">
+            <p className="mt-1.5 text-xs font-normal text-slate-400">
               Move faster through your workspace
             </p>
           </div>
@@ -60,9 +60,9 @@ export default function KeyboardShortcutsHelp() {
 
         <div className="mb-2 space-y-3">
           {shortcuts.map((s, idx) => (
-            <div key={idx} className="flex items-center justify-between text-[13px]">
+            <div key={idx} className="flex items-center justify-between text-sm">
               <span className="font-normal text-slate-600">{s.desc}</span>
-              <kbd className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 font-mono text-[11px] text-slate-700">
+              <kbd className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 font-mono text-2xs text-slate-700">
                 {s.key}
               </kbd>
             </div>

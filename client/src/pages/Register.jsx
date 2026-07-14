@@ -72,13 +72,13 @@ const Register = () => {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className="text-[15px] font-normal leading-[1.65] tracking-[-0.01em] text-white/70"
+              className="text-md font-normal leading-[1.65] tracking-[-0.01em] text-white/70"
             >
               Create your account in seconds and step into a calm, secure health workspace.
             </motion.p>
           </div>
 
-          <p className="text-[12.5px] font-normal text-white/50">
+          <p className="text-xs font-normal text-white/50">
             © {new Date().getFullYear()} Clinova
           </p>
         </div>
@@ -96,10 +96,10 @@ const Register = () => {
           </div>
 
           <div>
-            <h2 className="text-[20px] font-medium tracking-[-0.025em] text-slate-900 sm:text-[22px]">
+            <h2 className="text-xl font-medium tracking-[-0.025em] text-slate-900 sm:text-2xl">
               Create an account
             </h2>
-            <p className="mt-1.5 text-[13.5px] font-normal leading-snug tracking-[-0.01em] text-slate-500">
+            <p className="mt-1.5 text-sm font-normal leading-snug tracking-[-0.01em] text-slate-500">
               Fill in your details below to get started.
             </p>
           </div>
@@ -160,7 +160,7 @@ const Register = () => {
               </div>
             </form>
 
-            <p className="mt-7 text-center text-[13px] font-normal text-slate-500">
+            <p className="mt-7 text-center text-sm font-normal text-slate-500">
               Already have an account?{' '}
               <Link to="/login" className="font-medium text-slate-900 underline-offset-4 hover:underline">
                 Sign in

@@ -147,7 +147,7 @@ export default function OnboardingTour() {
       <button
         type="button"
         onClick={handleRestart}
-        className="fixed bottom-6 left-6 z-[90] flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white px-3.5 py-2.5 text-[12px] font-medium text-slate-500 shadow-premium transition-colors duration-200 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800"
+        className="fixed bottom-6 left-6 z-[90] flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white px-3.5 py-2.5 text-xs font-medium text-slate-500 shadow-premium transition-colors duration-product hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800"
         title="Take onboarding tour"
       >
         <Sparkles className="h-3.5 w-3.5 text-slate-400" />
@@ -178,10 +178,10 @@ export default function OnboardingTour() {
           </span>
         </div>
 
-        <h3 className="mb-1.5 pr-6 text-[15px] font-medium leading-tight text-slate-900">
+        <h3 className="mb-1.5 pr-6 text-md font-medium leading-tight text-slate-900">
           {step.title}
         </h3>
-        <p className="mb-5 text-[12.5px] font-normal leading-relaxed text-slate-500">
+        <p className="mb-5 text-xs font-normal leading-relaxed text-slate-500">
           {step.description}
         </p>
 
@@ -189,7 +189,7 @@ export default function OnboardingTour() {
           <button
             type="button"
             onClick={handleComplete}
-            className="text-[12px] font-medium text-slate-400 transition-colors hover:text-slate-600"
+            className="text-xs font-medium text-slate-400 transition-colors hover:text-slate-600"
           >
             Skip
           </button>

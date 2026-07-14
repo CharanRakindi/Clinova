@@ -5,7 +5,7 @@ import { Search, Users, Calendar, FileText, Settings, X, LayoutDashboard } from 
 import { useAuth } from '../contexts/AuthContext';
 
 const itemClass =
-  'flex cursor-pointer items-center rounded-xl px-3 py-2.5 text-[13px] font-normal text-slate-700 aria-selected:bg-slate-50 aria-selected:text-slate-900';
+  'flex cursor-pointer items-center rounded-xl px-3 py-2.5 text-sm font-normal text-slate-700 aria-selected:bg-slate-50 aria-selected:text-slate-900';
 
 export default function CommandPalette() {
   const [open, setOpen] = useState(false);
@@ -44,7 +44,7 @@ export default function CommandPalette() {
             <Command.Input
               autoFocus
               placeholder="Search pages and actions…"
-              className="h-12 flex-1 bg-transparent text-[14px] font-normal text-slate-900 outline-none placeholder:text-slate-400"
+              className="h-12 flex-1 bg-transparent text-base font-normal text-slate-900 outline-none placeholder:text-slate-400"
             />
             <button
               type="button"
@@ -56,13 +56,13 @@ export default function CommandPalette() {
           </div>
 
           <Command.List className="max-h-[300px] overflow-y-auto p-2">
-            <Command.Empty className="py-8 text-center text-[13px] text-slate-500">
+            <Command.Empty className="py-8 text-center text-sm text-slate-500">
               No results found.
             </Command.Empty>
 
             <Command.Group
               heading="Quick links"
-              className="mb-1 px-2 py-1 text-[10px] font-medium uppercase tracking-[0.12em] text-slate-400"
+              className="mb-1 px-2 py-1 text-2xs font-medium uppercase tracking-[0.12em] text-slate-400"
             >
               {user?.role === 'admin' && (
                 <>
@@ -164,7 +164,7 @@ export default function CommandPalette() {
           </Command.List>
 
           <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3">
-            <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
+            <div className="flex items-center gap-1.5 text-2xs text-slate-400">
               <kbd className="rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono text-slate-500">
                 ↑
               </kbd>
@@ -173,13 +173,13 @@ export default function CommandPalette() {
               </kbd>
               <span className="ml-1">navigate</span>
             </div>
-            <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
+            <div className="flex items-center gap-1.5 text-2xs text-slate-400">
               <kbd className="rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono text-slate-500">
                 Enter
               </kbd>
               <span className="ml-1">select</span>
             </div>
-            <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
+            <div className="flex items-center gap-1.5 text-2xs text-slate-400">
               <kbd className="rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono text-slate-500">
                 esc
               </kbd>

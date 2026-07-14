@@ -141,8 +141,8 @@ export default function LabTechDashboard() {
                 key={col.id}
                 className="flex w-80 shrink-0 flex-col overflow-hidden rounded-2xl border border-slate-200/70 bg-white shadow-premium"
               >
-                <div className="flex items-center justify-between border-b border-slate-100 bg-[#F7F6F3]/80 px-4 py-3.5">
-                  <h3 className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">
+                <div className="flex items-center justify-between border-b border-slate-100 bg-surface-muted/80 px-4 py-3.5">
+                  <h3 className="text-2xs font-medium uppercase tracking-[0.12em] text-slate-500">
                     {col.title}
                   </h3>
                   <span className="badge badge-neutral">{colReports.length}</span>
@@ -158,19 +158,19 @@ export default function LabTechDashboard() {
                         className="rounded-xl border border-slate-200/70 bg-white p-4 transition-[border-color,box-shadow] hover:border-slate-300 hover:shadow-premium"
                       >
                         <div className="mb-2 flex items-start justify-between gap-2">
-                          <h4 className="text-[13.5px] font-medium tracking-[-0.01em] text-slate-900">
+                          <h4 className="text-sm font-medium tracking-[-0.01em] text-slate-900">
                             {report.testName}
                           </h4>
                           <span className={cn('badge shrink-0 capitalize', statusBadge(report.status))}>
                             {report.status.replace(/_/g, ' ')}
                           </span>
                         </div>
-                        <p className="mb-3 flex items-center gap-1.5 text-[11.5px] text-slate-400">
+                        <p className="mb-3 flex items-center gap-1.5 text-2xs text-slate-400">
                           <Clock className="h-3.5 w-3.5" strokeWidth={1.75} />
                           {format(new Date(report.orderedDate), 'MMM dd, HH:mm')}
                         </p>
                         <div className="flex items-center justify-between border-t border-slate-100 pt-3">
-                          <p className="truncate text-[12px] text-slate-600">
+                          <p className="truncate text-xs text-slate-600">
                             <span className="text-slate-400">Patient · </span>
                             <span className="font-medium text-slate-800">
                               {report.patient?.name}
@@ -179,7 +179,7 @@ export default function LabTechDashboard() {
                           <button
                             type="button"
                             onClick={() => advanceStatus(report)}
-                            className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-[#F7F6F3] text-slate-700 transition-colors hover:bg-slate-900 hover:text-white"
+                            className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-surface-muted text-slate-700 transition-colors hover:bg-slate-900 hover:text-white"
                             title={col.id === 'processing' ? 'Complete result' : 'Advance stage'}
                           >
                             {col.id === 'processing' ? (
@@ -198,8 +198,8 @@ export default function LabTechDashboard() {
           })}
 
           <div className="flex w-80 shrink-0 flex-col overflow-hidden rounded-2xl border border-slate-200/70 bg-white shadow-premium">
-            <div className="flex items-center justify-between border-b border-slate-100 bg-[#F7F6F3]/80 px-4 py-3.5">
-              <h3 className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">
+            <div className="flex items-center justify-between border-b border-slate-100 bg-surface-muted/80 px-4 py-3.5">
+              <h3 className="text-2xs font-medium uppercase tracking-[0.12em] text-slate-500">
                 Completed
               </h3>
               <span className="badge badge-success">{completed.length}</span>
@@ -211,21 +211,21 @@ export default function LabTechDashboard() {
                 completed.map((report) => (
                   <div
                     key={report._id}
-                    className="rounded-xl border border-slate-200/70 bg-[#F7F6F3]/40 p-4"
+                    className="rounded-xl border border-slate-200/70 bg-surface-muted/40 p-4"
                   >
                     <div className="mb-1.5 flex items-start justify-between gap-2">
-                      <h4 className="text-[13.5px] font-medium text-slate-900">
+                      <h4 className="text-sm font-medium text-slate-900">
                         {report.testName}
                       </h4>
                       <span className={cn('badge capitalize', statusBadge(report.status))}>
                         {report.status}
                       </span>
                     </div>
-                    <p className="text-[12px] text-slate-500">
+                    <p className="text-xs text-slate-500">
                       {report.patient?.name}
                     </p>
                     {report.resultSummary && (
-                      <p className="mt-2 line-clamp-2 text-[11.5px] text-slate-400">
+                      <p className="mt-2 line-clamp-2 text-2xs text-slate-400">
                         {report.resultSummary}
                       </p>
                     )}
@@ -241,7 +241,7 @@ export default function LabTechDashboard() {
         <div className="modal-backdrop">
           <div className="modal-panel max-w-lg">
             <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-              <h2 className="flex items-center gap-2 text-[15px] font-medium tracking-[-0.015em] text-slate-900">
+              <h2 className="flex items-center gap-2 text-md font-medium tracking-[-0.015em] text-slate-900">
                 <CheckCircle className="h-4 w-4 text-slate-400" />
                 Finalize lab results
               </h2>
@@ -256,10 +256,10 @@ export default function LabTechDashboard() {
 
             <form onSubmit={handleCompleteSubmit} className="space-y-4 p-6">
               <div>
-                <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-slate-400">
+                <p className="text-2xs font-medium uppercase tracking-[0.12em] text-slate-400">
                   Test details
                 </p>
-                <p className="mt-1 text-[13.5px] font-medium text-slate-800">
+                <p className="mt-1 text-sm font-medium text-slate-800">
                   {selectedReport.testName} · {selectedReport.patient?.name}
                 </p>
               </div>
@@ -288,7 +288,7 @@ export default function LabTechDashboard() {
                 />
               </div>
 
-              <div className="rounded-xl border border-slate-200 bg-[#F7F6F3]/50 p-4">
+              <div className="rounded-xl border border-slate-200 bg-surface-muted/50 p-4">
                 <FileUpload
                   onUploadSuccess={handleUploadSuccess}
                   label="Attach result PDF or image"

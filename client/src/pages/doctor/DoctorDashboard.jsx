@@ -305,13 +305,13 @@ const DoctorDashboard = () => {
                 pendingRequests.map((apt) => (
                   <div key={apt._id} className="list-row flex-col items-stretch gap-2.5 sm:flex-row sm:items-center">
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-[13px] font-medium tracking-[-0.01em] text-slate-800">
+                      <p className="truncate text-sm font-medium tracking-[-0.01em] text-slate-800">
                         {apt.patient?.name}
                       </p>
-                      <p className="mt-0.5 text-[11.5px] text-slate-400">
+                      <p className="mt-0.5 text-2xs text-slate-400">
                         {format(new Date(apt.appointmentDate), 'MMM dd, yyyy')} · {apt.timeSlot}
                       </p>
-                      <p className="mt-0.5 line-clamp-1 text-[11.5px] text-slate-500">{apt.reason}</p>
+                      <p className="mt-0.5 line-clamp-1 text-2xs text-slate-500">{apt.reason}</p>
                     </div>
                     <div className="flex shrink-0 gap-1.5">
                       <button
@@ -375,13 +375,13 @@ const DoctorDashboard = () => {
                       <div className="min-w-0">
                         <p
                           className={cn(
-                            'truncate text-[13px] font-medium tracking-[-0.01em] text-slate-800',
+                            'truncate text-sm font-medium tracking-[-0.01em] text-slate-800',
                             apt.status === 'completed' && 'line-through text-slate-400'
                           )}
                         >
                           {apt.patient?.name}
                         </p>
-                        <p className="mt-0.5 text-[11.5px] text-slate-400">
+                        <p className="mt-0.5 text-2xs text-slate-400">
                           {apt.timeSlot} · <span className="capitalize">{apt.status}</span>
                           {apt.reason ? ` · ${apt.reason}` : ''}
                         </p>
@@ -438,10 +438,10 @@ const DoctorDashboard = () => {
                 {upcomingConfirmed.slice(0, 12).map((apt) => (
                   <div key={apt._id} className="list-row">
                     <div className="min-w-0">
-                      <p className="truncate text-[13px] font-medium tracking-[-0.01em] text-slate-800">
+                      <p className="truncate text-sm font-medium tracking-[-0.01em] text-slate-800">
                         {apt.patient?.name}
                       </p>
-                      <p className="mt-0.5 text-[11.5px] text-slate-400">
+                      <p className="mt-0.5 text-2xs text-slate-400">
                         {format(new Date(apt.appointmentDate), 'MMM dd, yyyy')} · {apt.timeSlot}
                       </p>
                     </div>
@@ -467,7 +467,7 @@ const DoctorDashboard = () => {
               rows={4}
               value={quickNote}
               onChange={(e) => setQuickNote(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] outline-none focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 text-slate-700 placeholder:text-slate-400 transition-all font-sans resize-none"
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 text-slate-700 placeholder:text-slate-400 transition-all font-sans resize-none"
               placeholder="Start typing reminders, code shortcuts, or clinical notes..."
             />
           </div>
@@ -495,7 +495,7 @@ const DoctorDashboard = () => {
             </div>
             <div className="max-h-[280px] space-y-2 overflow-y-auto pr-1">
               {(!labReports || labReports.length === 0) ? (
-                <p className="py-6 text-center text-[12.5px] text-slate-400">
+                <p className="py-6 text-center text-xs text-slate-400">
                   No lab orders yet
                 </p>
               ) : (
@@ -505,10 +505,10 @@ const DoctorDashboard = () => {
                     className="flex items-center justify-between gap-2 rounded-xl border border-slate-200/70 bg-white p-3"
                   >
                     <div className="min-w-0">
-                      <p className="truncate text-[13px] font-medium text-slate-800">
+                      <p className="truncate text-sm font-medium text-slate-800">
                         {report.testName}
                       </p>
-                      <p className="mt-0.5 truncate text-[11px] text-slate-400">
+                      <p className="mt-0.5 truncate text-2xs text-slate-400">
                         {report.patient?.name || 'Patient'} ·{' '}
                         {format(new Date(report.orderedDate || report.createdAt), 'MMM dd')} ·{' '}
                         <span className="capitalize">{String(report.status || '').replace(/_/g, ' ')}</span>
@@ -534,8 +534,8 @@ const DoctorDashboard = () => {
         {/* Schedule Calendar */}
         <div id="calendar-view" className="lg:col-span-2 card p-5 relative z-0">
           <div className="mb-4">
-            <h3 className="text-[14.5px] font-semibold text-slate-800">Interactive Clinical Calendar</h3>
-            <p className="text-[11.5px] font-medium text-slate-400 mt-0.5">Manage schedules, consultations, and drag/drop adjustments.</p>
+            <h3 className="text-base font-medium text-slate-800">Interactive Clinical Calendar</h3>
+            <p className="text-2xs font-medium text-slate-400 mt-0.5">Manage schedules, consultations, and drag/drop adjustments.</p>
           </div>
           <InteractiveCalendar 
             events={allAppointments || []} 
@@ -547,7 +547,7 @@ const DoctorDashboard = () => {
         <div className="modal-backdrop items-start overflow-y-auto">
           <div className="modal-panel my-8 max-w-lg">
             <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-              <h2 className="flex items-center gap-2 text-[15px] font-medium text-slate-900">
+              <h2 className="flex items-center gap-2 text-md font-medium text-slate-900">
                 <FlaskConical className="h-4 w-4 text-slate-400" />
                 Request lab report
               </h2>
@@ -645,7 +645,7 @@ const DoctorDashboard = () => {
                   {['Normal', 'Urgent'].map((p) => (
                     <label
                       key={p}
-                      className="flex cursor-pointer items-center gap-2 text-[13px] font-normal text-slate-700"
+                      className="flex cursor-pointer items-center gap-2 text-sm font-normal text-slate-700"
                     >
                       <input
                         type="radio"

@@ -42,7 +42,7 @@ export default function NotificationCenter() {
       {isOpen && (
         <div className="absolute right-0 z-50 mt-2 w-80 origin-top-right animate-scale-in overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-premium-lg sm:w-96">
           <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/60 px-4 py-3">
-            <h3 className="text-[13.5px] font-medium text-slate-900">Notifications</h3>
+            <h3 className="text-sm font-medium text-slate-900">Notifications</h3>
             {notifications.length > 0 && (
               <button
                 onClick={clearNotifications}

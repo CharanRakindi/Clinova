@@ -4,22 +4,46 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../../api/axios';
 import {
   ArrowLeft, Plus, X, FileText, Heart, Thermometer, Activity,
-  CheckCircle, Paperclip, AlertTriangle, ShieldAlert, Stethoscope, Droplet,
+  CheckCircle, Paperclip, AlertTriangle, Stethoscope, Droplet,
   RotateCcw,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import FileUpload from '../../components/FileUpload';
 import { formatDoctorName } from '../../utils/format';
+import Tabs from '../../components/ui/Tabs';
+import DataValue from '../../components/ui/DataValue';
+import EmptyState from '../../components/ui/EmptyState';
+import AlertBanner from '../../components/ui/AlertBanner';
 
 const TABS = ['Overview', 'Timeline', 'Lab Reports', 'Prescriptions'];
 
 const SEVERITY_STYLES = {
-  Severe: 'bg-red-50 text-red-700 border-red-200',
-  Moderate: 'bg-amber-50 text-amber-700 border-amber-200',
-  Mild: 'bg-slate-100 text-slate-600 border-slate-200',
-  Unknown: 'bg-slate-100 text-slate-600 border-slate-200',
+  Severe: 'badge-danger',
+  Moderate: 'badge-warning',
+  Mild: 'badge-neutral',
+  Unknown: 'badge-neutral',
 };
+
+function VitalCell({ label, icon: Icon, value, unit }) {
+  const missing = value == null || value === '';
+  return (
+    <div className="soft-panel">
+      <p className="ui-label mb-1 flex items-center gap-1.5">
+        {Icon && <Icon className="h-3 w-3 text-ink-faint" aria-hidden />}
+        {label}
+      </p>
+      {missing ? (
+        <p className="data-empty">Not recorded</p>
+      ) : (
+        <p className="text-lg font-medium text-ink">
+          {value}
+          {unit ? <span className="ml-1 text-2xs font-normal text-ink-faint">{unit}</span> : null}
+        </p>
+      )}
+    </div>
+  );
+}
 
 const DoctorPatientDetail = () => {
   const { patientId } = useParams();
@@ -243,92 +267,82 @@ const DoctorPatientDetail = () => {
         </div>
       </div>
 
-      {/* Critical Medical Alerts */}
       {alertCount > 0 && (
-        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-red-200/60 bg-red-50/50 px-4 py-2.5">
-          <ShieldAlert className="h-4 w-4 shrink-0 text-red-600" />
-          <span className="text-[12.5px] font-semibold text-red-700">Medical Alerts:</span>
-          {severeAllergies.map((a) => (
-            <span key={a._id} className="rounded border border-red-200 bg-white px-2 py-0.5 text-[11px] font-medium text-red-700">
-              Severe Allergy: {a.allergen}
-            </span>
-          ))}
-          {activeConditions.filter(c => c.severity === 'Severe').map((c) => (
-            <span key={c._id} className="rounded border border-red-200 bg-white px-2 py-0.5 text-[11px] font-medium text-red-700">
-              Severe Condition: {c.conditionName}
-            </span>
-          ))}
-        </div>
+        <AlertBanner title="Critical medical alerts" severity="critical">
+          <div className="flex flex-wrap gap-1.5">
+            {severeAllergies.map((a) => (
+              <span key={a._id} className="badge badge-danger">
+                Allergy: {a.allergen}
+              </span>
+            ))}
+            {activeConditions
+              .filter((c) => c.severity === 'Severe')
+              .map((c) => (
+                <span key={c._id} className="badge badge-danger">
+                  Condition: {c.conditionName}
+                </span>
+              ))}
+          </div>
+        </AlertBanner>
       )}
 
-      {/* Patient Profile Card */}
-      <div className="card p-6">
-        <div className="flex flex-col gap-6 md:flex-row md:items-start">
-          <div className="flex flex-col items-center shrink-0">
-            <div className="h-16 w-16 overflow-hidden rounded-full bg-slate-100 ring-1 ring-slate-100">
-              <img src={`https://api.dicebear.com/7.x/initials/svg?seed=${patient?.user?.name}`} alt="" className="h-full w-full" />
+      <div className="card p-5 sm:p-6">
+        <div className="flex flex-col gap-5 md:flex-row md:items-start">
+          <div className="flex shrink-0 flex-col items-center">
+            <div
+              className="flex h-14 w-14 items-center justify-center rounded-full bg-ink text-lg font-medium text-ink-inverse"
+              aria-hidden
+            >
+              {(patient?.user?.name || '?').charAt(0).toUpperCase()}
             </div>
-            <span className="mt-2.5 inline-flex rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-500 font-mono">
-              ID: {patient?.patientId}
+            <span className="badge badge-neutral mt-2 font-mono">
+              {patient?.patientId || 'No MRN'}
             </span>
           </div>
 
-          <div className="w-full flex-1">
-            <div className="mb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
-                <h2 className="text-[18px] font-medium tracking-[-0.02em] text-slate-900">{patient?.user?.name}</h2>
-                <div className="mt-1 flex flex-wrap items-center gap-2 text-[12.5px] font-medium text-slate-400">
-                  <span className="capitalize">{patient?.user?.gender || 'Unknown gender'}</span>
-                  <span>•</span>
-                  <span className="inline-flex items-center gap-1 rounded bg-slate-50 border border-slate-200/60 px-1.5 py-0.5 text-[11px] font-medium text-slate-600">
-                    <Droplet className="h-2.5 w-2.5 text-rose-500" /> {patient?.bloodGroup || 'Blood group not documented'}
-                  </span>
-                </div>
-              </div>
-            </div>
+          <div className="min-w-0 flex-1">
+            <h2 className="text-lg font-medium text-ink">{patient?.user?.name}</h2>
+            <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-muted">
+              <DataValue value={patient?.user?.gender} empty="Gender not documented" className="capitalize" />
+              <span className="text-line-strong" aria-hidden>
+                ·
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <Droplet className="h-3 w-3 text-ink-faint" aria-hidden />
+                <DataValue value={patient?.bloodGroup} empty="Blood group not documented" />
+              </span>
+            </p>
 
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 pt-4 border-t border-slate-100">
+            <div className="mt-4 grid grid-cols-1 gap-4 border-t border-line pt-4 sm:grid-cols-2 lg:grid-cols-3">
               <div>
-                <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">Email Address</p>
-                <p className="text-[13px] font-medium text-slate-800">{patient?.user?.email}</p>
+                <p className="ui-label mb-0.5">Email</p>
+                <DataValue value={patient?.user?.email} />
               </div>
               <div>
-                <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">Phone Number</p>
-                <p className="text-[13px] font-medium text-slate-800">{patient?.user?.phone || 'Not provided'}</p>
+                <p className="ui-label mb-0.5">Phone</p>
+                <DataValue value={patient?.user?.phone} empty="Not documented" />
               </div>
-              {patient?.emergencyContact?.name && (
-                <div>
-                  <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">Emergency Contact</p>
-                  <p className="text-[13px] font-semibold text-slate-800">{patient.emergencyContact.name}</p>
-                  <p className="text-[11.5px] text-slate-400 mt-0.5">
-                    {patient.emergencyContact.relationship} • {patient.emergencyContact.phone}
-                  </p>
-                </div>
-              )}
+              <div>
+                <p className="ui-label mb-0.5">Emergency contact</p>
+                {patient?.emergencyContact?.name ? (
+                  <div>
+                    <p className="data-value">{patient.emergencyContact.name}</p>
+                    <p className="mt-0.5 text-xs text-ink-faint">
+                      {[patient.emergencyContact.relationship, patient.emergencyContact.phone]
+                        .filter(Boolean)
+                        .join(' · ')}
+                    </p>
+                  </div>
+                ) : (
+                  <p className="data-empty">Not documented</p>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="border-b border-slate-200/60">
-        <div className="flex gap-6">
-          {TABS.map(tab => (
-            <button
-              key={tab}
-              className={`relative pb-3.5 text-[13px] font-semibold transition-colors ${
-                activeTab === tab ? 'text-primary-600' : 'text-slate-400 hover:text-slate-600'
-              }`}
-              onClick={() => setActiveTab(tab)}
-            >
-              {tab}
-              {activeTab === tab && (
-                <div className="absolute bottom-0 left-0 h-0.5 w-full rounded-t bg-primary-600" />
-              )}
-            </button>
-          ))}
-        </div>
-      </div>
+      <Tabs tabs={TABS} value={activeTab} onChange={setActiveTab} />
 
       {/* Tab Content */}
       <div className="mt-6">
@@ -336,45 +350,33 @@ const DoctorPatientDetail = () => {
           <div className="grid animate-fade-in grid-cols-1 gap-6 lg:grid-cols-2">
             {/* Vitals Overview */}
             <div className="card p-5">
-              <h3 className="mb-4 flex items-center gap-2 text-[14px] font-semibold text-slate-800">
-                <Activity className="h-4 w-4 text-primary-500" />
-                Latest Vitals
+              <h3 className="panel-title mb-4 flex items-center gap-2">
+                <Activity className="h-4 w-4 text-ink-faint" aria-hidden />
+                Latest vitals
               </h3>
-              {records && records[0]?.vitals ? (
+              {records?.[0]?.vitals ? (
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="rounded-xl border border-slate-100 bg-slate-50/40 p-3.5">
-                    <p className="mb-1 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                      <Heart className="h-3 w-3 text-rose-500" /> Pulse
-                    </p>
-                    <p className="text-[17px] font-semibold text-slate-900">{records[0].vitals.pulse} <span className="text-[11px] font-medium text-slate-400">bpm</span></p>
-                  </div>
-                  <div className="rounded-xl border border-slate-100 bg-slate-50/40 p-3.5">
-                    <p className="mb-1 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                      <Thermometer className="h-3 w-3 text-amber-500" /> Temp
-                    </p>
-                    <p className="text-[17px] font-semibold text-slate-900">{records[0].vitals.temperature} <span className="text-[11px] font-medium text-slate-400">°C</span></p>
-                  </div>
-                  <div className="rounded-xl border border-slate-100 bg-slate-50/40 p-3.5">
-                    <p className="mb-1 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                      <Activity className="h-3 w-3 text-indigo-500" /> Blood Pressure
-                    </p>
-                    <p className="text-[17px] font-semibold text-slate-900">
-                      {records[0].vitals.bloodPressureSystolic}/{records[0].vitals.bloodPressureDiastolic}
-                    </p>
-                  </div>
-                  <div className="rounded-xl border border-slate-100 bg-slate-50/40 p-3.5">
-                    <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400">Oxygen Saturation</p>
-                    <p className="text-[17px] font-semibold text-slate-900">{records[0].vitals.oxygenSaturation} <span className="text-[11px] font-medium text-slate-400">%</span></p>
-                  </div>
+                  <VitalCell label="Pulse" icon={Heart} value={records[0].vitals.pulse} unit="bpm" />
+                  <VitalCell label="Temp" icon={Thermometer} value={records[0].vitals.temperature} unit="°C" />
+                  <VitalCell
+                    label="Blood pressure"
+                    icon={Activity}
+                    value={
+                      records[0].vitals.bloodPressureSystolic && records[0].vitals.bloodPressureDiastolic
+                        ? `${records[0].vitals.bloodPressureSystolic}/${records[0].vitals.bloodPressureDiastolic}`
+                        : null
+                    }
+                  />
+                  <VitalCell label="SpO₂" value={records[0].vitals.oxygenSaturation} unit="%" />
                 </div>
               ) : (
-                <p className="text-[12.5px] font-medium text-slate-400 py-6 text-center">No patient vitals recorded yet.</p>
+                <EmptyState compact title="No vitals on file" description="Vitals appear here after a clinical note is recorded." />
               )}
             </div>
 
             {/* Diagnosis Overview */}
             <div className="card p-5">
-              <h3 className="mb-4 flex items-center gap-2 text-[14px] font-semibold text-slate-800">
+              <h3 className="mb-4 flex items-center gap-2 text-base font-medium text-slate-800">
                 <Stethoscope className="h-4 w-4 text-primary-500" />
                 Recent Diagnoses
               </h3>
@@ -383,37 +385,37 @@ const DoctorPatientDetail = () => {
                   {records[0].diagnosis.map((d, i) => (
                     <div key={i} className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50/40 px-3.5 py-2.5">
                       <div className="h-1.5 w-1.5 rounded-full bg-primary-500" />
-                      <span className="text-[13px] font-medium text-slate-800">{d}</span>
+                      <span className="text-sm font-medium text-slate-800">{d}</span>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-[12.5px] font-medium text-slate-400 py-6 text-center">No recent diagnoses recorded.</p>
+                <p className="text-xs font-medium text-slate-400 py-6 text-center">No recent diagnoses recorded.</p>
               )}
             </div>
 
             {/* Allergies Overview */}
             <div className="card p-5">
-              <h3 className="mb-4 flex items-center gap-2 text-[14px] font-semibold text-slate-800">
+              <h3 className="mb-4 flex items-center gap-2 text-base font-medium text-slate-800">
                 <AlertTriangle className="h-4 w-4 text-primary-500" />
                 Allergies Log
               </h3>
               {allergies && allergies.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
                   {allergies.map((a) => (
-                    <span key={a._id} className={`rounded border px-2.5 py-1 text-[11.5px] font-semibold ${SEVERITY_STYLES[a.severity] || SEVERITY_STYLES.Unknown}`}>
+                    <span key={a._id} className={`badge ${SEVERITY_STYLES[a.severity] || SEVERITY_STYLES.Unknown}`}>
                       {a.allergen}
                     </span>
                   ))}
                 </div>
               ) : (
-                <p className="text-[12.5px] font-medium text-slate-400 py-6 text-center">No known allergies logged.</p>
+                <p className="text-xs font-medium text-slate-400 py-6 text-center">No known allergies logged.</p>
               )}
             </div>
 
             {/* Conditions Overview */}
             <div className="card p-5">
-              <h3 className="mb-4 flex items-center gap-2 text-[14px] font-semibold text-slate-800">
+              <h3 className="mb-4 flex items-center gap-2 text-base font-medium text-slate-800">
                 <FileText className="h-4 w-4 text-primary-500" />
                 Clinical Conditions
               </h3>
@@ -421,8 +423,8 @@ const DoctorPatientDetail = () => {
                 <div className="flex flex-col gap-2">
                   {conditions.map((c) => (
                     <div key={c._id} className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50/40 px-3.5 py-2.5">
-                      <span className="text-[13px] font-semibold text-slate-800">{c.conditionName}</span>
-                      <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${
+                      <span className="text-sm font-medium text-slate-800">{c.conditionName}</span>
+                      <span className={`rounded px-1.5 py-0.5 text-2xs font-medium ${
                         c.status === 'Active' ? 'border border-amber-100 bg-amber-50 text-amber-700' :
                         c.status === 'Resolved' ? 'border border-emerald-100 bg-emerald-50 text-emerald-700' :
                         'border border-slate-200 bg-white text-slate-400'
@@ -433,7 +435,7 @@ const DoctorPatientDetail = () => {
                   ))}
                 </div>
               ) : (
-                <p className="text-[12.5px] font-medium text-slate-400 py-6 text-center">No medical conditions recorded.</p>
+                <p className="text-xs font-medium text-slate-400 py-6 text-center">No medical conditions recorded.</p>
               )}
             </div>
           </div>
@@ -446,8 +448,8 @@ const DoctorPatientDetail = () => {
                 <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-slate-50">
                   <FileText className="h-6 w-6 text-slate-300" />
                 </div>
-                <p className="mb-1 text-[15px] font-semibold text-slate-900">No medical records found</p>
-                <p className="mb-6 max-w-sm text-[12.5px] font-medium text-slate-500">This patient's clinical care history will update as medical notes are signed off.</p>
+                <p className="mb-1 text-md font-medium text-slate-900">No medical records found</p>
+                <p className="mb-6 max-w-sm text-xs font-medium text-slate-500">This patient's clinical care history will update as medical notes are signed off.</p>
                 <button onClick={() => setIsModalOpen(true)} className="btn btn-outline px-4 py-2">
                   Add Clinical Note
                 </button>
@@ -466,20 +468,20 @@ const DoctorPatientDetail = () => {
                       <div className="card p-5">
                         <div className="mb-4 flex flex-col items-start justify-between gap-2 sm:flex-row">
                           <div>
-                            <p className="text-[11.5px] font-semibold text-slate-400 font-mono">
+                            <p className="text-2xs font-medium text-slate-400 font-mono">
                               {format(new Date(record.visitDate), 'MMMM dd, yyyy')}
                             </p>
-                            <h3 className="mt-0.5 text-[15px] font-semibold text-slate-800">{record.chiefComplaint}</h3>
-                            <p className="mt-0.5 text-[12px] font-medium text-slate-500">
+                            <h3 className="mt-0.5 text-md font-medium text-slate-800">{record.chiefComplaint}</h3>
+                            <p className="mt-0.5 text-xs font-medium text-slate-500">
                               Practitioner: {formatDoctorName(record.doctor?.name)}
                               {record.version > 1 && (
-                                <span className="ml-2 rounded border border-amber-200 bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700">
+                                <span className="ml-2 rounded border border-amber-200 bg-amber-50 px-1.5 py-0.5 text-2xs font-medium text-amber-700">
                                   Amended v{record.version}
                                 </span>
                               )}
                             </p>
                           </div>
-                          <span className={`rounded border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
+                          <span className={`rounded border px-2 py-0.5 text-2xs font-medium uppercase tracking-wider ${
                             record.status === 'active' ? 'border-emerald-100 bg-emerald-50 text-emerald-700' :
                             'border-slate-200 bg-slate-50 text-slate-400'
                           }`}>
@@ -490,10 +492,10 @@ const DoctorPatientDetail = () => {
                         <div className="space-y-4 border-t border-slate-100 pt-4">
                           {(record.symptoms?.length > 0 || record.chiefComplaint) && (
                             <div>
-                              <span className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wider text-slate-400">Symptoms</span>
+                              <span className="mb-1.5 block text-2xs font-medium uppercase tracking-wider text-slate-400">Symptoms</span>
                               <div className="flex flex-wrap gap-1">
                                 {record.symptoms?.map((s, i) => (
-                                  <span key={i} className="rounded border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-600">{s}</span>
+                                  <span key={i} className="rounded border border-slate-200 bg-slate-50 px-2 py-0.5 text-2xs font-medium text-slate-600">{s}</span>
                                 ))}
                               </div>
                             </div>
@@ -501,43 +503,43 @@ const DoctorPatientDetail = () => {
 
                           {record.vitals && Object.keys(record.vitals).some(k => record.vitals[k]) && (
                             <div>
-                              <span className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wider text-slate-400">Signed Vitals</span>
+                              <span className="mb-1.5 block text-2xs font-medium uppercase tracking-wider text-slate-400">Signed Vitals</span>
                               <div className="flex flex-wrap gap-2">
-                                {record.vitals.pulse && <span className="rounded border border-slate-200/80 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600">{record.vitals.pulse} bpm</span>}
-                                {record.vitals.temperature && <span className="rounded border border-slate-200/80 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600">{record.vitals.temperature}°C</span>}
-                                {record.vitals.bloodPressureSystolic && <span className="rounded border border-slate-200/80 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600">{record.vitals.bloodPressureSystolic}/{record.vitals.bloodPressureDiastolic} mmHg</span>}
-                                {record.vitals.oxygenSaturation && <span className="rounded border border-slate-200/80 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600">SpO₂ {record.vitals.oxygenSaturation}%</span>}
+                                {record.vitals.pulse && <span className="rounded border border-slate-200/80 bg-white px-2.5 py-1 text-2xs font-medium text-slate-600">{record.vitals.pulse} bpm</span>}
+                                {record.vitals.temperature && <span className="rounded border border-slate-200/80 bg-white px-2.5 py-1 text-2xs font-medium text-slate-600">{record.vitals.temperature}°C</span>}
+                                {record.vitals.bloodPressureSystolic && <span className="rounded border border-slate-200/80 bg-white px-2.5 py-1 text-2xs font-medium text-slate-600">{record.vitals.bloodPressureSystolic}/{record.vitals.bloodPressureDiastolic} mmHg</span>}
+                                {record.vitals.oxygenSaturation && <span className="rounded border border-slate-200/80 bg-white px-2.5 py-1 text-2xs font-medium text-slate-600">SpO₂ {record.vitals.oxygenSaturation}%</span>}
                               </div>
                             </div>
                           )}
 
                           {(record.diagnosis?.length > 0 || record.clinicalNotes) && (
                             <div>
-                              <span className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wider text-slate-400">Clinical Diagnoses</span>
+                              <span className="mb-1.5 block text-2xs font-medium uppercase tracking-wider text-slate-400">Clinical Diagnoses</span>
                               {record.diagnosis?.length > 0 && (
                                 <div className="mb-2 flex flex-wrap gap-1">
                                   {record.diagnosis.map((d, i) => (
-                                    <span key={i} className="rounded bg-primary-50 text-primary-700 px-2 py-0.5 text-[11px] font-semibold">{d}</span>
+                                    <span key={i} className="rounded bg-primary-50 text-primary-700 px-2 py-0.5 text-2xs font-medium">{d}</span>
                                   ))}
                                 </div>
                               )}
-                              {record.clinicalNotes && <p className="text-[13px] font-medium text-slate-600">{record.clinicalNotes}</p>}
+                              {record.clinicalNotes && <p className="text-sm font-medium text-slate-600">{record.clinicalNotes}</p>}
                             </div>
                           )}
 
                           {record.treatmentPlan && (
                             <div className="rounded-lg border border-slate-200 bg-slate-50/40 p-3.5">
-                              <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-400">Treatment Plan</span>
-                              <p className="text-[13px] font-medium text-slate-700">{record.treatmentPlan}</p>
+                              <span className="mb-1 block text-2xs font-medium uppercase tracking-wider text-slate-400">Treatment Plan</span>
+                              <p className="text-sm font-medium text-slate-700">{record.treatmentPlan}</p>
                             </div>
                           )}
 
                           {record.attachments && record.attachments.length > 0 && (
                             <div>
-                              <span className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wider text-slate-400">Attachments</span>
+                              <span className="mb-1.5 block text-2xs font-medium uppercase tracking-wider text-slate-400">Attachments</span>
                               <div className="flex flex-wrap gap-2">
                                 {record.attachments.map((att, idx) => (
-                                  <a key={idx} href={att.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[12px] font-semibold text-slate-600 transition-colors hover:border-slate-300 hover:text-slate-800">
+                                  <a key={idx} href={att.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:border-slate-300 hover:text-slate-800">
                                     <Paperclip className="h-3.5 w-3.5 text-slate-400" /> {att.filename}
                                   </a>
                                 ))}
@@ -561,8 +563,8 @@ const DoctorPatientDetail = () => {
                 <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-slate-50">
                   <Activity className="h-6 w-6 text-slate-300" />
                 </div>
-                <p className="mb-1 text-[15px] font-semibold text-slate-900">No lab reports found</p>
-                <p className="max-w-xs text-[12.5px] font-medium text-slate-500">Laboratory reports for this patient will sync here once completed by technicians.</p>
+                <p className="mb-1 text-md font-medium text-slate-900">No lab reports found</p>
+                <p className="max-w-xs text-xs font-medium text-slate-500">Laboratory reports for this patient will sync here once completed by technicians.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-4">
@@ -570,13 +572,13 @@ const DoctorPatientDetail = () => {
                   <div key={report._id} className="card p-5 bg-white border border-slate-200/60 hover:border-slate-300 transition-colors">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-slate-100">
                       <div>
-                        <h4 className="font-bold text-[14.5px] text-slate-900">{report.testName}</h4>
-                        <p className="text-[11.5px] font-medium text-slate-400 mt-0.5">
+                        <h4 className="font-medium text-base text-slate-900">{report.testName}</h4>
+                        <p className="text-2xs font-medium text-slate-400 mt-0.5">
                           Ordered: {format(new Date(report.orderedDate), 'MMM dd, yyyy')} • Practitioner: {formatDoctorName(report.doctor?.name)}
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className={`inline-flex px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-md border ${
+                        <span className={`inline-flex px-2.5 py-0.5 text-2xs font-medium uppercase tracking-wider rounded-md border ${
                           report.status === 'ordered' ? 'bg-amber-50 text-amber-600 border-amber-100' :
                           report.status === 'sample_collected' ? 'bg-blue-50 text-blue-600 border-blue-100' :
                           report.status === 'processing' ? 'bg-indigo-50 text-indigo-600 border-indigo-100' :
@@ -599,10 +601,10 @@ const DoctorPatientDetail = () => {
                       </div>
                     </div>
 
-                    <div className="pt-3.5 space-y-3 text-[13px]">
+                    <div className="pt-3.5 space-y-3 text-sm">
                       {report.notes && (
                         <div>
-                          <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 block">Doctor Notes</span>
+                          <span className="text-2xs font-medium uppercase tracking-wider text-slate-500 block">Doctor Notes</span>
                           <p className="text-slate-600 font-medium mt-0.5">{report.notes}</p>
                         </div>
                       )}
@@ -610,8 +612,8 @@ const DoctorPatientDetail = () => {
                       {(report.status === 'completed' || report.status === 'reviewed') && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50/50 p-3 rounded-lg border border-slate-200/40">
                           <div>
-                            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 block">Result Summary</span>
-                            <p className="text-slate-800 font-semibold mt-0.5">
+                            <span className="text-2xs font-medium uppercase tracking-wider text-slate-500 block">Result Summary</span>
+                            <p className="text-slate-800 font-medium mt-0.5">
                               {report.resultSummary?.trim()
                                 ? report.resultSummary
                                 : 'No result documented'}
@@ -619,8 +621,8 @@ const DoctorPatientDetail = () => {
                           </div>
                           {report.referenceRange && (
                             <div>
-                              <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 block">Reference Range</span>
-                              <p className="text-slate-800 font-semibold mt-0.5">{report.referenceRange}</p>
+                              <span className="text-2xs font-medium uppercase tracking-wider text-slate-500 block">Reference Range</span>
+                              <p className="text-slate-800 font-medium mt-0.5">{report.referenceRange}</p>
                             </div>
                           )}
                         </div>
@@ -628,7 +630,7 @@ const DoctorPatientDetail = () => {
 
                       {report.attachments?.length > 0 && (
                         <div>
-                          <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 block mb-1">Attachments</span>
+                          <span className="text-2xs font-medium uppercase tracking-wider text-slate-500 block mb-1">Attachments</span>
                           <div className="flex flex-wrap gap-2">
                             {report.attachments.map((file, idx) => (
                               <a
@@ -636,7 +638,7 @@ const DoctorPatientDetail = () => {
                                 href={file.url}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 hover:text-primary-600 hover:border-primary-300 transition-colors shadow-sm"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-600 hover:text-primary-600 hover:border-primary-300 transition-colors shadow-sm"
                               >
                                 <Paperclip className="w-3.5 h-3.5" />
                                 <span className="truncate max-w-[150px]">{file.filename}</span>
@@ -663,8 +665,8 @@ const DoctorPatientDetail = () => {
             </div>
             {(!prescriptions || prescriptions.length === 0) ? (
               <div className="card flex flex-col items-center justify-center p-12 text-center">
-                <p className="mb-1 text-[15px] font-medium text-slate-900">No prescriptions yet</p>
-                <p className="mb-4 max-w-sm text-[12.5px] text-slate-500">
+                <p className="mb-1 text-md font-medium text-slate-900">No prescriptions yet</p>
+                <p className="mb-4 max-w-sm text-xs text-slate-500">
                   Write a prescription for this patient. Access is limited to doctors with a care relationship.
                 </p>
                 <button type="button" onClick={() => setIsRxOpen(true)} className="btn btn-secondary">
@@ -677,10 +679,10 @@ const DoctorPatientDetail = () => {
                   <div key={rx._id} className="card p-5">
                     <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
                       <div>
-                        <p className="text-[11px] font-medium uppercase tracking-wider text-slate-400">
+                        <p className="text-2xs font-medium uppercase tracking-wider text-slate-400">
                           {format(new Date(rx.createdAt || rx.startDate), 'MMM dd, yyyy')}
                         </p>
-                        <p className="mt-0.5 text-[13px] text-slate-500">
+                        <p className="mt-0.5 text-sm text-slate-500">
                           By {formatDoctorName(rx.doctor?.name)}
                         </p>
                       </div>
@@ -688,16 +690,16 @@ const DoctorPatientDetail = () => {
                     </div>
                     <ul className="space-y-2">
                       {(rx.medicines || []).map((med, i) => (
-                        <li key={i} className="rounded-xl border border-slate-100 bg-slate-50/60 px-3.5 py-2.5 text-[13px]">
+                        <li key={i} className="rounded-xl border border-slate-100 bg-slate-50/60 px-3.5 py-2.5 text-sm">
                           <span className="font-medium text-slate-900">{med.medicineName || med.name}</span>
-                          <span className="mt-0.5 block text-[12px] text-slate-500">
+                          <span className="mt-0.5 block text-xs text-slate-500">
                             {[med.dosage, med.frequency, med.duration].filter(Boolean).join(' · ') || '—'}
                           </span>
                         </li>
                       ))}
                     </ul>
                     {rx.instructions && (
-                      <p className="mt-3 text-[12.5px] text-slate-600">{rx.instructions}</p>
+                      <p className="mt-3 text-xs text-slate-600">{rx.instructions}</p>
                     )}
                   </div>
                 ))}
@@ -711,7 +713,7 @@ const DoctorPatientDetail = () => {
         <div className="modal-backdrop">
           <div className="modal-panel max-w-md">
             <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-              <h2 className="text-[15px] font-medium text-slate-900">New prescription</h2>
+              <h2 className="text-md font-medium text-slate-900">New prescription</h2>
               <button type="button" onClick={() => setIsRxOpen(false)} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100">
                 <X className="h-4 w-4" />
               </button>
@@ -779,7 +781,7 @@ const DoctorPatientDetail = () => {
         <div className="modal-backdrop items-start overflow-y-auto">
           <div className="modal-panel my-8 max-w-2xl">
             <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-              <h2 className="flex items-center gap-2 text-[15px] font-medium text-slate-900">
+              <h2 className="flex items-center gap-2 text-md font-medium text-slate-900">
                 <FileText className="h-4 w-4 text-slate-400" />
                 New clinical note
               </h2>
@@ -854,7 +856,7 @@ const DoctorPatientDetail = () => {
               </div>
 
               <div className="rounded-2xl border border-slate-200 bg-slate-50/40 p-5">
-                <label className="mb-4 flex items-center gap-2 text-[13px] font-medium text-slate-800">
+                <label className="mb-4 flex items-center gap-2 text-sm font-medium text-slate-800">
                   <Activity className="h-4 w-4 text-slate-400" /> Patient vitals
                 </label>
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -868,7 +870,7 @@ const DoctorPatientDetail = () => {
                     { key: 'weight', label: 'Weight (kg)', placeholder: '70' },
                   ].map(({ key, label, placeholder }) => (
                     <div key={key}>
-                      <label className="mb-1 block text-[11px] font-medium text-slate-400">
+                      <label className="mb-1 block text-2xs font-medium text-slate-400">
                         {label}
                       </label>
                       <input
@@ -907,7 +909,7 @@ const DoctorPatientDetail = () => {
                 />
                 {formData.attachments.length > 0 && (
                   <div className="mt-3">
-                    <p className="mb-2 text-[10px] font-medium uppercase tracking-wider text-slate-400">
+                    <p className="mb-2 text-2xs font-medium uppercase tracking-wider text-slate-400">
                       Attachments
                     </p>
                     <div className="flex flex-wrap gap-2">
