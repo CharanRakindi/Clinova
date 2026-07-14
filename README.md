@@ -25,7 +25,7 @@ Cinematic marketing site, role-based workspaces, JWT cookie auth, and Socket.io 
 
 | Landing | Login | Admin dashboard |
 |---------|-------|-----------------|
-| ![Landing](docs/screenshots/01-landing.png) | ![Login](docs/screenshots/02-login.png) | ![Admin](docs/screenshots/03-admin-dashboard.png) |
+| ![Landing](docs/screenshots/01-landing.jpg) | ![Login](docs/screenshots/02-login.jpg) | ![Admin](docs/screenshots/03-admin-dashboard.jpg) |
 
 ---
 
