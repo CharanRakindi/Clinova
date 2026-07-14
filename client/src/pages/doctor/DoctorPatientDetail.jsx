@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../../api/axios';
 import {
-  ArrowLeft, Plus, X, FileText, Heart, Thermometer, Activity,
+  ArrowLeft, Plus, FileText, Heart, Thermometer, Activity,
   CheckCircle, Paperclip, AlertTriangle, Stethoscope, Droplet,
   RotateCcw,
 } from 'lucide-react';
@@ -15,6 +15,7 @@ import Tabs from '../../components/ui/Tabs';
 import DataValue from '../../components/ui/DataValue';
 import EmptyState from '../../components/ui/EmptyState';
 import AlertBanner from '../../components/ui/AlertBanner';
+import Modal from '../../components/ui/Modal';
 
 const TABS = ['Overview', 'Timeline', 'Lab Reports', 'Prescriptions'];
 
@@ -390,7 +391,7 @@ const DoctorPatientDetail = () => {
                   ))}
                 </div>
               ) : (
-                <p className="text-xs font-medium text-slate-400 py-6 text-center">No recent diagnoses recorded.</p>
+                <EmptyState compact title="No diagnoses on file" description="Documented diagnoses appear after clinical notes." />
               )}
             </div>
 
@@ -409,7 +410,7 @@ const DoctorPatientDetail = () => {
                   ))}
                 </div>
               ) : (
-                <p className="text-xs font-medium text-slate-400 py-6 text-center">No known allergies logged.</p>
+                <EmptyState compact title="No allergies on file" description="Documented allergies will list here." />
               )}
             </div>
 
@@ -435,7 +436,7 @@ const DoctorPatientDetail = () => {
                   ))}
                 </div>
               ) : (
-                <p className="text-xs font-medium text-slate-400 py-6 text-center">No medical conditions recorded.</p>
+                <EmptyState compact title="No conditions on file" description="Active conditions appear when documented." />
               )}
             </div>
           </div>
@@ -444,15 +445,17 @@ const DoctorPatientDetail = () => {
         {activeTab === 'Timeline' && (
           <div className="animate-fade-in">
             {(!records || records.length === 0) ? (
-              <div className="card flex flex-col items-center justify-center p-12 text-center">
-                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-slate-50">
-                  <FileText className="h-6 w-6 text-slate-300" />
-                </div>
-                <p className="mb-1 text-md font-medium text-slate-900">No medical records found</p>
-                <p className="mb-6 max-w-sm text-xs font-medium text-slate-500">This patient's clinical care history will update as medical notes are signed off.</p>
-                <button onClick={() => setIsModalOpen(true)} className="btn btn-outline px-4 py-2">
-                  Add Clinical Note
-                </button>
+              <div className="card">
+                <EmptyState
+                  icon={FileText}
+                  title="No clinical notes on file"
+                  description="This patient's care history updates as notes are signed off."
+                  action={
+                    <button type="button" onClick={() => setIsModalOpen(true)} className="btn btn-secondary">
+                      Add clinical note
+                    </button>
+                  }
+                />
               </div>
             ) : (
               <div className="relative pl-8">
@@ -559,12 +562,12 @@ const DoctorPatientDetail = () => {
         {activeTab === 'Lab Reports' && (
           <div className="space-y-4 animate-fade-in">
             {(!labReports || labReports.length === 0) ? (
-              <div className="card flex flex-col items-center justify-center p-12 text-center bg-white">
-                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-slate-50">
-                  <Activity className="h-6 w-6 text-slate-300" />
-                </div>
-                <p className="mb-1 text-md font-medium text-slate-900">No lab reports found</p>
-                <p className="max-w-xs text-xs font-medium text-slate-500">Laboratory reports for this patient will sync here once completed by technicians.</p>
+              <div className="card">
+                <EmptyState
+                  icon={Activity}
+                  title="No lab reports on file"
+                  description="Orders and results appear here when lab work is placed or completed."
+                />
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-4">
@@ -664,14 +667,17 @@ const DoctorPatientDetail = () => {
               </button>
             </div>
             {(!prescriptions || prescriptions.length === 0) ? (
-              <div className="card flex flex-col items-center justify-center p-12 text-center">
-                <p className="mb-1 text-md font-medium text-slate-900">No prescriptions yet</p>
-                <p className="mb-4 max-w-sm text-xs text-slate-500">
-                  Write a prescription for this patient. Access is limited to doctors with a care relationship.
-                </p>
-                <button type="button" onClick={() => setIsRxOpen(true)} className="btn btn-secondary">
-                  Prescribe medication
-                </button>
+              <div className="card">
+                <EmptyState
+                  icon={FileText}
+                  title="No prescriptions on file"
+                  description="Medications you prescribe for this patient will list here."
+                  action={
+                    <button type="button" onClick={() => setIsRxOpen(true)} className="btn btn-secondary">
+                      Prescribe medication
+                    </button>
+                  }
+                />
               </div>
             ) : (
               <div className="space-y-3">
@@ -709,23 +715,11 @@ const DoctorPatientDetail = () => {
         )}
       </div>
 
-      {isRxOpen && (
-        <div className="modal-backdrop">
-          <div className="modal-panel max-w-md">
-            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-              <h2 className="text-md font-medium text-slate-900">New prescription</h2>
-              <button type="button" onClick={() => setIsRxOpen(false)} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100">
-                <X className="h-4 w-4" />
-              </button>
-            </div>
+      <Modal open={isRxOpen} onClose={() => setIsRxOpen(false)} title="New prescription" panelClassName="max-w-md">
             <form
               className="space-y-4 p-6"
               onSubmit={(e) => {
                 e.preventDefault();
-                if (!rxForm.name.trim()) {
-                  toast.error('Medicine name is required');
-                  return;
-                }
                 if (!rxForm.name.trim() || !rxForm.dosage.trim() || !rxForm.frequency.trim() || !rxForm.duration.trim()) {
                   toast.error('Medicine name, dosage, frequency, and duration are required');
                   return;
@@ -751,49 +745,37 @@ const DoctorPatientDetail = () => {
               <div className="grid grid-cols-3 gap-2">
                 <div>
                   <label className="label">Dosage</label>
-                  <input className="input" placeholder="10mg" value={rxForm.dosage} onChange={(e) => setRxForm({ ...rxForm, dosage: e.target.value })} />
+                  <input className="input" placeholder="10mg" value={rxForm.dosage} onChange={(e) => setRxForm({ ...rxForm, dosage: e.target.value })} required />
                 </div>
                 <div>
                   <label className="label">Frequency</label>
-                  <input className="input" placeholder="BID" value={rxForm.frequency} onChange={(e) => setRxForm({ ...rxForm, frequency: e.target.value })} />
+                  <input className="input" placeholder="BID" value={rxForm.frequency} onChange={(e) => setRxForm({ ...rxForm, frequency: e.target.value })} required />
                 </div>
                 <div>
                   <label className="label">Duration</label>
-                  <input className="input" placeholder="7 days" value={rxForm.duration} onChange={(e) => setRxForm({ ...rxForm, duration: e.target.value })} />
+                  <input className="input" placeholder="7 days" value={rxForm.duration} onChange={(e) => setRxForm({ ...rxForm, duration: e.target.value })} required />
                 </div>
               </div>
               <div>
                 <label className="label">Instructions</label>
                 <textarea className="input min-h-[72px] resize-none py-2.5" value={rxForm.instructions} onChange={(e) => setRxForm({ ...rxForm, instructions: e.target.value })} />
               </div>
-              <div className="flex justify-end gap-2 border-t border-slate-100 pt-4">
+              <div className="flex justify-end gap-2 border-t border-line pt-4">
                 <button type="button" className="btn btn-secondary" onClick={() => setIsRxOpen(false)}>Cancel</button>
                 <button type="submit" className="btn btn-primary" disabled={createPrescription.isPending}>
                   {createPrescription.isPending ? 'Saving…' : 'Save prescription'}
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
+      </Modal>
 
-      {isModalOpen && (
-        <div className="modal-backdrop items-start overflow-y-auto">
-          <div className="modal-panel my-8 max-w-2xl">
-            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-              <h2 className="flex items-center gap-2 text-md font-medium text-slate-900">
-                <FileText className="h-4 w-4 text-slate-400" />
-                New clinical note
-              </h2>
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(false)}
-                className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
+      <Modal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="New clinical note"
+        wide
+        scrollable
+      >
             <form onSubmit={handleSubmit} className="space-y-5 p-6">
               <div>
                 <label className="label">
@@ -946,9 +928,7 @@ const DoctorPatientDetail = () => {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
+      </Modal>
     </div>
   );
 };

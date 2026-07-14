@@ -4,6 +4,7 @@ import api from '../../api/axios';
 import SkeletonLoader from '../../components/SkeletonLoader';
 import { FileText, Search, ArrowLeft, ArrowRight, Download, Filter } from 'lucide-react';
 import { format } from 'date-fns';
+import EmptyState from '../../components/ui/EmptyState';
 
 export default function AuditLogs() {
   const [page, setPage] = useState(1);
@@ -129,9 +130,12 @@ export default function AuditLogs() {
                 ))
               ) : !data?.data || data.data.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-14 text-center text-slate-400 text-xs">
-                    <FileText className="w-10 h-10 mx-auto mb-3 text-slate-300" />
-                    No audit records match your query
+                  <td colSpan={7} className="px-6 py-8">
+                    <EmptyState
+                      icon={FileText}
+                      title="No audit records match"
+                      description="Try a different search or clear the action filter."
+                    />
                   </td>
                 </tr>
               ) : (

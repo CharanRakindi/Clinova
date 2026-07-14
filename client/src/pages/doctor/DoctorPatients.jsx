@@ -4,6 +4,8 @@ import { Search, Droplet, Users } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SkeletonTable } from '../../components/SkeletonLoader';
+import EmptyState from '../../components/ui/EmptyState';
+import DataValue from '../../components/ui/DataValue';
 
 const DoctorPatients = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -68,39 +70,42 @@ const DoctorPatients = () => {
             <tbody className="divide-y divide-slate-50 bg-white">
               {(!filteredPatients || filteredPatients.length === 0) ? (
                 <tr>
-                  <td colSpan="4" className="px-6 py-14 text-center">
-                    <div className="flex flex-col items-center justify-center">
-                      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-slate-50">
-                        <Search className="h-6 w-6 text-slate-300" />
-                      </div>
-                      <p className="mb-1 text-md font-medium text-slate-900">No patients found</p>
-                      <p className="text-sm font-medium text-slate-500">Try adjusting your search query.</p>
-                    </div>
+                  <td colSpan="4" className="px-6 py-8">
+                    <EmptyState
+                      icon={Search}
+                      title="No patients found"
+                      description="Try adjusting your search query."
+                    />
                   </td>
                 </tr>
               ) : (
                 filteredPatients.map((patient) => (
-                  <tr key={patient._id} className="group transition-colors hover:bg-slate-50/70">
+                  <tr key={patient._id} className="group transition-colors hover:bg-surface-subtle/70">
                     <td className="whitespace-nowrap px-6 py-3.5">
                       <div className="flex items-center">
-                        <div className="h-9 w-9 overflow-hidden rounded-full bg-slate-100 ring-1 ring-slate-100">
-                          <img src={`https://api.dicebear.com/7.x/initials/svg?seed=${patient.user?.name}`} alt="" className="h-full w-full" />
+                        <div
+                          className="flex h-9 w-9 items-center justify-center rounded-full bg-ink text-xs font-medium text-ink-inverse"
+                          aria-hidden
+                        >
+                          {(patient.user?.name || '?').charAt(0).toUpperCase()}
                         </div>
                         <div className="ml-3">
-                          <div className="text-sm font-medium text-slate-900 group-hover:text-primary-600 transition-colors">{patient.user?.name}</div>
-                          <div className="text-xs font-medium text-slate-400">{patient.user?.email}</div>
+                          <div className="text-sm font-medium text-ink transition-colors group-hover:text-ink-secondary">
+                            {patient.user?.name}
+                          </div>
+                          <div className="text-xs font-medium text-ink-faint">{patient.user?.email}</div>
                         </div>
                       </div>
                     </td>
                     <td className="whitespace-nowrap px-6 py-3.5">
-                      <span className="inline-flex rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-2xs font-medium text-slate-600 font-mono">
+                      <span className="badge badge-neutral font-mono">
                         {patient.patientId}
                       </span>
                     </td>
                     <td className="whitespace-nowrap px-6 py-3.5">
-                      <span className="inline-flex items-center gap-1 rounded-md border border-rose-100 bg-rose-50 px-2.5 py-1 text-2xs font-medium text-rose-700">
-                        <Droplet className="w-3 h-3 text-rose-600" />
-                        {patient.bloodGroup}
+                      <span className="inline-flex items-center gap-1 text-2xs font-medium text-ink-secondary">
+                        <Droplet className="h-3 w-3 text-ink-faint" />
+                        <DataValue value={patient.bloodGroup} empty="Not documented" />
                       </span>
                     </td>
                     <td className="whitespace-nowrap px-6 py-3.5 text-right">

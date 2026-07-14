@@ -12,6 +12,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatDoctorName } from '../../utils/format';
 import { cn } from '../../utils/cn';
+import EmptyState from '../../components/ui/EmptyState';
+import Modal from '../../components/ui/Modal';
 
 const DoctorDashboard = () => {
   const queryClient = useQueryClient();
@@ -300,7 +302,7 @@ const DoctorDashboard = () => {
             </div>
             <div className="max-h-[280px] space-y-2 overflow-y-auto pr-1">
               {pendingRequests.length === 0 ? (
-                <div className="empty-state py-6">No open requests</div>
+                <EmptyState compact title="No open requests" description="Patient booking requests will appear here." />
               ) : (
                 pendingRequests.map((apt) => (
                   <div key={apt._id} className="list-row flex-col items-stretch gap-2.5 sm:flex-row sm:items-center">
@@ -359,7 +361,7 @@ const DoctorDashboard = () => {
             <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1">
               <AnimatePresence initial={false}>
                 {todayAppointments.length === 0 ? (
-                  <div className="empty-state py-8">No appointments today</div>
+                  <EmptyState compact title="Nothing scheduled today" description="Today's consultations will list here." />
                 ) : (
                   todayAppointments.map((apt) => (
                     <motion.div
@@ -495,9 +497,7 @@ const DoctorDashboard = () => {
             </div>
             <div className="max-h-[280px] space-y-2 overflow-y-auto pr-1">
               {(!labReports || labReports.length === 0) ? (
-                <p className="py-6 text-center text-xs text-slate-400">
-                  No lab orders yet
-                </p>
+                <EmptyState compact title="No lab orders yet" description="Orders you place will appear here." />
               ) : (
                 labReports.slice(0, 8).map((report) => (
                   <div
@@ -543,23 +543,13 @@ const DoctorDashboard = () => {
           />
         </div>
       </div>
-      {isLabModalOpen && (
-        <div className="modal-backdrop items-start overflow-y-auto">
-          <div className="modal-panel my-8 max-w-lg">
-            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-              <h2 className="flex items-center gap-2 text-md font-medium text-slate-900">
-                <FlaskConical className="h-4 w-4 text-slate-400" />
-                Request lab report
-              </h2>
-              <button
-                type="button"
-                onClick={() => setIsLabModalOpen(false)}
-                className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
+      <Modal
+        open={isLabModalOpen}
+        onClose={() => setIsLabModalOpen(false)}
+        title="Request lab report"
+        scrollable
+        panelClassName="max-w-lg"
+      >
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -689,9 +679,7 @@ const DoctorDashboard = () => {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
+      </Modal>
     </div>
   );
 };

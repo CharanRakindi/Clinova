@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../../api/axios';
 import FileUpload from '../../components/FileUpload';
-import { CheckCircle, ArrowRight, X, Paperclip, Clock } from 'lucide-react';
+import { CheckCircle, ArrowRight, Paperclip, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { SkeletonTable } from '../../components/SkeletonLoader';
 import { cn } from '../../utils/cn';
+import EmptyState from '../../components/ui/EmptyState';
+import Modal from '../../components/ui/Modal';
 
 export default function LabTechDashboard() {
   const queryClient = useQueryClient();
@@ -150,7 +152,7 @@ export default function LabTechDashboard() {
 
                 <div className="custom-scrollbar flex-1 space-y-2.5 overflow-y-auto p-3">
                   {colReports.length === 0 ? (
-                    <p className="empty-state py-8">No items</p>
+                    <EmptyState compact title="No items" description="Queue is clear for this stage." />
                   ) : (
                     colReports.map((report) => (
                       <div
@@ -206,7 +208,7 @@ export default function LabTechDashboard() {
             </div>
             <div className="custom-scrollbar flex-1 space-y-2.5 overflow-y-auto p-3">
               {completed.length === 0 ? (
-                <p className="empty-state py-8">No completed tests</p>
+                <EmptyState compact title="No completed tests" description="Finished reports appear here." />
               ) : (
                 completed.map((report) => (
                   <div
@@ -237,26 +239,15 @@ export default function LabTechDashboard() {
         </div>
       </div>
 
-      {selectedReport && (
-        <div className="modal-backdrop">
-          <div className="modal-panel max-w-lg">
-            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-              <h2 className="flex items-center gap-2 text-md font-medium tracking-[-0.015em] text-slate-900">
-                <CheckCircle className="h-4 w-4 text-slate-400" />
-                Finalize lab results
-              </h2>
-              <button
-                type="button"
-                onClick={() => setSelectedReport(null)}
-                className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
+      <Modal
+        open={!!selectedReport}
+        onClose={() => setSelectedReport(null)}
+        title="Finalize lab results"
+        panelClassName="max-w-lg"
+      >
             <form onSubmit={handleCompleteSubmit} className="space-y-4 p-6">
               <div>
-                <p className="text-2xs font-medium uppercase tracking-[0.12em] text-slate-400">
+                <p className="ui-label">
                   Test details
                 </p>
                 <p className="mt-1 text-sm font-medium text-slate-800">
@@ -327,9 +318,7 @@ export default function LabTechDashboard() {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
+      </Modal>
     </div>
   );
 }

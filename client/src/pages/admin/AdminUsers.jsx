@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../../api/axios';
 import { SkeletonTable } from '../../components/SkeletonLoader';
-import { Search, UserCheck, UserX, Shield, Stethoscope, User as UserIcon, ArrowUp, ArrowDown, ChevronsUpDown, Plus, X, Pencil } from 'lucide-react';
+import { Search, UserCheck, UserX, Shield, Stethoscope, User as UserIcon, ArrowUp, ArrowDown, ChevronsUpDown, Plus, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
+import Modal from '../../components/ui/Modal';
+import EmptyState from '../../components/ui/EmptyState';
 
 const ROLE_META = {
   admin: { label: 'Admin', icon: Shield, className: 'bg-slate-900 text-white' },
@@ -238,23 +240,24 @@ const AdminUsers = () => {
             <tbody className="divide-y divide-slate-50 bg-white">
               {(!paginatedUsers || paginatedUsers.length === 0) ? (
                 <tr>
-                  <td colSpan="5" className="px-6 py-14 text-center">
-                    <div className="flex flex-col items-center justify-center">
-                      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-slate-50">
-                        <Search className="h-6 w-6 text-slate-300" />
-                      </div>
-                      <p className="mb-1 text-md font-medium text-slate-900">No users found</p>
-                      <p className="text-sm font-medium text-slate-400">Try adjusting your search or filters.</p>
-                    </div>
+                  <td colSpan="5" className="px-6 py-8">
+                    <EmptyState
+                      icon={Search}
+                      title="No users match"
+                      description="Try adjusting your search or filters."
+                    />
                   </td>
                 </tr>
               ) : (
                 paginatedUsers.map((user) => (
-                  <tr key={user._id} className="group transition-colors hover:bg-slate-50/70">
+                  <tr key={user._id} className="group transition-colors hover:bg-surface-subtle/70">
                     <td className="whitespace-nowrap px-6 py-3.5">
                       <div className="flex items-center">
-                        <div className="h-9 w-9 overflow-hidden rounded-full bg-slate-100 ring-1 ring-slate-100">
-                          <img src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.name}`} alt="" className="h-full w-full" />
+                        <div
+                          className="flex h-9 w-9 items-center justify-center rounded-full bg-ink text-xs font-medium text-ink-inverse"
+                          aria-hidden
+                        >
+                          {(user.name || '?').charAt(0).toUpperCase()}
                         </div>
                         <div className="ml-3">
                           <div className="text-sm font-medium text-slate-900">{user.name}</div>
@@ -337,23 +340,13 @@ const AdminUsers = () => {
           </div>
         )}
       </div>
-      {isCreateModalOpen && (
-        <div className="modal-backdrop items-start overflow-y-auto">
-          <div className="modal-panel my-8 max-w-lg">
-            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-              <h2 className="flex items-center gap-2 text-md font-medium text-slate-900">
-                <Plus className="h-4 w-4 text-slate-400" />
-                Add hospital staff
-              </h2>
-              <button
-                type="button"
-                onClick={() => setIsCreateModalOpen(false)}
-                className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
+      <Modal
+        open={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        title="Add hospital staff"
+        scrollable
+        panelClassName="max-w-lg"
+      >
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -509,26 +502,14 @@ const AdminUsers = () => {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
+      </Modal>
 
-      {editUser && (
-        <div className="modal-backdrop">
-          <div className="modal-panel max-w-md">
-            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-              <h2 className="flex items-center gap-2 text-md font-medium tracking-[-0.015em] text-slate-900">
-                <Pencil className="h-4 w-4 text-slate-400" />
-                Edit user
-              </h2>
-              <button
-                type="button"
-                onClick={() => setEditUser(null)}
-                className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
+      <Modal
+        open={!!editUser}
+        onClose={() => setEditUser(null)}
+        title="Edit user"
+        panelClassName="max-w-md"
+      >
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -565,7 +546,7 @@ const AdminUsers = () => {
                   onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
                   required
                 />
-                <p className="mt-1.5 text-xs text-slate-400">
+                <p className="mt-1.5 text-xs text-ink-faint">
                   Only admins can change user emails. Staff cannot change their own.
                 </p>
               </div>
@@ -577,7 +558,7 @@ const AdminUsers = () => {
                   onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
                 />
               </div>
-              <div className="flex justify-end gap-2 border-t border-slate-100 pt-4">
+              <div className="flex justify-end gap-2 border-t border-line pt-4">
                 <button type="button" onClick={() => setEditUser(null)} className="btn btn-secondary">
                   Cancel
                 </button>
@@ -586,9 +567,7 @@ const AdminUsers = () => {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
+      </Modal>
     </div>
   );
 };

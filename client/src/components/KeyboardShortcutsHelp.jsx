@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Command, X } from 'lucide-react';
+import { Command } from 'lucide-react';
+import Modal from './ui/Modal';
 
 export default function KeyboardShortcutsHelp() {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Toggle palette on Ctrl+/ or '?' (if not typing in input)
       if (
-        (e.key === '/' && e.ctrlKey) || 
+        (e.key === '/' && e.ctrlKey) ||
         (e.key === '?' && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName))
       ) {
         e.preventDefault();
@@ -20,55 +20,44 @@ export default function KeyboardShortcutsHelp() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  if (!isOpen) return null;
-
   const shortcuts = [
-    { key: "⌘ K / Ctrl K", desc: "Open Command Palette / Search" },
-    { key: "? / Ctrl /", desc: "Show / Hide Keyboard Shortcuts Help" },
-    { key: "Esc", desc: "Close dialog or overlays" },
-    { key: "⌥ D", desc: "Go to Dashboard" },
-    { key: "⌥ P", desc: "Go to Patients Directory" },
-    { key: "⌥ A", desc: "Go to Appointments" },
-    { key: "⌥ R", desc: "Go to Medical Records" },
-    { key: "⌥ S", desc: "Go to Profile / Settings" }
+    { key: '⌘ K / Ctrl K', desc: 'Open command palette / search' },
+    { key: '? / Ctrl /', desc: 'Show / hide keyboard shortcuts' },
+    { key: 'Esc', desc: 'Close dialog or overlays' },
+    { key: '⌥ D', desc: 'Go to dashboard' },
+    { key: '⌥ P', desc: 'Go to patients directory' },
+    { key: '⌥ A', desc: 'Go to appointments' },
+    { key: '⌥ R', desc: 'Go to medical records' },
+    { key: '⌥ S', desc: 'Go to profile / settings' },
   ];
 
   return (
-    <div className="modal-backdrop z-[120]">
-      <div className="modal-panel relative max-w-md p-6">
-        <button
-          type="button"
-          onClick={() => setIsOpen(false)}
-          className="absolute right-4 top-4 rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
-        >
-          <X className="h-4 w-4" />
-        </button>
-
-        <div className="mb-6 flex items-center gap-3">
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-2 text-slate-600">
-            <Command className="h-4.5 w-4.5" />
+    <Modal
+      open={isOpen}
+      onClose={() => setIsOpen(false)}
+      title="Keyboard shortcuts"
+      className="z-[120]"
+      panelClassName="max-w-md"
+    >
+      <div className="px-6 pb-6 pt-2">
+        <div className="mb-5 flex items-center gap-3">
+          <div className="rounded-lg border border-line bg-surface-subtle p-2 text-ink-muted">
+            <Command className="h-4 w-4" aria-hidden />
           </div>
-          <div>
-            <h3 className="text-md font-medium leading-none text-slate-900">
-              Keyboard shortcuts
-            </h3>
-            <p className="mt-1.5 text-xs font-normal text-slate-400">
-              Move faster through your workspace
-            </p>
-          </div>
+          <p className="text-xs text-ink-faint">Move faster through your workspace</p>
         </div>
 
-        <div className="mb-2 space-y-3">
-          {shortcuts.map((s, idx) => (
-            <div key={idx} className="flex items-center justify-between text-sm">
-              <span className="font-normal text-slate-600">{s.desc}</span>
-              <kbd className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 font-mono text-2xs text-slate-700">
+        <div className="space-y-3">
+          {shortcuts.map((s) => (
+            <div key={s.key} className="flex items-center justify-between gap-4 text-sm">
+              <span className="font-normal text-ink-muted">{s.desc}</span>
+              <kbd className="shrink-0 rounded-lg border border-line bg-surface-subtle px-2.5 py-1 font-mono text-2xs text-ink-secondary">
                 {s.key}
               </kbd>
             </div>
           ))}
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

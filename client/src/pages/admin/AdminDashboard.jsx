@@ -6,6 +6,7 @@ import { SkeletonCard } from '../../components/SkeletonLoader';
 import { Users, UserPlus, Stethoscope, Calendar, ShieldAlert, Clock } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { format, subDays, isAfter, startOfDay } from 'date-fns';
+import EmptyState from '../../components/ui/EmptyState';
 
 const AdminDashboard = () => {
   const { data: stats, isLoading } = useQuery({
@@ -160,7 +161,7 @@ const AdminDashboard = () => {
 
           <div className="flex-1 space-y-3">
             {!auditLogs?.length ? (
-              <div className="empty-state py-8">No audit events yet</div>
+              <EmptyState compact title="No audit events yet" description="Security events will list here as staff act." />
             ) : (
               auditLogs.map((log) => (
                 <div key={log._id} className="flex gap-3">

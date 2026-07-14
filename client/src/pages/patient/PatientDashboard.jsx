@@ -10,6 +10,9 @@ import { useAuth } from '../../contexts/AuthContext';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { formatDoctorName } from '../../utils/format';
 import { cn } from '../../utils/cn';
+import Tabs from '../../components/ui/Tabs';
+import EmptyState from '../../components/ui/EmptyState';
+import DataValue from '../../components/ui/DataValue';
 
 const statusBadge = (status) => {
   if (status === 'confirmed' || status === 'completed' || status === 'active') return 'badge-success';
@@ -243,33 +246,33 @@ const PatientDashboard = () => {
             </div>
           )}
 
-          <div className="card overflow-hidden">
-            <div className="tabs-bar">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setActiveTab(tab.id)}
-                  className={cn('tab-btn', activeTab === tab.id && 'tab-btn-active')}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
+          <div className="card overflow-hidden p-4 sm:p-5">
+            <Tabs
+              variant="segmented"
+              tabs={tabs.map((t) => ({ id: t.id, label: t.label }))}
+              value={activeTab}
+              onChange={setActiveTab}
+              aria-label="Care summary"
+            />
 
-            <div className="p-4 sm:p-5">
+            <div className="mt-4">
               {activeTab === 'overview' && (
                 <div className="space-y-2.5">
                   {!appointments?.length ? (
-                    <div className="empty-state">No upcoming appointments</div>
+                    <EmptyState
+                      compact
+                      icon={Calendar}
+                      title="No upcoming appointments"
+                      description="Booked visits will show here once scheduled."
+                    />
                   ) : (
                     appointments.map((apt) => (
                       <div key={apt._id} className="list-row">
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-medium tracking-[-0.01em] text-slate-900">
+                          <p className="truncate text-sm font-medium text-ink">
                             {formatDoctorName(apt.doctor?.name)}
                           </p>
-                          <p className="mt-0.5 text-xs text-slate-400">
+                          <p className="mt-0.5 text-xs text-ink-faint">
                             {format(new Date(apt.appointmentDate), 'MMM dd, yyyy')} · {apt.timeSlot}
                           </p>
                         </div>
@@ -285,21 +288,29 @@ const PatientDashboard = () => {
               {activeTab === 'prescriptions' && (
                 <div className="space-y-2.5">
                   {!prescriptions?.length ? (
-                    <div className="empty-state">No prescriptions logged</div>
+                    <EmptyState
+                      compact
+                      icon={Pill}
+                      title="No prescriptions on file"
+                      description="Medications ordered by your clinician appear here."
+                    />
                   ) : (
                     prescriptions.map((p) => (
                       <div key={p._id} className="list-row !items-start">
                         <div className="min-w-0 space-y-1">
-                          <p className="flex items-center gap-1.5 text-sm font-medium text-slate-900">
-                            <Pill className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-                            {p.medicines?.[0]?.medicineName}
+                          <p className="flex items-center gap-1.5 text-sm font-medium text-ink">
+                            <Pill className="h-3.5 w-3.5 shrink-0 text-ink-faint" />
+                            <DataValue
+                              value={p.medicines?.[0]?.medicineName}
+                              empty="Unnamed medication"
+                            />
                             {p.medicines?.length > 1 && ` +${p.medicines.length - 1} more`}
                           </p>
-                          <p className="text-xs text-slate-400">
+                          <p className="text-xs text-ink-faint">
                             {formatDoctorName(p.doctor?.name)}
                           </p>
                           {p.instructions && (
-                            <p className="text-xs leading-snug text-slate-500">
+                            <p className="text-xs leading-snug text-ink-muted">
                               {p.instructions}
                             </p>
                           )}
@@ -316,19 +327,24 @@ const PatientDashboard = () => {
               {activeTab === 'reports' && (
                 <div className="space-y-2.5">
                   {!labReports?.length ? (
-                    <div className="empty-state">No lab reports yet</div>
+                    <EmptyState
+                      compact
+                      icon={FileCheck}
+                      title="No lab reports yet"
+                      description="Completed results will list here when available."
+                    />
                   ) : (
                     labReports.map((report) => (
                       <div key={report._id} className="list-row">
                         <div className="min-w-0">
-                          <p className="flex items-center gap-1.5 text-sm font-medium text-slate-900">
-                            <FileCheck className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                          <p className="flex items-center gap-1.5 text-sm font-medium text-ink">
+                            <FileCheck className="h-3.5 w-3.5 shrink-0 text-ink-faint" />
                             {report.testName}
                           </p>
-                          <p className="mt-0.5 text-xs text-slate-400">
+                          <p className="mt-0.5 text-xs text-ink-faint">
                             {report.resultDate
                               ? `Completed ${format(new Date(report.resultDate), 'MMM dd, yyyy')}`
-                              : 'Pending results'}
+                              : 'Results not documented yet'}
                           </p>
                         </div>
                         <span

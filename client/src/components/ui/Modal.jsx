@@ -13,6 +13,9 @@ export default function Modal({
   className,
   panelClassName,
   wide = false,
+  /** Tall forms: align top and allow page scroll */
+  scrollable = false,
+  footer,
 }) {
   const titleId = useId();
   const closeRef = useRef(null);
@@ -40,7 +43,11 @@ export default function Modal({
 
   return (
     <div
-      className={cn('modal-backdrop', className)}
+      className={cn(
+        'modal-backdrop',
+        scrollable && 'items-start overflow-y-auto py-8',
+        className
+      )}
       role="presentation"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose?.();
@@ -50,7 +57,12 @@ export default function Modal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={title ? titleId : undefined}
-        className={cn('modal-panel', wide && 'max-w-2xl', panelClassName)}
+        className={cn(
+          'modal-panel',
+          wide && 'max-w-2xl',
+          scrollable && 'my-0',
+          panelClassName
+        )}
       >
         {(title || onClose) && (
           <div className="flex items-center justify-between border-b border-line px-6 py-4">
@@ -75,6 +87,9 @@ export default function Modal({
           </div>
         )}
         {children}
+        {footer ? (
+          <div className="flex justify-end gap-2 border-t border-line px-6 py-4">{footer}</div>
+        ) : null}
       </div>
     </div>
   );

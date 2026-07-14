@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 import { SkeletonTable } from '../../components/SkeletonLoader';
 import { formatDoctorName } from '../../utils/format';
 import { cn } from '../../utils/cn';
+import EmptyState from '../../components/ui/EmptyState';
 
 const PatientMedicalRecords = () => {
   const { user } = useAuth();
@@ -41,14 +42,12 @@ const PatientMedicalRecords = () => {
       </div>
 
       {!records || records.length === 0 ? (
-        <div className="card flex flex-col items-center justify-center p-14 text-center">
-          <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-slate-50 ring-4 ring-white">
-            <FileText className="h-7 w-7 text-slate-300" />
-          </div>
-          <h2 className="text-lg font-medium text-slate-900">No records yet</h2>
-          <p className="mt-1.5 max-w-sm text-sm font-normal text-slate-500">
-            Your medical records and doctor notes will appear here after consultations.
-          </p>
+        <div className="card">
+          <EmptyState
+            icon={FileText}
+            title="No records on file"
+            description="Consultation notes and vitals appear here after visits with your care team."
+          />
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-5">

@@ -5,6 +5,7 @@ import { UserPlus, Calendar, Plus, Check, Trash } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { formatDoctorName } from '../../utils/format';
+import EmptyState from '../../components/ui/EmptyState';
 
 export default function ReceptionistDashboard() {
   const queryClient = useQueryClient();
@@ -326,8 +327,12 @@ export default function ReceptionistDashboard() {
                 <tbody className="divide-y divide-slate-50 text-sm font-medium">
                   {!appointments || appointments.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="px-4 py-12 text-center text-slate-400 text-xs">
-                        No appointments currently scheduled
+                      <td colSpan={5} className="px-4 py-8">
+                        <EmptyState
+                          icon={Calendar}
+                          title="No appointments scheduled"
+                          description="Booked visits will appear in the check-in queue."
+                        />
                       </td>
                     </tr>
                   ) : (
