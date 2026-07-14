@@ -1,12 +1,12 @@
 # SPA (+ optional reverse-proxy to API)
 # PORT and API_HOST substituted at container start
 upstream clinova_api {
-    server api:5001;
+    server ${API_HOST};
     keepalive 32;
 }
 
 server {
-    listen 80;
+    listen ${PORT};
     server_name _;
     root /usr/share/nginx/html;
     index index.html;

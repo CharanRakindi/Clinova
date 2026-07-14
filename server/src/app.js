@@ -60,10 +60,10 @@ app.use(cookieParser());
 // NOTE: Local uploads are NOT served publicly.
 // Authenticated download: GET /api/v1/upload/files/:filename
 
-// Logging
+// Logging (skip in tests)
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
-} else {
+} else if (process.env.NODE_ENV !== 'test') {
   app.use(morgan('combined'));
 }
 

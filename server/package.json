@@ -5,11 +5,16 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "test": "vitest run --passWithNoTests",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "seed": "node src/seeders/seed.js",
     "check": "node --check src/server.js && node --check src/app.js && node --check src/seeders/seed.js"
   },
-  "keywords": ["clinova", "ehr", "healthcare"],
+  "keywords": [
+    "clinova",
+    "ehr",
+    "healthcare"
+  ],
   "author": "Charan Rakindi",
   "license": "ISC",
   "description": "Clinova EHR API server",
@@ -32,6 +37,7 @@
   },
   "devDependencies": {
     "eslint": "^10.6.0",
+    "mongodb-memory-server": "^11.2.0",
     "nodemon": "^3.1.14",
     "prettier": "^3.9.4",
     "supertest": "^7.2.2",
