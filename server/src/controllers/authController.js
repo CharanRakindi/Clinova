@@ -1,6 +1,7 @@
 import User from '../models/User.js';
 import PatientProfile from '../models/PatientProfile.js';
 import { generateTokens, setTokenCookies, clearTokenCookies } from '../utils/generateToken.js';
+import { hashToken, tokenMatches } from '../utils/tokenHash.js';
 import jwt from 'jsonwebtoken';
 import { logAction } from '../utils/auditLogger.js';
 
@@ -43,9 +44,7 @@ export const register = async (req, res, next) => {
     });
 
     const { accessToken, refreshToken } = generateTokens(user._id);
-    
-    // In a real app, save refreshToken hash to DB if needed for invalidation
-    user.refreshToken = refreshToken;
+    user.refreshToken = hashToken(refreshToken);
     await user.save();
 
     setTokenCookies(res, accessToken, refreshToken);
@@ -84,8 +83,9 @@ export const register = async (req, res, next) => {
 export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
+    const normalizedEmail = String(email || '').toLowerCase().trim();
 
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ email: normalizedEmail }).select('+password');
 
     if (!user || !(await user.matchPassword(password))) {
       return res.status(401).json({ success: false, message: 'Invalid email or password' });
@@ -97,7 +97,7 @@ export const login = async (req, res, next) => {
 
     user.lastLogin = Date.now();
     const { accessToken, refreshToken } = generateTokens(user._id);
-    user.refreshToken = refreshToken;
+    user.refreshToken = hashToken(refreshToken);
     await user.save();
 
     setTokenCookies(res, accessToken, refreshToken);
@@ -174,13 +174,13 @@ export const refresh = async (req, res, next) => {
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
     const user = await User.findById(decoded.id).select('+refreshToken');
 
-    if (!user || user.refreshToken !== refreshToken) {
+    if (!user || !tokenMatches(user.refreshToken, refreshToken)) {
       clearTokenCookies(res);
       return res.status(401).json({ success: false, message: 'Invalid refresh token' });
     }
 
     const tokens = generateTokens(user._id);
-    user.refreshToken = tokens.refreshToken;
+    user.refreshToken = hashToken(tokens.refreshToken);
     await user.save();
 
     setTokenCookies(res, tokens.accessToken, tokens.refreshToken);
@@ -317,7 +317,7 @@ export const updatePassword = async (req, res, next) => {
 
     // Rotate session: issue new tokens and invalidate prior refresh token
     const { accessToken, refreshToken } = generateTokens(user._id);
-    user.refreshToken = refreshToken;
+    user.refreshToken = hashToken(refreshToken);
     await user.save();
     setTokenCookies(res, accessToken, refreshToken);
 

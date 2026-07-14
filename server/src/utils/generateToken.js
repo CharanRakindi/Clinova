@@ -1,5 +1,18 @@
 import jwt from 'jsonwebtoken';
 
+/** Parse ms / s / m / h / d duration strings used by jsonwebtoken expiresIn. */
+export function durationToMs(value, fallbackMs) {
+  if (value == null || value === '') return fallbackMs;
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  const s = String(value).trim();
+  const m = s.match(/^(\d+)(ms|s|m|h|d)?$/i);
+  if (!m) return fallbackMs;
+  const n = Number(m[1]);
+  const unit = (m[2] || 'ms').toLowerCase();
+  const mult = { ms: 1, s: 1000, m: 60_000, h: 3_600_000, d: 86_400_000 };
+  return n * (mult[unit] || 1);
+}
+
 /** Cookie flags — override with COOKIE_SECURE / COOKIE_SAMESITE for Docker HTTP or cross-site HTTPS */
 function cookieOptions(maxAgeMs) {
   const secure =
@@ -31,8 +44,10 @@ export const generateTokens = (userId) => {
 };
 
 export const setTokenCookies = (res, accessToken, refreshToken) => {
-  res.cookie('accessToken', accessToken, cookieOptions(15 * 60 * 1000));
-  res.cookie('refreshToken', refreshToken, cookieOptions(7 * 24 * 60 * 60 * 1000));
+  const accessMs = durationToMs(process.env.ACCESS_TOKEN_EXPIRES_IN, 15 * 60 * 1000);
+  const refreshMs = durationToMs(process.env.REFRESH_TOKEN_EXPIRES_IN, 7 * 24 * 60 * 60 * 1000);
+  res.cookie('accessToken', accessToken, cookieOptions(accessMs));
+  res.cookie('refreshToken', refreshToken, cookieOptions(refreshMs));
 };
 
 export const clearTokenCookies = (res) => {

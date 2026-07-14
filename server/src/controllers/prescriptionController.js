@@ -1,16 +1,23 @@
 import Prescription from '../models/Prescription.js';
 import User from '../models/User.js';
 import { logAction } from '../utils/auditLogger.js';
+import { assertClinicalAccess, ensureDoctorPatientLink } from '../utils/careAccess.js';
+import { parsePagination } from '../utils/pagination.js';
 
 // @desc    Create a new prescription
 // @route   POST /api/v1/prescriptions
 // @access  Private/Doctor
 export const createPrescription = async (req, res, next) => {
   try {
-    const { patientId, medicines, instructions, startDate, endDate } = req.body;
+    const { patientId, medicines, instructions, startDate, endDate, medicalRecord } = req.body;
 
     if (!patientId || !medicines || medicines.length === 0) {
       return res.status(400).json({ success: false, message: 'Patient ID and at least one medicine are required' });
+    }
+
+    const denied = await assertClinicalAccess(req.user, patientId);
+    if (denied) {
+      return res.status(denied.status).json({ success: false, message: denied.message });
     }
 
     const patientExists = await User.findById(patientId);
@@ -18,14 +25,26 @@ export const createPrescription = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Patient not found' });
     }
 
+    const normalizedMeds = medicines.map((m) => ({
+      medicineName: m.medicineName || m.name,
+      dosage: m.dosage || '—',
+      frequency: m.frequency || '—',
+      duration: m.duration || '—',
+      route: m.route,
+      instructions: m.instructions,
+    }));
+
     const prescription = await Prescription.create({
       patient: patientId,
       doctor: req.user._id,
-      medicines,
+      medicines: normalizedMeds,
       instructions,
       startDate: startDate || new Date(),
       endDate,
+      medicalRecord: medicalRecord || undefined,
     });
+
+    await ensureDoctorPatientLink(req.user._id, patientId);
 
     // Populate patient and doctor info
     const populated = await Prescription.findById(prescription._id)
@@ -57,6 +76,7 @@ export const getPrescriptions = async (req, res, next) => {
   try {
     const { role, _id } = req.user;
     const { patientId } = req.query;
+    const { page, limit, skip } = parsePagination(req.query);
 
     let query = {};
 
@@ -64,19 +84,34 @@ export const getPrescriptions = async (req, res, next) => {
       query.patient = _id;
     } else if (role === 'doctor') {
       query.doctor = _id;
-      if (patientId) query.patient = patientId;
+      if (patientId) {
+        const denied = await assertClinicalAccess(req.user, patientId);
+        if (denied) {
+          return res.status(denied.status).json({ success: false, message: denied.message });
+        }
+        query.patient = patientId;
+      }
     } else if (role === 'admin') {
       if (patientId) query.patient = patientId;
     } else {
       return res.status(403).json({ success: false, message: 'Forbidden' });
     }
 
-    const prescriptions = await Prescription.find(query)
-      .populate('patient', 'name email')
-      .populate('doctor', 'name email')
-      .sort({ createdAt: -1 });
+    const [prescriptions, total] = await Promise.all([
+      Prescription.find(query)
+        .populate('patient', 'name email')
+        .populate('doctor', 'name email')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      Prescription.countDocuments(query),
+    ]);
 
-    res.status(200).json({ success: true, data: prescriptions });
+    res.status(200).json({
+      success: true,
+      data: prescriptions,
+      meta: { page, limit, total, totalPages: Math.max(1, Math.ceil(total / limit) || 1) },
+    });
   } catch (error) {
     next(error);
   }

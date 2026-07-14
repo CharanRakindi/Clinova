@@ -1,13 +1,15 @@
 import express from 'express';
 import { createPrescription, getPrescriptions, getPrescriptionById, updatePrescriptionStatus } from '../controllers/prescriptionController.js';
 import { authenticate, authorizeRoles } from '../middleware/authMiddleware.js';
+import { validateRequest } from '../middleware/validateRequest.js';
+import { createPrescriptionSchema } from '../validators/clinicalValidators.js';
 
 const router = express.Router();
 
 router.use(authenticate);
 
 router.route('/')
-  .post(authorizeRoles('doctor'), createPrescription)
+  .post(authorizeRoles('doctor'), validateRequest(createPrescriptionSchema), createPrescription)
   .get(getPrescriptions);
 
 router.route('/:id')

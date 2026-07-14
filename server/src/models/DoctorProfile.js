@@ -35,6 +35,11 @@ const doctorProfileSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    /** Soft online status for booking filters */
+    isAcceptingPatients: {
+      type: Boolean,
+      default: true,
+    },
     availability: [
       {
         dayOfWeek: {

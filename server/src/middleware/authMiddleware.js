@@ -1,8 +1,6 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
-import Appointment from '../models/Appointment.js';
-import PatientProfile from '../models/PatientProfile.js';
-import DoctorProfile from '../models/DoctorProfile.js';
+import { doctorHasPatientAccess } from '../utils/careAccess.js';
 
 export const authenticate = async (req, res, next) => {
   let token;
@@ -19,13 +17,18 @@ export const authenticate = async (req, res, next) => {
 
       // Force password reset restriction on first login
       if (req.user.mustChangePassword) {
-        const allowedPaths = ['/api/v1/auth/update-password', '/api/v1/auth/logout', '/api/v1/auth/me'];
+        const allowedPaths = [
+          '/api/v1/auth/update-password',
+          '/api/v1/auth/logout',
+          '/api/v1/auth/me',
+          '/api/v1/auth/profile',
+        ];
         const currentPath = req.baseUrl + req.path;
         if (!allowedPaths.includes(currentPath)) {
-          return res.status(403).json({ 
-            success: false, 
-            message: 'First login password change required', 
-            mustChangePassword: true 
+          return res.status(403).json({
+            success: false,
+            message: 'First login password change required',
+            mustChangePassword: true,
           });
         }
       }
@@ -62,16 +65,20 @@ export const authorizeRoles = (...roles) => {
   };
 };
 
+/**
+ * Clinical chart access (records, allergies, conditions, full profile PHI).
+ * Receptionist is NOT allowed — scheduling only.
+ */
 export const authorizeDoctorPatientAccess = async (req, res, next) => {
   try {
-    const { patientId } = req.params; // Expect patient ID in params
+    const { patientId } = req.params;
     if (!patientId) {
       return res.status(400).json({ success: false, message: 'Patient ID is required for access check' });
     }
 
-    if (req.user.role === 'admin') return next(); // Admins bypass
+    if (req.user.role === 'admin') return next();
+
     if (req.user.role === 'patient') {
-      // Patient can only access their own records
       if (req.user._id.toString() !== patientId) {
         return res.status(403).json({ success: false, message: 'Forbidden: Can only access your own data' });
       }
@@ -79,33 +86,57 @@ export const authorizeDoctorPatientAccess = async (req, res, next) => {
     }
 
     if (req.user.role === 'doctor') {
-      // Check if doctor is assigned to this patient
-      const patientProfile = await PatientProfile.findOne({ user: patientId });
-      const doctorProfile = await DoctorProfile.findOne({ user: req.user._id });
-      
-      if (!patientProfile || !doctorProfile) {
-        return res.status(404).json({ success: false, message: 'Profiles not found' });
-      }
-
-      const isAssigned = (patientProfile.assignedDoctors || []).some(
-        (id) => id.toString() === doctorProfile._id.toString()
-      );
-
-      // OR check if there is an appointment history
-      const hasAppointment = await Appointment.findOne({
-        patient: patientId,
-        doctor: req.user._id,
+      const ok = await doctorHasPatientAccess(req.user._id, patientId);
+      if (ok) return next();
+      return res.status(403).json({
+        success: false,
+        message: 'Forbidden: Doctor is not authorized for this patient',
       });
-
-      if (isAssigned || hasAppointment) {
-        return next();
-      }
-
-      return res.status(403).json({ success: false, message: 'Forbidden: Doctor is not authorized for this patient' });
     }
 
-    // Receptionist may view basic patient profiles for scheduling
-    if (req.user.role === 'receptionist') {
+    // receptionist / lab / others — no clinical chart
+    return res.status(403).json({
+      success: false,
+      message: 'Forbidden: Clinical chart access requires a clinical role',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Scheduling / directory profile read: admin, doctor (with care link),
+ * patient self, receptionist (basic demographics only — enforced in controller).
+ */
+export const authorizePatientProfileRead = async (req, res, next) => {
+  try {
+    const { patientId } = req.params;
+    if (!patientId) {
+      return res.status(400).json({ success: false, message: 'Patient ID is required' });
+    }
+
+    if (req.user.role === 'admin' || req.user.role === 'receptionist') {
+      req.profileAccessLevel = req.user.role === 'receptionist' ? 'basic' : 'full';
+      return next();
+    }
+
+    if (req.user.role === 'patient') {
+      if (req.user._id.toString() !== patientId) {
+        return res.status(403).json({ success: false, message: 'Forbidden' });
+      }
+      req.profileAccessLevel = 'full';
+      return next();
+    }
+
+    if (req.user.role === 'doctor') {
+      const ok = await doctorHasPatientAccess(req.user._id, patientId);
+      if (!ok) {
+        return res.status(403).json({
+          success: false,
+          message: 'Forbidden: Doctor is not authorized for this patient',
+        });
+      }
+      req.profileAccessLevel = 'full';
       return next();
     }
 

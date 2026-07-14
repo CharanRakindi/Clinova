@@ -1,8 +1,9 @@
 import LabReport from '../models/LabReport.js';
 import User from '../models/User.js';
-import MedicalRecord from '../models/MedicalRecord.js';
 import { logAction } from '../utils/auditLogger.js';
 import { sendToRole } from '../services/socketService.js';
+import { assertClinicalAccess, ensureDoctorPatientLink } from '../utils/careAccess.js';
+import { parsePagination } from '../utils/pagination.js';
 
 // @desc    Order a lab test
 // @route   POST /api/v1/lab-reports
@@ -13,6 +14,11 @@ export const orderLabTest = async (req, res, next) => {
 
     if (!patientId || !testName) {
       return res.status(400).json({ success: false, message: 'Patient ID and test name are required' });
+    }
+
+    const denied = await assertClinicalAccess(req.user, patientId);
+    if (denied) {
+      return res.status(denied.status).json({ success: false, message: denied.message });
     }
 
     const patientExists = await User.findById(patientId);
@@ -32,15 +38,10 @@ export const orderLabTest = async (req, res, next) => {
       status: 'ordered',
     });
 
-    // Automatically create a corresponding MedicalRecord to update the patient timeline
-    await MedicalRecord.create({
-      patient: patientId,
-      doctor: req.user._id,
-      chiefComplaint: `Laboratory Request: ${testName}`,
-      clinicalNotes: `Priority: ${priority || 'Normal'}. Notes: ${notes || 'No specific instructions added.'}`,
-      visitDate: new Date(),
-      status: 'active'
-    });
+    await ensureDoctorPatientLink(req.user._id, patientId);
+
+    // Note: do NOT create a synthetic MedicalRecord for lab orders (keeps chart clean).
+    // Labs appear under lab-reports; clinical notes remain doctor-authored encounters.
 
     // Notify assigned Lab Technicians using Socket.io
     sendToRole('lab_technician', 'notification', {
@@ -169,7 +170,8 @@ export const updateLabReportStatus = async (req, res, next) => {
 export const getLabReports = async (req, res, next) => {
   try {
     const { role, _id } = req.user;
-    const { patientId } = req.query;
+    const { patientId, status } = req.query;
+    const { page, limit, skip } = parsePagination(req.query);
 
     let query = {};
 
@@ -177,20 +179,41 @@ export const getLabReports = async (req, res, next) => {
       query.patient = _id;
     } else if (role === 'doctor') {
       query.doctor = _id;
+      if (patientId) {
+        const denied = await assertClinicalAccess(req.user, patientId);
+        if (denied) {
+          return res.status(denied.status).json({ success: false, message: denied.message });
+        }
+        query.patient = patientId;
+      }
+    } else if (role === 'lab_technician') {
+      // Work queue: open orders only by default (not full historical PHI dump)
       if (patientId) query.patient = patientId;
-    } else if (role === 'lab_technician' || role === 'admin') {
+      if (status) query.status = status;
+      else query.status = { $in: ['ordered', 'sample_collected', 'processing'] };
+    } else if (role === 'admin') {
       if (patientId) query.patient = patientId;
+      if (status) query.status = status;
     } else {
       return res.status(403).json({ success: false, message: 'Forbidden' });
     }
 
-    const labReports = await LabReport.find(query)
-      .populate('patient', 'name email')
-      .populate('doctor', 'name email')
-      .populate('reviewedBy', 'name email')
-      .sort({ createdAt: -1 });
+    const [labReports, total] = await Promise.all([
+      LabReport.find(query)
+        .populate('patient', 'name email')
+        .populate('doctor', 'name email')
+        .populate('reviewedBy', 'name email')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      LabReport.countDocuments(query),
+    ]);
 
-    res.status(200).json({ success: true, data: labReports });
+    res.status(200).json({
+      success: true,
+      data: labReports,
+      meta: { page, limit, total, totalPages: Math.max(1, Math.ceil(total / limit) || 1) },
+    });
   } catch (error) {
     next(error);
   }

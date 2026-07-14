@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 import FileUpload from '../../components/FileUpload';
 import { formatDoctorName } from '../../utils/format';
 
-const TABS = ['Overview', 'Timeline', 'Lab Reports'];
+const TABS = ['Overview', 'Timeline', 'Lab Reports', 'Prescriptions'];
 
 const SEVERITY_STYLES = {
   Severe: 'bg-red-50 text-red-700 border-red-200',
@@ -25,7 +25,15 @@ const DoctorPatientDetail = () => {
   const { patientId } = useParams();
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isRxOpen, setIsRxOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('Overview');
+  const [rxForm, setRxForm] = useState({
+    name: '',
+    dosage: '',
+    frequency: '',
+    duration: '',
+    instructions: '',
+  });
   const [formData, setFormData] = useState({
     chiefComplaint: '',
     symptoms: '',
@@ -80,8 +88,32 @@ const DoctorPatientDetail = () => {
   const { data: labReports, isLoading: labReportsLoading } = useQuery({
     queryKey: ['patientLabReports', patientId],
     queryFn: async () => {
-      const res = await api.get(`/lab-reports?patientId=${patientId}`);
+      const res = await api.get(`/lab-reports?patientId=${patientId}&limit=50`);
       return res.data.data;
+    },
+  });
+
+  const { data: prescriptions, isLoading: rxLoading } = useQuery({
+    queryKey: ['patientPrescriptions', patientId],
+    queryFn: async () => {
+      const res = await api.get(`/prescriptions?patientId=${patientId}&limit=50`);
+      return res.data.data;
+    },
+  });
+
+  const createPrescription = useMutation({
+    mutationFn: async (payload) => {
+      const res = await api.post('/prescriptions', payload);
+      return res.data.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['patientPrescriptions', patientId] });
+      setIsRxOpen(false);
+      setRxForm({ name: '', dosage: '', frequency: '', duration: '', instructions: '' });
+      toast.success('Prescription created');
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to create prescription');
     },
   });
 
@@ -159,7 +191,7 @@ const DoctorPatientDetail = () => {
     }));
   };
 
-  if (profileLoading || recordsLoading || labReportsLoading) {
+  if (profileLoading || recordsLoading || labReportsLoading || rxLoading) {
     return (
       <div className="flex justify-center p-16">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-primary-600" />
@@ -170,14 +202,6 @@ const DoctorPatientDetail = () => {
   const severeAllergies = (allergies || []).filter(a => a.severity === 'Severe');
   const activeConditions = (conditions || []).filter(c => c.status === 'Active');
   const alertCount = severeAllergies.length + activeConditions.filter(c => c.severity === 'Severe').length;
-
-  // Simple, transparent heuristic \u2014 not a diagnostic score. Starts from a
-  // baseline and is nudged by open severe alerts and record completeness.
-  const healthScore = Math.max(
-    100 - severeAllergies.length * 8 - activeConditions.filter(c => c.severity === 'Severe').length * 10,
-    45
-  );
-  const cn = (...classes) => classes.filter(Boolean).join(' ');
 
   return (
     <div className="workspace">
@@ -199,14 +223,24 @@ const DoctorPatientDetail = () => {
             </p>
           </div>
         </div>
-        <button
-          type="button"
-          onClick={() => setIsModalOpen(true)}
-          className="btn btn-primary"
-        >
-          <Plus className="h-3.5 w-3.5" />
-          Add clinical note
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setIsRxOpen(true)}
+            className="btn btn-secondary"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Prescribe
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsModalOpen(true)}
+            className="btn btn-primary"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Add clinical note
+          </button>
+        </div>
       </div>
 
       {/* Critical Medical Alerts */}
@@ -242,25 +276,14 @@ const DoctorPatientDetail = () => {
           <div className="w-full flex-1">
             <div className="mb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h2 className="text-[18px] font-semibold text-slate-900">{patient?.user?.name}</h2>
+                <h2 className="text-[18px] font-medium tracking-[-0.02em] text-slate-900">{patient?.user?.name}</h2>
                 <div className="mt-1 flex flex-wrap items-center gap-2 text-[12.5px] font-medium text-slate-400">
                   <span className="capitalize">{patient?.user?.gender || 'Unknown gender'}</span>
                   <span>•</span>
-                  <span className="inline-flex items-center gap-1 rounded bg-slate-50 border border-slate-200/60 px-1.5 py-0.5 text-[11px] font-semibold text-slate-600">
+                  <span className="inline-flex items-center gap-1 rounded bg-slate-50 border border-slate-200/60 px-1.5 py-0.5 text-[11px] font-medium text-slate-600">
                     <Droplet className="h-2.5 w-2.5 text-rose-500" /> {patient?.bloodGroup || 'Blood group N/A'}
                   </span>
                 </div>
-              </div>
-
-              {/* Health Score Pill */}
-              <div className={cn(
-                'inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 sm:self-center',
-                healthScore >= 85 && 'bg-emerald-50 text-emerald-700 border-emerald-100',
-                healthScore >= 65 && healthScore < 85 && 'bg-amber-50 text-amber-700 border-amber-100',
-                healthScore < 65 && 'bg-red-50 text-red-700 border-red-100'
-              )}>
-                <span className="text-[11px] font-semibold uppercase tracking-wider opacity-75">Health Index</span>
-                <span className="text-[14px] font-bold font-mono">{healthScore} / 100</span>
               </div>
             </div>
 
@@ -625,7 +648,124 @@ const DoctorPatientDetail = () => {
             )}
           </div>
         )}
+
+        {activeTab === 'Prescriptions' && (
+          <div className="animate-fade-in space-y-4">
+            <div className="flex justify-end">
+              <button type="button" onClick={() => setIsRxOpen(true)} className="btn btn-primary btn-sm">
+                <Plus className="h-3.5 w-3.5" />
+                New prescription
+              </button>
+            </div>
+            {(!prescriptions || prescriptions.length === 0) ? (
+              <div className="card flex flex-col items-center justify-center p-12 text-center">
+                <p className="mb-1 text-[15px] font-medium text-slate-900">No prescriptions yet</p>
+                <p className="mb-4 max-w-sm text-[12.5px] text-slate-500">
+                  Write a prescription for this patient. Access is limited to doctors with a care relationship.
+                </p>
+                <button type="button" onClick={() => setIsRxOpen(true)} className="btn btn-secondary">
+                  Prescribe medication
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {prescriptions.map((rx) => (
+                  <div key={rx._id} className="card p-5">
+                    <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
+                      <div>
+                        <p className="text-[11px] font-medium uppercase tracking-wider text-slate-400">
+                          {format(new Date(rx.createdAt || rx.startDate), 'MMM dd, yyyy')}
+                        </p>
+                        <p className="mt-0.5 text-[13px] text-slate-500">
+                          By {formatDoctorName(rx.doctor?.name)}
+                        </p>
+                      </div>
+                      <span className="badge badge-neutral uppercase tracking-wider">{rx.status || 'active'}</span>
+                    </div>
+                    <ul className="space-y-2">
+                      {(rx.medicines || []).map((med, i) => (
+                        <li key={i} className="rounded-xl border border-slate-100 bg-slate-50/60 px-3.5 py-2.5 text-[13px]">
+                          <span className="font-medium text-slate-900">{med.medicineName || med.name}</span>
+                          <span className="mt-0.5 block text-[12px] text-slate-500">
+                            {[med.dosage, med.frequency, med.duration].filter(Boolean).join(' · ') || '—'}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                    {rx.instructions && (
+                      <p className="mt-3 text-[12.5px] text-slate-600">{rx.instructions}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
+
+      {isRxOpen && (
+        <div className="modal-backdrop">
+          <div className="modal-panel max-w-md">
+            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
+              <h2 className="text-[15px] font-medium text-slate-900">New prescription</h2>
+              <button type="button" onClick={() => setIsRxOpen(false)} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <form
+              className="space-y-4 p-6"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!rxForm.name.trim()) {
+                  toast.error('Medicine name is required');
+                  return;
+                }
+                createPrescription.mutate({
+                  patientId,
+                  medicines: [
+                    {
+                      medicineName: rxForm.name.trim(),
+                      dosage: rxForm.dosage.trim() || 'As directed',
+                      frequency: rxForm.frequency.trim() || 'As directed',
+                      duration: rxForm.duration.trim() || 'As directed',
+                    },
+                  ],
+                  instructions: rxForm.instructions.trim(),
+                });
+              }}
+            >
+              <div>
+                <label className="label">Medicine name</label>
+                <input className="input" value={rxForm.name} onChange={(e) => setRxForm({ ...rxForm, name: e.target.value })} required />
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <label className="label">Dosage</label>
+                  <input className="input" placeholder="10mg" value={rxForm.dosage} onChange={(e) => setRxForm({ ...rxForm, dosage: e.target.value })} />
+                </div>
+                <div>
+                  <label className="label">Frequency</label>
+                  <input className="input" placeholder="BID" value={rxForm.frequency} onChange={(e) => setRxForm({ ...rxForm, frequency: e.target.value })} />
+                </div>
+                <div>
+                  <label className="label">Duration</label>
+                  <input className="input" placeholder="7 days" value={rxForm.duration} onChange={(e) => setRxForm({ ...rxForm, duration: e.target.value })} />
+                </div>
+              </div>
+              <div>
+                <label className="label">Instructions</label>
+                <textarea className="input min-h-[72px] resize-none py-2.5" value={rxForm.instructions} onChange={(e) => setRxForm({ ...rxForm, instructions: e.target.value })} />
+              </div>
+              <div className="flex justify-end gap-2 border-t border-slate-100 pt-4">
+                <button type="button" className="btn btn-secondary" onClick={() => setIsRxOpen(false)}>Cancel</button>
+                <button type="submit" className="btn btn-primary" disabled={createPrescription.isPending}>
+                  {createPrescription.isPending ? 'Saving…' : 'Save prescription'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {isModalOpen && (
         <div className="modal-backdrop items-start overflow-y-auto">

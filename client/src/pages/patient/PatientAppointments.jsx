@@ -38,9 +38,9 @@ const PatientAppointments = () => {
   });
 
   const { data: doctors } = useQuery({
-    queryKey: ['doctors'],
+    queryKey: ['doctorsAccepting'],
     queryFn: async () => {
-      const res = await api.get('/doctors');
+      const res = await api.get('/doctors?accepting=true');
       return res.data.data;
     },
   });

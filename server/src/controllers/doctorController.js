@@ -13,7 +13,13 @@ export const getDoctors = async (req, res, next) => {
       ? 'name email phone gender profileImage isActive'
       : 'name profileImage isActive';
 
-    const doctors = await DoctorProfile.find({})
+    const filter = {};
+    // Booking UIs can request only doctors currently accepting patients
+    if (req.query.accepting === 'true') {
+      filter.isAcceptingPatients = { $ne: false };
+    }
+
+    const doctors = await DoctorProfile.find(filter)
       .populate('user', userFields)
       .populate('department', 'name');
     res.status(200).json({ success: true, data: doctors });
@@ -50,7 +56,16 @@ export const updateDoctorProfile = async (req, res, next) => {
       return res.status(403).json({ success: false, message: 'Forbidden' });
     }
 
-    const { specialization, department, licenseNumber, experienceYears, qualifications, consultationFee, availability } = req.body;
+    const {
+      specialization,
+      department,
+      licenseNumber,
+      experienceYears,
+      qualifications,
+      consultationFee,
+      availability,
+      isAcceptingPatients,
+    } = req.body;
 
     let profile = await DoctorProfile.findOne({ user: req.params.doctorId });
 
@@ -58,10 +73,13 @@ export const updateDoctorProfile = async (req, res, next) => {
       profile.specialization = specialization || profile.specialization;
       profile.department = department || profile.department;
       profile.licenseNumber = licenseNumber || profile.licenseNumber;
-      profile.experienceYears = experienceYears || profile.experienceYears;
+      profile.experienceYears = experienceYears ?? profile.experienceYears;
       profile.qualifications = qualifications || profile.qualifications;
-      profile.consultationFee = consultationFee || profile.consultationFee;
+      profile.consultationFee = consultationFee ?? profile.consultationFee;
       profile.availability = availability || profile.availability;
+      if (typeof isAcceptingPatients === 'boolean') {
+        profile.isAcceptingPatients = isAcceptingPatients;
+      }
       await profile.save();
     } else {
       profile = await DoctorProfile.create({
@@ -74,6 +92,7 @@ export const updateDoctorProfile = async (req, res, next) => {
         qualifications,
         consultationFee,
         availability,
+        isAcceptingPatients: typeof isAcceptingPatients === 'boolean' ? isAcceptingPatients : true,
       });
     }
 

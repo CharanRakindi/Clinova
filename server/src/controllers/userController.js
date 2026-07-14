@@ -8,8 +8,19 @@ import { logAction } from '../utils/auditLogger.js';
 // @access  Private/Admin
 export const getUsers = async (req, res, next) => {
   try {
-    const users = await User.find({}).select('-password');
-    res.status(200).json({ success: true, data: users });
+    const { parsePagination } = await import('../utils/pagination.js');
+    const { page, limit, skip } = parsePagination(req.query, { defaultLimit: 50 });
+    const filter = {};
+    if (req.query.role) filter.role = req.query.role;
+    const [users, total] = await Promise.all([
+      User.find(filter).select('-password').sort({ createdAt: -1 }).skip(skip).limit(limit),
+      User.countDocuments(filter),
+    ]);
+    res.status(200).json({
+      success: true,
+      data: users,
+      meta: { page, limit, total, totalPages: Math.max(1, Math.ceil(total / limit) || 1) },
+    });
   } catch (error) {
     next(error);
   }

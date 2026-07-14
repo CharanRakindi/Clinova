@@ -1,7 +1,9 @@
 # Clinova
 
-Full-stack **Electronic Health Record (EHR)** and clinic operations platform (MERN).  
-Cinematic marketing site, role-based workspaces, JWT cookie auth, and Socket.io notifications.
+Full-stack **multi-role clinic operations demo** (MERN) — appointments, charts, labs, and staff workflows.  
+Polished marketing site, role-based workspaces, JWT cookie auth, and Socket.io notifications.
+
+> Portfolio / educational project — **not** a certified EHR and **not** HIPAA certified.
 
 ![Node.js](https://img.shields.io/badge/Node.js-20-339933?logo=node.js&logoColor=white)
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)

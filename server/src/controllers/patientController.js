@@ -4,18 +4,18 @@ import User from '../models/User.js';
 import Appointment from '../models/Appointment.js';
 import DoctorProfile from '../models/DoctorProfile.js';
 import { logAction } from '../utils/auditLogger.js';
+import { parsePagination } from '../utils/pagination.js';
 
 // @desc    Get all patients (scoped by role)
 // @route   GET /api/v1/patients
 // @access  Private/Admin/Doctor/Receptionist
 export const getPatients = async (req, res, next) => {
   try {
-    let patients;
+    const { page, limit, skip } = parsePagination(req.query);
+    let filter = {};
 
     if (req.user.role === 'admin' || req.user.role === 'receptionist') {
-      patients = await PatientProfile.find({})
-        .populate('user', 'name email phone gender dateOfBirth profileImage isActive')
-        .sort({ createdAt: -1 });
+      filter = {};
     } else if (req.user.role === 'doctor') {
       const doctorProfile = await DoctorProfile.findOne({ user: req.user._id });
       const appointmentPatientIds = await Appointment.distinct('patient', {
@@ -26,15 +26,31 @@ export const getPatients = async (req, res, next) => {
       if (doctorProfile) {
         or.push({ assignedDoctors: doctorProfile._id });
       }
-
-      patients = await PatientProfile.find({ $or: or })
-        .populate('user', 'name email phone gender dateOfBirth profileImage isActive')
-        .sort({ createdAt: -1 });
+      filter = { $or: or };
     } else {
       return res.status(403).json({ success: false, message: 'Forbidden' });
     }
 
-    res.status(200).json({ success: true, data: patients });
+    // Receptionist: basic directory fields only (no clinical PHI expansion later)
+    const userFields =
+      req.user.role === 'receptionist'
+        ? 'name email phone gender isActive'
+        : 'name email phone gender dateOfBirth profileImage isActive';
+
+    const [patients, total] = await Promise.all([
+      PatientProfile.find(filter)
+        .populate('user', userFields)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      PatientProfile.countDocuments(filter),
+    ]);
+
+    res.status(200).json({
+      success: true,
+      data: patients,
+      meta: { page, limit, total, totalPages: Math.max(1, Math.ceil(total / limit) || 1) },
+    });
   } catch (error) {
     next(error);
   }
@@ -72,8 +88,8 @@ export const createPatientAccount = async (req, res, next) => {
       });
     }
 
-    // One-time temporary password; force change on first login
-    const temporaryPassword = crypto.randomBytes(4).toString('hex'); // 8 hex chars
+    // One-time temporary password (high entropy); force change on first login
+    const temporaryPassword = crypto.randomBytes(18).toString('base64url');
 
     const user = await User.create({
       name: name.trim(),
@@ -123,15 +139,36 @@ export const createPatientAccount = async (req, res, next) => {
 // @access  Private
 export const getPatientProfile = async (req, res, next) => {
   try {
-    const profile = await PatientProfile.findOne({ user: req.params.patientId })
-      .populate('user', 'name email phone gender dateOfBirth profileImage isActive')
-      .populate('assignedDoctors');
-      
+    const isBasic = req.profileAccessLevel === 'basic';
+    const userFields = isBasic
+      ? 'name email phone gender isActive'
+      : 'name email phone gender dateOfBirth profileImage isActive';
+
+    let profileQuery = PatientProfile.findOne({ user: req.params.patientId }).populate(
+      'user',
+      userFields
+    );
+    if (!isBasic) {
+      profileQuery = profileQuery.populate('assignedDoctors');
+    }
+    const profile = await profileQuery;
+
     if (!profile) {
       return res.status(404).json({ success: false, message: 'Patient profile not found' });
     }
 
-    res.status(200).json({ success: true, data: profile });
+    // Strip clinical fields for receptionist scheduling view
+    if (isBasic) {
+      const plain = profile.toObject();
+      delete plain.bloodGroup;
+      delete plain.insuranceProvider;
+      delete plain.insuranceNumber;
+      delete plain.emergencyContact;
+      delete plain.assignedDoctors;
+      return res.status(200).json({ success: true, data: plain, access: 'basic' });
+    }
+
+    res.status(200).json({ success: true, data: profile, access: 'full' });
   } catch (error) {
     next(error);
   }

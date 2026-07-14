@@ -1,6 +1,9 @@
 import Appointment from '../models/Appointment.js';
 import User from '../models/User.js';
+import DoctorProfile from '../models/DoctorProfile.js';
 import { sendToUser } from '../services/socketService.js';
+import { ensureDoctorPatientLink } from '../utils/careAccess.js';
+import { parsePagination } from '../utils/pagination.js';
 
 const VALID_STATUSES = ['requested', 'confirmed', 'completed', 'cancelled', 'no-show'];
 
@@ -22,12 +25,22 @@ export const getAppointments = async (req, res, next) => {
       return res.status(200).json({ success: true, data: [] });
     }
 
-    const appointments = await Appointment.find(query)
-      .populate('patient', 'name email profileImage')
-      .populate('doctor', 'name email profileImage')
-      .sort({ appointmentDate: 1 });
+    const { page, limit, skip } = parsePagination(req.query, { defaultLimit: 50 });
+    const [appointments, total] = await Promise.all([
+      Appointment.find(query)
+        .populate('patient', 'name email profileImage')
+        .populate('doctor', 'name email profileImage')
+        .sort({ appointmentDate: 1 })
+        .skip(skip)
+        .limit(limit),
+      Appointment.countDocuments(query),
+    ]);
 
-    res.status(200).json({ success: true, data: appointments });
+    res.status(200).json({
+      success: true,
+      data: appointments,
+      meta: { page, limit, total, totalPages: Math.max(1, Math.ceil(total / limit) || 1) },
+    });
   } catch (error) {
     next(error);
   }
@@ -81,6 +94,14 @@ export const createAppointment = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Invalid doctor' });
     }
 
+    const doctorProfile = await DoctorProfile.findOne({ user: doctorId });
+    if (doctorProfile && doctorProfile.isAcceptingPatients === false && req.user.role === 'patient') {
+      return res.status(400).json({
+        success: false,
+        message: 'This doctor is not currently accepting new appointment requests',
+      });
+    }
+
     const existing = await Appointment.findOne({
       doctor: doctorId,
       appointmentDate,
@@ -98,15 +119,28 @@ export const createAppointment = async (req, res, next) => {
     const status =
       req.user.role === 'patient' ? 'requested' : req.body.status || 'confirmed';
 
-    const appointment = await Appointment.create({
-      patient: patientId,
-      doctor: doctorId,
-      appointmentDate,
-      timeSlot,
-      reason,
-      status: VALID_STATUSES.includes(status) ? status : 'requested',
-      createdBy: req.user._id,
-    });
+    let appointment;
+    try {
+      appointment = await Appointment.create({
+        patient: patientId,
+        doctor: doctorId,
+        appointmentDate,
+        timeSlot,
+        reason,
+        status: VALID_STATUSES.includes(status) ? status : 'requested',
+        createdBy: req.user._id,
+      });
+    } catch (err) {
+      if (err?.code === 11000) {
+        return res.status(400).json({
+          success: false,
+          message: 'Time slot is already booked for this doctor',
+        });
+      }
+      throw err;
+    }
+
+    await ensureDoctorPatientLink(doctorId, patientId);
 
     if (req.user.role === 'patient') {
       sendToUser(doctorId, 'notification', {

@@ -17,6 +17,7 @@ const DoctorDashboard = () => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const [isAvailable, setIsAvailable] = useState(true);
+  const [availabilityLoaded, setAvailabilityLoaded] = useState(false);
   const [quickNote, setQuickNote] = useState(() => localStorage.getItem(`clinova_note_${user?._id}`) || '');
   const [isLabModalOpen, setIsLabModalOpen] = useState(false);
   const [labForm, setLabForm] = useState({
@@ -44,9 +45,49 @@ const DoctorDashboard = () => {
   const { data: allAppointments } = useQuery({
     queryKey: ['doctorAppointments'],
     queryFn: async () => {
-      const res = await api.get('/appointments');
+      const res = await api.get('/appointments?limit=100');
       return res.data.data;
     }
+  });
+
+  const { data: myDoctorProfile } = useQuery({
+    queryKey: ['myDoctorProfile', user?._id],
+    enabled: !!user?._id,
+    queryFn: async () => {
+      const res = await api.get(`/doctors/${user._id}`);
+      return res.data.data;
+    },
+  });
+
+  useEffect(() => {
+    if (myDoctorProfile && !availabilityLoaded) {
+      setIsAvailable(myDoctorProfile.isAcceptingPatients !== false);
+      setAvailabilityLoaded(true);
+    }
+  }, [myDoctorProfile, availabilityLoaded]);
+
+  const toggleAvailability = useMutation({
+    mutationFn: async (next) => {
+      const res = await api.post(`/doctors/${user._id}`, {
+        isAcceptingPatients: next,
+        specialization: myDoctorProfile?.specialization,
+        department: myDoctorProfile?.department?._id || myDoctorProfile?.department,
+        licenseNumber: myDoctorProfile?.licenseNumber,
+      });
+      return res.data.data;
+    },
+    onSuccess: (data) => {
+      setIsAvailable(data.isAcceptingPatients !== false);
+      queryClient.invalidateQueries({ queryKey: ['myDoctorProfile', user?._id] });
+      toast.success(
+        data.isAcceptingPatients !== false
+          ? 'You are now accepting appointment requests'
+          : 'You are not accepting new appointment requests'
+      );
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to update availability');
+    },
   });
 
   const { data: patients } = useQuery({
@@ -195,17 +236,16 @@ const DoctorDashboard = () => {
 
           <button
             type="button"
-            onClick={() => {
-              setIsAvailable(!isAvailable);
-              toast.info(`Availability: ${!isAvailable ? 'Available' : 'Offline'}`);
-            }}
+            disabled={toggleAvailability.isPending || !myDoctorProfile}
+            onClick={() => toggleAvailability.mutate(!isAvailable)}
             className="btn btn-secondary"
+            title="Controls whether patients can request appointments with you"
           >
             <span className={cn(
               "w-2 h-2 rounded-full",
               isAvailable ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-slate-400"
             )} />
-            <span>Status: {isAvailable ? "Available" : "Offline"}</span>
+            <span>Accepting: {isAvailable ? 'Yes' : 'No'}</span>
             {isAvailable ? <ToggleRight className="w-5 h-5 text-slate-400 ml-1" /> : <ToggleLeft className="w-5 h-5 text-slate-300 ml-1" />}
           </button>
         </div>
