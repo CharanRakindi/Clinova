@@ -8,16 +8,32 @@ services:
   mongo:
     image: mongo:7
     restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:-clinova}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-clinova_change_me}
+      MONGO_INITDB_DATABASE: clinova
     volumes:
       - mongo_data:/data/db
     networks:
       - clinova
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      test:
+        [
+          "CMD",
+          "mongosh",
+          "-u",
+          "${MONGO_ROOT_USER:-clinova}",
+          "-p",
+          "${MONGO_ROOT_PASSWORD:-clinova_change_me}",
+          "--authenticationDatabase",
+          "admin",
+          "--eval",
+          "db.adminCommand('ping')",
+        ]
       interval: 15s
       timeout: 5s
       retries: 5
-      start_period: 20s
+      start_period: 25s
 
   api:
     build:
@@ -28,15 +44,17 @@ services:
       NODE_ENV: production
       PORT: 5001
       HOST: 0.0.0.0
-      MONGO_URI: mongodb://mongo:27017/clinova
+      MONGO_URI: ${MONGO_URI:-mongodb://clinova:clinova_change_me@mongo:27017/clinova?authSource=admin}
       CLIENT_URL: ${CLIENT_URL:-http://localhost}
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?Set JWT_ACCESS_SECRET}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?Set JWT_REFRESH_SECRET}
       ACCESS_TOKEN_EXPIRES_IN: ${ACCESS_TOKEN_EXPIRES_IN:-15m}
       REFRESH_TOKEN_EXPIRES_IN: ${REFRESH_TOKEN_EXPIRES_IN:-7d}
-      # Local compose is usually HTTP — cookies must not require Secure
+      # Demo HTTP: false. Real PHI: true + HTTPS edge (set REQUIRE_HTTPS=true)
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
       COOKIE_SAMESITE: ${COOKIE_SAMESITE:-lax}
+      REQUIRE_HTTPS: ${REQUIRE_HTTPS:-false}
+      REQUIRE_MONGO_AUTH: ${REQUIRE_MONGO_AUTH:-false}
       TRUST_PROXY: "1"
       RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-200}
       CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-}
@@ -55,12 +73,12 @@ services:
           "CMD",
           "node",
           "-e",
-          "fetch('http://127.0.0.1:5001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+          "fetch('http://127.0.0.1:5001/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
         ]
       interval: 20s
       timeout: 5s
       retries: 5
-      start_period: 25s
+      start_period: 35s
 
   web:
     build:
@@ -82,11 +100,11 @@ services:
       dockerfile: Dockerfile
     profiles: ["seed"]
     environment:
-      NODE_ENV: production
-      ALLOW_SEED: "true"
-      MONGO_URI: mongodb://mongo:27017/clinova
-      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-seed_only_not_used}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-seed_only_not_used}
+      # Seed is blocked when NODE_ENV=production
+      NODE_ENV: development
+      MONGO_URI: ${MONGO_URI:-mongodb://clinova:clinova_change_me@mongo:27017/clinova?authSource=admin}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-seed_only_not_used_min_32_chars_xx}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-seed_only_not_used_min_32_chars_x}
     depends_on:
       mongo:
         condition: service_healthy

@@ -11,6 +11,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Unauthorized from './pages/Unauthorized';
 import NotFound from './pages/NotFound';
+import Activate from './pages/Activate';
 
 // Role workspaces — code-split to keep initial bundle smaller
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
@@ -54,6 +55,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/activate" element={<Activate />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
 
             <Route element={<ProtectedRoute />}>

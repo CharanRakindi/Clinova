@@ -64,13 +64,13 @@ export const initSocket = (server) => {
   });
 
   io.on('connection', (socket) => {
-    console.log(`User connected: ${socket.user.name} (${socket.user._id})`);
+    console.log(`User connected: ${socket.user._id}`);
 
     connectedUsers.set(socket.user._id.toString(), socket.id);
     socket.join(socket.user.role);
 
     socket.on('disconnect', () => {
-      console.log(`User disconnected: ${socket.user.name}`);
+      console.log(`User disconnected: ${socket.user._id}`);
       connectedUsers.delete(socket.user._id.toString());
     });
   });

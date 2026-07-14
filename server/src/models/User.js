@@ -71,6 +71,15 @@ const userSchema = new mongoose.Schema(
       type: String,
       select: false,
     },
+    /** One-time account activation (hashed); used instead of returning temp passwords */
+    inviteTokenHash: {
+      type: String,
+      select: false,
+    },
+    inviteExpires: {
+      type: Date,
+      select: false,
+    },
   },
   {
     timestamps: true,

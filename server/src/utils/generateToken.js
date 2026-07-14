@@ -13,8 +13,8 @@ export function durationToMs(value, fallbackMs) {
   return n * (mult[unit] || 1);
 }
 
-/** Cookie flags — override with COOKIE_SECURE / COOKIE_SAMESITE for Docker HTTP or cross-site HTTPS */
-function cookieOptions(maxAgeMs) {
+/** Shared cookie base (auth + CSRF). */
+export function cookieOptionsBase(maxAgeMs) {
   const secure =
     process.env.COOKIE_SECURE !== undefined
       ? process.env.COOKIE_SECURE === 'true'
@@ -46,12 +46,12 @@ export const generateTokens = (userId) => {
 export const setTokenCookies = (res, accessToken, refreshToken) => {
   const accessMs = durationToMs(process.env.ACCESS_TOKEN_EXPIRES_IN, 15 * 60 * 1000);
   const refreshMs = durationToMs(process.env.REFRESH_TOKEN_EXPIRES_IN, 7 * 24 * 60 * 60 * 1000);
-  res.cookie('accessToken', accessToken, cookieOptions(accessMs));
-  res.cookie('refreshToken', refreshToken, cookieOptions(refreshMs));
+  res.cookie('accessToken', accessToken, cookieOptionsBase(accessMs));
+  res.cookie('refreshToken', refreshToken, cookieOptionsBase(refreshMs));
 };
 
 export const clearTokenCookies = (res) => {
-  const base = cookieOptions(0);
+  const base = cookieOptionsBase(0);
   res.cookie('accessToken', '', { ...base, maxAge: 0, expires: new Date(0) });
   res.cookie('refreshToken', '', { ...base, maxAge: 0, expires: new Date(0) });
 };

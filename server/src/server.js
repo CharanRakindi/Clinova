@@ -2,6 +2,9 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import http from 'http';
+import { assertProductionConfig } from './middleware/productionGuard.js';
+assertProductionConfig();
+
 import app from './app.js';
 import { connectDB } from './config/db.js';
 import { initSocket } from './services/socketService.js';

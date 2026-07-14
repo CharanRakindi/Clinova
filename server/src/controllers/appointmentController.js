@@ -140,7 +140,10 @@ export const createAppointment = async (req, res, next) => {
       throw err;
     }
 
-    await ensureDoctorPatientLink(doctorId, patientId);
+    // Chart access only after confirmed care (not mere request)
+    if (appointment.status === 'confirmed') {
+      await ensureDoctorPatientLink(doctorId, patientId);
+    }
 
     if (req.user.role === 'patient') {
       sendToUser(doctorId, 'notification', {
@@ -219,6 +222,10 @@ export const updateAppointmentStatus = async (req, res, next) => {
     }
 
     await appointment.save();
+
+    if (status === 'confirmed') {
+      await ensureDoctorPatientLink(appointment.doctor, appointment.patient);
+    }
 
     const patientMessages = {
       confirmed: 'Your appointment request was accepted by the doctor',

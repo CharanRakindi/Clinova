@@ -8,6 +8,9 @@ export default function FileUpload({
   onUploadSuccess,
   label = 'Upload file',
   accept = 'image/*, .pdf, .doc, .docx',
+  /** Optional clinical scope — server validates care relationship */
+  patientId,
+  resourceType = 'general',
 }) {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -56,6 +59,8 @@ export default function FileUpload({
     setIsUploading(true);
     const formData = new FormData();
     formData.append('file', file);
+    if (patientId) formData.append('patientId', patientId);
+    if (resourceType) formData.append('resourceType', resourceType);
 
     try {
       const res = await api.post('/upload', formData, {

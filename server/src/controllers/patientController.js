@@ -5,6 +5,7 @@ import Appointment from '../models/Appointment.js';
 import DoctorProfile from '../models/DoctorProfile.js';
 import { logAction } from '../utils/auditLogger.js';
 import { parsePagination } from '../utils/pagination.js';
+import { generateSecureToken, hashToken } from '../utils/tokenHash.js';
 
 // @desc    Get all patients (scoped by role)
 // @route   GET /api/v1/patients
@@ -20,6 +21,7 @@ export const getPatients = async (req, res, next) => {
       const doctorProfile = await DoctorProfile.findOne({ user: req.user._id });
       const appointmentPatientIds = await Appointment.distinct('patient', {
         doctor: req.user._id,
+        status: { $in: ['confirmed', 'completed'] },
       });
 
       const or = [{ user: { $in: appointmentPatientIds } }];
@@ -88,22 +90,28 @@ export const createPatientAccount = async (req, res, next) => {
       });
     }
 
-    // One-time temporary password (high entropy); force change on first login
-    const temporaryPassword = crypto.randomBytes(18).toString('base64url');
+    // Unusable random password until patient activates via one-time invite token
+    const placeholderPassword = crypto.randomBytes(32).toString('hex');
+    const inviteToken = generateSecureToken(32);
+    const inviteExpires = new Date(Date.now() + 48 * 60 * 60 * 1000);
 
     const user = await User.create({
       name: name.trim(),
       email: normalizedEmail,
-      password: temporaryPassword,
+      password: placeholderPassword,
       role: 'patient',
       phone: phone || undefined,
       gender: gender || undefined,
-      mustChangePassword: true,
+      mustChangePassword: false,
+      inviteTokenHash: hashToken(inviteToken),
+      inviteExpires,
+      isActive: true,
     });
 
     const profile = await PatientProfile.create({
       user: user._id,
       patientId: `PAT-${Date.now().toString().slice(-8)}`,
+      // bloodGroup intentionally unset until documented
     });
 
     await logAction(
@@ -114,19 +122,26 @@ export const createPatientAccount = async (req, res, next) => {
       user._id,
       req.ip,
       req.headers['user-agent'],
-      { createdUserRole: 'patient', email: user.email }
+      { createdUserRole: 'patient', email: user.email, invite: true },
+      { critical: true }
     );
+
+    const clientBase = (process.env.CLIENT_URL || 'http://localhost:5173').split(',')[0].trim();
+    const activationPath = `/activate?token=${encodeURIComponent(inviteToken)}&email=${encodeURIComponent(normalizedEmail)}`;
 
     res.status(201).json({
       success: true,
-      message: 'Patient registered successfully',
+      message: 'Patient registered. Share the one-time activation link (expires in 48h).',
       data: {
         _id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
         patientId: profile.patientId,
-        temporaryPassword, // return once for staff to share securely
+        // One-time secret — never a login password; hash only stored server-side
+        inviteToken,
+        inviteExpires,
+        activationUrl: `${clientBase}${activationPath}`,
       },
     });
   } catch (error) {

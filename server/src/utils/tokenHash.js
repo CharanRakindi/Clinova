@@ -1,22 +1,24 @@
 import crypto from 'crypto';
 
-/** One-way hash for refresh tokens at rest (DB leak ≠ reusable token). */
+/** One-way hash for refresh / invite tokens at rest. */
 export function hashToken(token) {
   return crypto.createHash('sha256').update(String(token)).digest('hex');
 }
 
-/** Constant-time compare of hashed token to stored hash (or legacy plaintext). */
-export function tokenMatches(stored, rawToken) {
-  if (!stored || !rawToken) return false;
+/** Constant-time compare of raw token to stored SHA-256 hash only (no plaintext legacy). */
+export function tokenMatches(storedHash, rawToken) {
+  if (!storedHash || !rawToken) return false;
   const hashed = hashToken(rawToken);
-  // Prefer hashed equality
   try {
-    const a = Buffer.from(stored);
-    const b = Buffer.from(hashed);
-    if (a.length === b.length && crypto.timingSafeEqual(a, b)) return true;
+    const a = Buffer.from(String(storedHash), 'utf8');
+    const b = Buffer.from(hashed, 'utf8');
+    if (a.length !== b.length) return false;
+    return crypto.timingSafeEqual(a, b);
   } catch {
-    // fall through
+    return false;
   }
-  // Legacy: plaintext stored before migration
-  return stored === rawToken;
+}
+
+export function generateSecureToken(bytes = 32) {
+  return crypto.randomBytes(bytes).toString('base64url');
 }

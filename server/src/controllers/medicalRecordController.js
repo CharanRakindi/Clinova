@@ -1,6 +1,6 @@
 import MedicalRecord from '../models/MedicalRecord.js';
-import AuditLog from '../models/AuditLog.js';
 import { sendToUser } from '../services/socketService.js';
+import { logAccess, logAction } from '../utils/auditLogger.js';
 
 // @desc    Get medical records for a patient
 // @route   GET /api/v1/patients/:patientId/medical-records
@@ -14,6 +14,12 @@ export const getPatientMedicalRecords = async (req, res, next) => {
       .populate('doctor', 'name profileImage')
       .populate('appointment', 'appointmentDate timeSlot')
       .sort({ visitDate: -1 });
+
+    await logAccess(req, 'MedicalRecord', req.params.patientId, {
+      count: records.length,
+      patientId: req.params.patientId,
+      breakGlass: req.user.role === 'admin' ? true : undefined,
+    });
 
     res.status(200).json({ success: true, data: records });
   } catch (error) {
@@ -45,16 +51,17 @@ export const createMedicalRecord = async (req, res, next) => {
       followUpDate
     });
 
-    // Create Audit Log
-    await AuditLog.create({
-      actor: req.user._id,
-      actorRole: req.user.role,
-      action: 'CREATE',
-      resourceType: 'MedicalRecord',
-      resourceId: record._id,
-      ipAddress: req.ip,
-      metadata: { patientId: req.params.patientId }
-    });
+    await logAction(
+      req.user._id,
+      req.user.role,
+      'CREATE',
+      'MedicalRecord',
+      record._id,
+      req.ip,
+      req.headers['user-agent'],
+      { patientId: req.params.patientId },
+      { critical: true }
+    );
 
     // Notify patient
     sendToUser(req.params.patientId, 'notification', {
@@ -119,15 +126,17 @@ export const amendMedicalRecord = async (req, res, next) => {
       amendedFrom: oldRecord._id,
     });
 
-    await AuditLog.create({
-      actor: req.user._id,
-      actorRole: req.user.role,
-      action: 'UPDATE',
-      resourceType: 'MedicalRecord',
-      resourceId: newRecord._id,
-      ipAddress: req.ip,
-      metadata: { amendedFrom: oldRecord._id }
-    });
+    await logAction(
+      req.user._id,
+      req.user.role,
+      'UPDATE',
+      'MedicalRecord',
+      newRecord._id,
+      req.ip,
+      req.headers['user-agent'],
+      { amendedFrom: oldRecord._id },
+      { critical: true }
+    );
 
     // Notify patient
     sendToUser(oldRecord.patient, 'notification', {

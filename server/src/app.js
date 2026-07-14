@@ -4,11 +4,11 @@ import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import mongoose from 'mongoose';
 
 import { errorHandler } from './middleware/errorHandler.js';
 import { notFound } from './middleware/notFound.js';
+import { csrfProtection, issueCsrfToken } from './middleware/csrf.js';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import patientRoutes from './routes/patientRoutes.js';
@@ -21,55 +21,65 @@ import prescriptionRoutes from './routes/prescriptionRoutes.js';
 import labReportRoutes from './routes/labReportRoutes.js';
 import auditLogRoutes from './routes/auditLogRoutes.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 const app = express();
 
-// Behind nginx / load balancers (rate limit + secure cookies)
 if (process.env.TRUST_PROXY === '1' || process.env.NODE_ENV === 'production') {
   app.set('trust proxy', 1);
 }
 
-// Security Middleware
-// Configure Helmet for allowing image loading from localhost/cross-origin (important for uploads)
-app.use(helmet({
-  crossOriginResourcePolicy: false,
-}));
+app.use(
+  helmet({
+    // Downloads are same-origin via /api/v1/upload/files
+    crossOriginResourcePolicy: { policy: 'same-site' },
+  })
+);
 
 const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
-const allowedOrigins = clientUrl.split(',').map((o) => o.trim()).filter(Boolean);
+const allowedOrigins = clientUrl
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean)
+  .filter((o) => o !== '*');
 
-app.use(cors({
-  origin(origin, callback) {
-    // Allow non-browser clients (curl, health checks) with no Origin
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
-      return callback(null, true);
-    }
-    return callback(null, false);
-  },
-  credentials: true,
-}));
+if (process.env.NODE_ENV === 'production' && allowedOrigins.length === 0) {
+  throw new Error('CLIENT_URL must list explicit origin(s) in production');
+}
 
-// Request payload parsing
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(null, false);
+    },
+    credentials: true,
+  })
+);
+
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use(cookieParser());
 
-// NOTE: Local uploads are NOT served publicly.
-// Authenticated download: GET /api/v1/upload/files/:filename
-
-// Logging (skip in tests)
+// Structured access log without query strings (reduce PHI leakage)
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 } else if (process.env.NODE_ENV !== 'test') {
-  app.use(morgan('combined'));
+  app.use(
+    morgan((tokens, req, res) =>
+      [
+        tokens.method(req, res),
+        // path only — no ?patientId=
+        (tokens.url(req, res) || '').split('?')[0],
+        tokens.status(req, res),
+        tokens['response-time'](req, res),
+        'ms',
+      ].join(' ')
+    )
+  );
 }
 
-// Rate Limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 15 * 60 * 1000,
   max: Number(process.env.RATE_LIMIT_MAX) || 200,
   standardHeaders: true,
   legacyHeaders: false,
@@ -77,7 +87,15 @@ const limiter = rateLimit({
 });
 app.use('/api', limiter);
 
-// Health / readiness (for Docker, k8s, load balancers)
+const refreshLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: 'Too many token refresh attempts.',
+});
+
+// Liveness — process up
 app.get('/health', (_req, res) => {
   res.status(200).json({
     status: 'ok',
@@ -87,12 +105,50 @@ app.get('/health', (_req, res) => {
   });
 });
 
+// Readiness — DB required
+app.get('/ready', async (_req, res) => {
+  const dbOk = mongoose.connection.readyState === 1;
+  if (!dbOk) {
+    return res.status(503).json({
+      status: 'not_ready',
+      database: 'disconnected',
+      timestamp: new Date().toISOString(),
+    });
+  }
+  try {
+    await mongoose.connection.db.admin().command({ ping: 1 });
+    return res.status(200).json({
+      status: 'ready',
+      database: 'ok',
+      timestamp: new Date().toISOString(),
+    });
+  } catch {
+    return res.status(503).json({
+      status: 'not_ready',
+      database: 'ping_failed',
+      timestamp: new Date().toISOString(),
+    });
+  }
+});
+
 app.get('/', (_req, res) => {
   res.json({ name: 'Clinova API', version: '1.0.0', docs: '/health' });
 });
 
-// Routes
+// CSRF cookie bootstrap (SPA calls once on load)
+app.get('/api/v1/auth/csrf', (req, res) => {
+  const token = issueCsrfToken(res);
+  res.status(200).json({ success: true, data: { csrfToken: token } });
+});
+
+// Mutating API requests require CSRF double-submit (disabled in test)
+app.use('/api', csrfProtection);
+
 app.use('/api/v1/auth', authRoutes);
+// Apply tighter limit only on refresh — mounted inside auth routes better;
+// keep global and document refresh limiter on route:
+app.use('/api/v1/auth/refresh', refreshLimiter);
+
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/patients', patientRoutes);
 app.use('/api/v1/doctors', doctorRoutes);
@@ -104,7 +160,6 @@ app.use('/api/v1/prescriptions', prescriptionRoutes);
 app.use('/api/v1/lab-reports', labReportRoutes);
 app.use('/api/v1/admin/audit-logs', auditLogRoutes);
 
-// Error Handling
 app.use(notFound);
 app.use(errorHandler);
 

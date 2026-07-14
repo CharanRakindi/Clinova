@@ -9,3 +9,5 @@ process.env.COOKIE_SECURE = 'false';
 process.env.RATE_LIMIT_MAX = '10000';
 process.env.ACCESS_TOKEN_EXPIRES_IN = '15m';
 process.env.REFRESH_TOKEN_EXPIRES_IN = '7d';
+process.env.CSRF_DISABLED = 'true';
+process.env.ALLOW_SEED = 'false';

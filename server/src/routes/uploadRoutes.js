@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url';
 import { upload } from '../utils/upload.js';
 import { authenticate } from '../middleware/authMiddleware.js';
 import UploadedFile from '../models/UploadedFile.js';
+import LabReport from '../models/LabReport.js';
 import { assertClinicalAccess } from '../utils/careAccess.js';
 import { logAction } from '../utils/auditLogger.js';
 
@@ -13,13 +14,59 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const uploadsDir = path.join(__dirname, '../../uploads');
 
+const ALLOWED_RESOURCE_TYPES = new Set([
+  'general',
+  'medical_record',
+  'lab_report',
+  'prescription',
+  'other',
+]);
+
+async function resolvePatientScope(req) {
+  const raw = req.body?.patientId || req.query?.patientId;
+  if (!raw) return undefined;
+
+  // Only roles with clinical write rights may bind a patient scope
+  if (!['doctor', 'admin', 'lab_technician'].includes(req.user.role)) {
+    const err = new Error('Forbidden: cannot attach patient scope to upload');
+    err.statusCode = 403;
+    throw err;
+  }
+
+  if (req.user.role === 'doctor' || req.user.role === 'admin') {
+    const denied = await assertClinicalAccess(req.user, raw);
+    if (denied) {
+      const err = new Error(denied.message);
+      err.statusCode = denied.status;
+      throw err;
+    }
+  }
+
+  // Lab tech: may only scope to patients on open lab orders they are processing
+  if (req.user.role === 'lab_technician') {
+    const open = await LabReport.findOne({
+      patient: raw,
+      status: { $in: ['ordered', 'sample_collected', 'processing'] },
+    }).select('_id');
+    if (!open) {
+      const err = new Error('Forbidden: no open lab order for this patient');
+      err.statusCode = 403;
+      throw err;
+    }
+  }
+
+  return raw;
+}
+
 async function persistUploadMeta(req, file) {
   const isCloud = file.path && String(file.path).startsWith('http');
-  const storageKey = isCloud
-    ? String(file.filename || file.path)
-    : file.filename;
+  const storageKey = isCloud ? String(file.filename || file.path) : file.filename;
 
-  const patient = req.body?.patientId || req.query?.patientId || undefined;
+  const patient = await resolvePatientScope(req);
+  let resourceType = String(req.body?.resourceType || 'general');
+  if (!ALLOWED_RESOURCE_TYPES.has(resourceType)) resourceType = 'general';
+  // Clients cannot self-elevate to lab_report without patient scope
+  if (resourceType === 'lab_report' && !patient) resourceType = 'general';
 
   const doc = await UploadedFile.create({
     storageKey,
@@ -30,7 +77,7 @@ async function persistUploadMeta(req, file) {
     cloudUrl: isCloud ? file.path : undefined,
     uploadedBy: req.user._id,
     patient: patient || undefined,
-    resourceType: req.body?.resourceType || 'general',
+    resourceType,
   });
 
   return {
@@ -51,19 +98,25 @@ async function canAccessUpload(user, meta) {
   if (meta.patient) {
     const denied = await assertClinicalAccess(user, meta.patient.toString());
     if (!denied) return true;
-    // lab tech may access if they have a lab report with this attachment path later;
-    // for now allow lab_technician only if they uploaded it (covered above) or admin
-    if (user.role === 'lab_technician' && meta.resourceType === 'lab_report') {
-      return true;
+
+    // Lab technician: only if this file is attached to an open lab report for that patient
+    if (user.role === 'lab_technician') {
+      const key = meta.storageKey;
+      const linked = await LabReport.findOne({
+        patient: meta.patient,
+        status: { $in: ['ordered', 'sample_collected', 'processing', 'completed', 'reviewed'] },
+        $or: [
+          { 'attachments.url': { $regex: key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') } },
+          { 'attachments.filename': key },
+        ],
+      }).select('_id');
+      if (linked) return true;
     }
   }
 
   return false;
 }
 
-// @desc    Upload a file
-// @route   POST /api/v1/upload
-// @access  Private
 router.post('/', authenticate, upload.single('file'), async (req, res, next) => {
   try {
     if (!req.file) {
@@ -72,13 +125,13 @@ router.post('/', authenticate, upload.single('file'), async (req, res, next) => 
     const data = await persistUploadMeta(req, req.file);
     res.status(200).json({ success: true, data });
   } catch (error) {
+    if (error.statusCode) {
+      return res.status(error.statusCode).json({ success: false, message: error.message });
+    }
     next(error);
   }
 });
 
-// @desc    Upload multiple files
-// @route   POST /api/v1/upload/multiple
-// @access  Private
 router.post('/multiple', authenticate, upload.array('files', 5), async (req, res, next) => {
   try {
     if (!req.files || req.files.length === 0) {
@@ -90,13 +143,13 @@ router.post('/multiple', authenticate, upload.array('files', 5), async (req, res
     }
     res.status(200).json({ success: true, data: files });
   } catch (error) {
+    if (error.statusCode) {
+      return res.status(error.statusCode).json({ success: false, message: error.message });
+    }
     next(error);
   }
 });
 
-// @desc    Authenticated download of a local upload (ACL enforced)
-// @route   GET /api/v1/upload/files/:filename
-// @access  Private
 router.get('/files/:filename', authenticate, async (req, res, next) => {
   try {
     const safeName = path.basename(req.params.filename);
@@ -105,7 +158,6 @@ router.get('/files/:filename', authenticate, async (req, res, next) => {
     }
 
     const meta = await UploadedFile.findOne({ storageKey: safeName });
-    // Deny unknown files (no free-for-all by filename guess)
     if (!meta) {
       return res.status(404).json({ success: false, message: 'File not found' });
     }
@@ -113,15 +165,6 @@ router.get('/files/:filename', authenticate, async (req, res, next) => {
     const allowed = await canAccessUpload(req.user, meta);
     if (!allowed) {
       return res.status(403).json({ success: false, message: 'Forbidden: no access to this file' });
-    }
-
-    if (meta.isCloud && meta.cloudUrl) {
-      return res.redirect(meta.cloudUrl);
-    }
-
-    const filePath = path.join(uploadsDir, safeName);
-    if (!filePath.startsWith(uploadsDir) || !fs.existsSync(filePath)) {
-      return res.status(404).json({ success: false, message: 'File not found on disk' });
     }
 
     await logAction(
@@ -132,8 +175,18 @@ router.get('/files/:filename', authenticate, async (req, res, next) => {
       meta._id,
       req.ip,
       req.headers['user-agent'],
-      { storageKey: safeName, patient: meta.patient }
+      { storageKey: safeName, patient: meta.patient },
+      { critical: false }
     );
+
+    if (meta.isCloud && meta.cloudUrl) {
+      return res.redirect(meta.cloudUrl);
+    }
+
+    const filePath = path.join(uploadsDir, safeName);
+    if (!filePath.startsWith(uploadsDir) || !fs.existsSync(filePath)) {
+      return res.status(404).json({ success: false, message: 'File not found on disk' });
+    }
 
     res.sendFile(filePath);
   } catch (error) {

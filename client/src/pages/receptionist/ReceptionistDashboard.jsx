@@ -54,10 +54,10 @@ export default function ReceptionistDashboard() {
       return res.data.data;
     },
     onSuccess: (data) => {
-      setLastTempPassword(data.temporaryPassword || null);
+      setLastTempPassword(data.activationUrl || data.inviteToken || null);
       toast.success(
-        data.temporaryPassword
-          ? `Patient ${data.name} registered. Temp password: ${data.temporaryPassword}`
+        data.activationUrl
+          ? `Patient ${data.name} registered. Share activation link (48h): ${data.activationUrl}`
           : `Patient ${data.name} registered successfully`
       );
       setRegisterData({ name: '', email: '', phone: '', gender: 'male' });
@@ -207,10 +207,10 @@ export default function ReceptionistDashboard() {
               </button>
               {lastTempPassword && (
                 <div className="rounded-xl border border-amber-100 bg-amber-50 p-3 text-[12.5px] text-amber-900">
-                  <p className="font-medium">Temporary password (share once):</p>
-                  <p className="mt-1 font-mono text-[13px]">{lastTempPassword}</p>
+                  <p className="font-medium">One-time activation link (48h — share securely):</p>
+                  <p className="mt-1 break-all font-mono text-[12px]">{lastTempPassword}</p>
                   <p className="mt-1 text-amber-800/80">
-                    Patient must change it on first login.
+                    Patient sets their own password via this link. It is not a login password.
                   </p>
                 </div>
               )}

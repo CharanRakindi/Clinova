@@ -98,7 +98,7 @@ describe('RBAC / clinical access', () => {
     expect(res.status).toBe(403);
   });
 
-  it('allows doctor lab order after appointment establishes care link', async () => {
+  it('allows doctor lab order after confirmed appointment establishes care link', async () => {
     await registerPatient('p3@example.com');
     const patient = await User.findOne({ email: 'p3@example.com' });
     const doctor = await createDoctor();
@@ -120,6 +120,29 @@ describe('RBAC / clinical access', () => {
 
     expect(res.status).toBe(201);
     expect(res.body.success).toBe(true);
+  });
+
+  it('blocks doctor lab order when only a cancelled appointment exists', async () => {
+    await registerPatient('p3b@example.com');
+    const patient = await User.findOne({ email: 'p3b@example.com' });
+    const doctor = await createDoctor();
+    await Appointment.create({
+      patient: patient._id,
+      doctor: doctor._id,
+      appointmentDate: new Date(),
+      timeSlot: '10:00 AM',
+      reason: 'Cancelled visit',
+      status: 'cancelled',
+      createdBy: doctor._id,
+    });
+
+    const { cookies } = await loginAs('doc@clinova.com');
+    const res = await request(app)
+      .post('/api/v1/lab-reports')
+      .set('Cookie', cookies)
+      .send({ patientId: patient._id.toString(), testName: 'CBC', priority: 'Normal' });
+
+    expect(res.status).toBe(403);
   });
 
   it('blocks receptionist from reading medical records', async () => {

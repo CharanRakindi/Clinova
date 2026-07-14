@@ -281,7 +281,7 @@ const DoctorPatientDetail = () => {
                   <span className="capitalize">{patient?.user?.gender || 'Unknown gender'}</span>
                   <span>•</span>
                   <span className="inline-flex items-center gap-1 rounded bg-slate-50 border border-slate-200/60 px-1.5 py-0.5 text-[11px] font-medium text-slate-600">
-                    <Droplet className="h-2.5 w-2.5 text-rose-500" /> {patient?.bloodGroup || 'Blood group N/A'}
+                    <Droplet className="h-2.5 w-2.5 text-rose-500" /> {patient?.bloodGroup || 'Blood group not documented'}
                   </span>
                 </div>
               </div>
@@ -611,7 +611,11 @@ const DoctorPatientDetail = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50/50 p-3 rounded-lg border border-slate-200/40">
                           <div>
                             <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 block">Result Summary</span>
-                            <p className="text-slate-800 font-semibold mt-0.5">{report.resultSummary || 'Normal'}</p>
+                            <p className="text-slate-800 font-semibold mt-0.5">
+                              {report.resultSummary?.trim()
+                                ? report.resultSummary
+                                : 'No result documented'}
+                            </p>
                           </div>
                           {report.referenceRange && (
                             <div>
@@ -720,14 +724,18 @@ const DoctorPatientDetail = () => {
                   toast.error('Medicine name is required');
                   return;
                 }
+                if (!rxForm.name.trim() || !rxForm.dosage.trim() || !rxForm.frequency.trim() || !rxForm.duration.trim()) {
+                  toast.error('Medicine name, dosage, frequency, and duration are required');
+                  return;
+                }
                 createPrescription.mutate({
                   patientId,
                   medicines: [
                     {
                       medicineName: rxForm.name.trim(),
-                      dosage: rxForm.dosage.trim() || 'As directed',
-                      frequency: rxForm.frequency.trim() || 'As directed',
-                      duration: rxForm.duration.trim() || 'As directed',
+                      dosage: rxForm.dosage.trim(),
+                      frequency: rxForm.frequency.trim(),
+                      duration: rxForm.duration.trim(),
                     },
                   ],
                   instructions: rxForm.instructions.trim(),

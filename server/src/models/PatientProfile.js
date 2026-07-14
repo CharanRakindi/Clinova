@@ -15,8 +15,9 @@ const patientProfileSchema = new mongoose.Schema(
     },
     bloodGroup: {
       type: String,
-      enum: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'Unknown'],
-      default: 'Unknown',
+      enum: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
+      // null / unset = not documented (never invent "Unknown" as clinical fact)
+      default: undefined,
     },
     emergencyContact: {
       name: String,

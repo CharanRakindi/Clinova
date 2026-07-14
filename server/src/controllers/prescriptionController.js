@@ -25,14 +25,25 @@ export const createPrescription = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Patient not found' });
     }
 
-    const normalizedMeds = medicines.map((m) => ({
-      medicineName: m.medicineName || m.name,
-      dosage: m.dosage || '—',
-      frequency: m.frequency || '—',
-      duration: m.duration || '—',
-      route: m.route,
-      instructions: m.instructions,
-    }));
+    const normalizedMeds = medicines.map((m) => {
+      const medicineName = (m.medicineName || m.name || '').trim();
+      const dosage = (m.dosage || '').trim();
+      const frequency = (m.frequency || '').trim();
+      const duration = (m.duration || '').trim();
+      if (!medicineName || !dosage || !frequency || !duration) {
+        const err = new Error('Each medicine requires name, dosage, frequency, and duration — do not invent values');
+        err.statusCode = 400;
+        throw err;
+      }
+      return {
+        medicineName,
+        dosage,
+        frequency,
+        duration,
+        route: m.route,
+        instructions: m.instructions,
+      };
+    });
 
     const prescription = await Prescription.create({
       patient: patientId,

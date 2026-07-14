@@ -2,13 +2,18 @@ import Appointment from '../models/Appointment.js';
 import PatientProfile from '../models/PatientProfile.js';
 import DoctorProfile from '../models/DoctorProfile.js';
 
+/** Active clinical relationship statuses (not cancelled / requested alone). */
+const ACTIVE_CARE_STATUSES = ['confirmed', 'completed'];
+
 /**
  * Whether a doctor (by User id) may access a patient's clinical data.
- * True if assigned on PatientProfile or any appointment history exists.
+ * True if explicitly assigned OR has confirmed/completed appointment history.
  */
 export async function doctorHasPatientAccess(doctorUserId, patientUserId) {
-  const patientProfile = await PatientProfile.findOne({ user: patientUserId });
-  const doctorProfile = await DoctorProfile.findOne({ user: doctorUserId });
+  const patientProfile = await PatientProfile.findOne({ user: patientUserId }).select(
+    'assignedDoctors'
+  );
+  const doctorProfile = await DoctorProfile.findOne({ user: doctorUserId }).select('_id');
 
   if (patientProfile && doctorProfile) {
     const isAssigned = (patientProfile.assignedDoctors || []).some(
@@ -17,12 +22,13 @@ export async function doctorHasPatientAccess(doctorUserId, patientUserId) {
     if (isAssigned) return true;
   }
 
-  const hasAppointment = await Appointment.findOne({
+  const hasCareAppointment = await Appointment.findOne({
     patient: patientUserId,
     doctor: doctorUserId,
+    status: { $in: ACTIVE_CARE_STATUSES },
   }).select('_id');
 
-  return !!hasAppointment;
+  return !!hasCareAppointment;
 }
 
 /**
@@ -37,6 +43,7 @@ export async function assertClinicalAccess(user, patientUserId) {
   const pid = patientUserId.toString();
   const uid = user._id.toString();
 
+  // Admin: still allowed, but callers should log break-glass via auditAccess
   if (user.role === 'admin') return null;
 
   if (user.role === 'patient') {
@@ -54,12 +61,10 @@ export async function assertClinicalAccess(user, patientUserId) {
     return null;
   }
 
-  // lab_technician: only via lab report assignment flows — not full chart by default
   if (user.role === 'lab_technician') {
     return { status: 403, message: 'Forbidden: Lab staff cannot access full clinical chart' };
   }
 
-  // receptionist: scheduling only — no clinical chart
   if (user.role === 'receptionist') {
     return { status: 403, message: 'Forbidden: Clinical records require clinical role' };
   }
@@ -68,7 +73,7 @@ export async function assertClinicalAccess(user, patientUserId) {
 }
 
 /**
- * Link doctor↔patient assignment when an appointment is created (best-effort).
+ * Link doctor↔patient assignment when care is established (confirmed appointment).
  */
 export async function ensureDoctorPatientLink(doctorUserId, patientUserId) {
   const patientProfile = await PatientProfile.findOne({ user: patientUserId });

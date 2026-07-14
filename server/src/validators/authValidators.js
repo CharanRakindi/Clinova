@@ -41,6 +41,14 @@ const addressSchema = z
   })
   .optional();
 
+export const activateSchema = z.object({
+  body: z.object({
+    email: z.string().email(),
+    token: z.string().min(20),
+    password: z.string().min(8, 'Password must be at least 8 characters'),
+  }),
+});
+
 /** Self-service profile update — never accepts email or role */
 export const updateProfileSchema = z.object({
   body: z.object({

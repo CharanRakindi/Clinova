@@ -6,6 +6,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthContext.jsx';
 import { SocketProvider } from './contexts/SocketContext.jsx';
 import { Toaster } from 'sonner';
+import ErrorBoundary from './components/ErrorBoundary.jsx';
+import { ensureCsrf } from './api/axios.js';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -20,27 +22,32 @@ const queryClient = new QueryClient({
   },
 });
 
+// Bootstrap CSRF cookie for double-submit on mutating requests
+ensureCsrf();
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <SocketProvider>
-          <App />
-          <Toaster
-            position="top-right"
-            richColors
-            toastOptions={{
-              className: 'font-sans text-[13px]',
-              style: {
-                borderRadius: '14px',
-                border: '1px solid rgba(226, 232, 240, 0.9)',
-                boxShadow: '0 8px 24px -8px rgba(15, 23, 42, 0.12)',
-              },
-            }}
-          />
-        </SocketProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <SocketProvider>
+            <App />
+            <Toaster
+              position="top-right"
+              richColors
+              toastOptions={{
+                className: 'font-sans text-[13px]',
+                style: {
+                  borderRadius: '14px',
+                  border: '1px solid rgba(226, 232, 240, 0.9)',
+                  boxShadow: '0 8px 24px -8px rgba(15, 23, 42, 0.12)',
+                },
+              }}
+            />
+          </SocketProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   </React.StrictMode>,
 );
 

@@ -4,6 +4,7 @@ import { generateTokens, setTokenCookies, clearTokenCookies } from '../utils/gen
 import { hashToken, tokenMatches } from '../utils/tokenHash.js';
 import jwt from 'jsonwebtoken';
 import { logAction } from '../utils/auditLogger.js';
+import { issueCsrfToken } from '../middleware/csrf.js';
 
 // @desc    Register a new user
 // @route   POST /api/v1/auth/register
@@ -48,6 +49,7 @@ export const register = async (req, res, next) => {
     await user.save();
 
     setTokenCookies(res, accessToken, refreshToken);
+    issueCsrfToken(res);
 
     // Audit log
     await logAction(
@@ -77,6 +79,72 @@ export const register = async (req, res, next) => {
   }
 };
 
+// @desc    Activate staff-created patient account with invite token + new password
+// @route   POST /api/v1/auth/activate
+// @access  Public
+export const activateAccount = async (req, res, next) => {
+  try {
+    const { email, token, password } = req.body;
+    const normalizedEmail = String(email || '').toLowerCase().trim();
+    if (!normalizedEmail || !token || !password || String(password).length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email, invite token, and password (min 8 characters) are required',
+      });
+    }
+
+    const user = await User.findOne({ email: normalizedEmail }).select(
+      '+password +inviteTokenHash +inviteExpires'
+    );
+    if (!user || !user.inviteTokenHash) {
+      return res.status(400).json({ success: false, message: 'Invalid or expired invite' });
+    }
+    if (user.inviteExpires && user.inviteExpires.getTime() < Date.now()) {
+      return res.status(400).json({ success: false, message: 'Invite has expired — contact the clinic' });
+    }
+    if (!tokenMatches(user.inviteTokenHash, token)) {
+      return res.status(400).json({ success: false, message: 'Invalid or expired invite' });
+    }
+
+    user.password = password;
+    user.inviteTokenHash = undefined;
+    user.inviteExpires = undefined;
+    user.mustChangePassword = false;
+    user.passwordChangedAt = Date.now();
+    const { accessToken, refreshToken } = generateTokens(user._id);
+    user.refreshToken = hashToken(refreshToken);
+    await user.save();
+
+    setTokenCookies(res, accessToken, refreshToken);
+    issueCsrfToken(res);
+
+    await logAction(
+      user._id,
+      user.role,
+      'UPDATE',
+      'User',
+      user._id,
+      req.ip,
+      req.headers['user-agent'],
+      { action: 'ACTIVATE_ACCOUNT' },
+      { critical: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: 'Account activated',
+      data: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Auth user & get token
 // @route   POST /api/v1/auth/login
 // @access  Public
@@ -85,7 +153,9 @@ export const login = async (req, res, next) => {
     const { email, password } = req.body;
     const normalizedEmail = String(email || '').toLowerCase().trim();
 
-    const user = await User.findOne({ email: normalizedEmail }).select('+password');
+    const user = await User.findOne({ email: normalizedEmail }).select(
+      '+password +inviteTokenHash +inviteExpires'
+    );
 
     if (!user || !(await user.matchPassword(password))) {
       return res.status(401).json({ success: false, message: 'Invalid email or password' });
@@ -95,12 +165,21 @@ export const login = async (req, res, next) => {
       return res.status(401).json({ success: false, message: 'Account is deactivated. Contact admin.' });
     }
 
+    if (user.inviteTokenHash) {
+      return res.status(403).json({
+        success: false,
+        message: 'Account not activated. Open the invite link from your clinic to set a password.',
+        code: 'INVITE_PENDING',
+      });
+    }
+
     user.lastLogin = Date.now();
     const { accessToken, refreshToken } = generateTokens(user._id);
     user.refreshToken = hashToken(refreshToken);
     await user.save();
 
     setTokenCookies(res, accessToken, refreshToken);
+    issueCsrfToken(res);
 
     // Audit log
     await logAction(

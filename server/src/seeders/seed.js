@@ -17,8 +17,8 @@ dotenv.config();
 
 const seedData = async () => {
   try {
-    if (process.env.NODE_ENV === 'production' && process.env.ALLOW_SEED !== 'true') {
-      console.error('❌ Seed blocked in production. Set ALLOW_SEED=true to override (dangerous).');
+    if (process.env.NODE_ENV === 'production') {
+      console.error('❌ Seed is permanently blocked when NODE_ENV=production. Use a non-production environment.');
       process.exit(1);
     }
 
