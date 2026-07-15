@@ -12,6 +12,7 @@ import Register from './pages/Register';
 import Unauthorized from './pages/Unauthorized';
 import NotFound from './pages/NotFound';
 import Activate from './pages/Activate';
+import Security from './pages/Security';
 
 // Role workspaces — code-split to keep initial bundle smaller
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
@@ -26,6 +27,7 @@ const PatientMedicalRecords = lazy(() => import('./pages/patient/PatientMedicalR
 const ReceptionistDashboard = lazy(() => import('./pages/receptionist/ReceptionistDashboard'));
 const LabTechDashboard = lazy(() => import('./pages/labtech/LabTechDashboard'));
 const Profile = lazy(() => import('./pages/Profile'));
+const Messages = lazy(() => import('./pages/Messages'));
 
 function RouteFallback() {
   return (
@@ -60,11 +62,17 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/activate" element={<Activate />} />
+            <Route path="/security" element={<Security />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
 
             <Route element={<ProtectedRoute />}>
               <Route element={<RootLayout />}>
                 <Route path="/profile" element={<Profile />} />
+                <Route
+                  element={<RoleRoute allowedRoles={['patient', 'doctor', 'admin']} />}
+                >
+                  <Route path="/messages" element={<Messages />} />
+                </Route>
 
                 <Route element={<RoleRoute allowedRoles={['admin']} />}>
                   <Route path="/admin/dashboard" element={<AdminDashboard />} />

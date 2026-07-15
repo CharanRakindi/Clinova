@@ -98,17 +98,36 @@ export default function ReceptionistDashboard() {
     },
   });
 
-  // Mutate: confirm appointment
+  // Mutate: confirm appointment / queue status
   const updateAptStatus = useMutation({
-    mutationFn: async ({ id, status }) => {
-      const res = await api.patch(`/appointments/${id}/status`, { status });
+    mutationFn: async ({ id, status, queueStatus }) => {
+      const res = await api.patch(`/appointments/${id}/status`, {
+        ...(status ? { status } : {}),
+        ...(queueStatus ? { queueStatus } : {}),
+      });
       return res.data.data;
     },
     onSuccess: () => {
-      toast.success('Appointment status updated');
+      toast.success('Queue updated');
       queryClient.invalidateQueries({ queryKey: ['receptionistAppointments'] });
-    }
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.message || 'Update failed');
+    },
   });
+
+  const todayStr = format(new Date(), 'yyyy-MM-dd');
+  const todayApts =
+    appointments?.filter((a) => {
+      if (!['confirmed', 'requested'].includes(a.status)) return false;
+      return format(new Date(a.appointmentDate), 'yyyy-MM-dd') === todayStr;
+    }) || [];
+  const queueCols = [
+    { id: 'not_arrived', title: 'Not arrived' },
+    { id: 'waiting', title: 'Waiting' },
+    { id: 'in_room', title: 'In room' },
+    { id: 'done', title: 'Done' },
+  ];
 
   const handleRegisterSubmit = (e) => {
     e.preventDefault();
@@ -140,6 +159,68 @@ export default function ReceptionistDashboard() {
         </div>
         <div className="badge badge-neutral px-3 py-1.5 text-xs">
           {appointments?.length || 0} appointments
+        </div>
+      </div>
+
+      {/* Check-in board — today's confirmed/requested */}
+      <div className="card overflow-hidden p-0">
+        <div className="border-b border-line-soft px-5 py-3.5">
+          <h2 className="panel-title">Today&apos;s check-in board</h2>
+          <p className="panel-meta">Move patients waiting → in room → done</p>
+        </div>
+        <div className="grid grid-cols-1 gap-0 sm:grid-cols-2 lg:grid-cols-4">
+          {queueCols.map((col) => {
+            const colItems = todayApts.filter(
+              (a) => (a.queueStatus || 'not_arrived') === col.id
+            );
+            return (
+              <div
+                key={col.id}
+                className="min-h-[140px] border-b border-line-soft p-3 sm:border-b-0 sm:border-r sm:last:border-r-0"
+              >
+                <div className="mb-2 flex items-center justify-between">
+                  <p className="ui-label">{col.title}</p>
+                  <span className="badge badge-neutral">{colItems.length}</span>
+                </div>
+                <div className="space-y-2">
+                  {colItems.length === 0 ? (
+                    <p className="text-2xs text-ink-faint">Empty</p>
+                  ) : (
+                    colItems.map((apt) => (
+                      <div
+                        key={apt._id}
+                        className="rounded-lg border border-line bg-surface-muted/50 p-2.5"
+                      >
+                        <p className="text-xs font-medium text-ink">{apt.patient?.name}</p>
+                        <p className="text-2xs text-ink-faint">
+                          {apt.timeSlot} · {formatDoctorName(apt.doctor?.name)}
+                        </p>
+                        <div className="mt-2 flex flex-wrap gap-1">
+                          {queueCols
+                            .filter((c) => c.id !== col.id)
+                            .map((c) => (
+                              <button
+                                key={c.id}
+                                type="button"
+                                className="rounded-full border border-line bg-surface px-2 py-0.5 text-2xs text-ink-muted hover:border-sky-200 hover:text-sky-700"
+                                onClick={() =>
+                                  updateAptStatus.mutate({
+                                    id: apt._id,
+                                    queueStatus: c.id,
+                                  })
+                                }
+                              >
+                                → {c.title}
+                              </button>
+                            ))}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 

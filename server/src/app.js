@@ -20,6 +20,8 @@ import uploadRoutes from './routes/uploadRoutes.js';
 import prescriptionRoutes from './routes/prescriptionRoutes.js';
 import labReportRoutes from './routes/labReportRoutes.js';
 import auditLogRoutes from './routes/auditLogRoutes.js';
+import messageRoutes from './routes/messageRoutes.js';
+import exportRoutes from './routes/exportRoutes.js';
 
 const app = express();
 
@@ -164,6 +166,8 @@ app.use('/api/v1/upload', uploadRoutes);
 app.use('/api/v1/prescriptions', prescriptionRoutes);
 app.use('/api/v1/lab-reports', labReportRoutes);
 app.use('/api/v1/admin/audit-logs', auditLogRoutes);
+app.use('/api/v1/messages', messageRoutes);
+app.use('/api/v1/export', exportRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

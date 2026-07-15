@@ -16,9 +16,26 @@ export const createAppointmentSchema = z.object({
 });
 
 export const updateAppointmentStatusSchema = z.object({
+  body: z
+    .object({
+      status: z
+        .enum(['requested', 'confirmed', 'completed', 'cancelled', 'no-show'])
+        .optional(),
+      cancellationReason: z.string().max(500).optional(),
+      visitSummary: z.string().max(4000).optional(),
+      queueStatus: z
+        .enum(['not_arrived', 'waiting', 'in_room', 'done'])
+        .optional(),
+    })
+    .refine((b) => b.status || b.queueStatus, {
+      message: 'status or queueStatus is required',
+    }),
+});
+
+export const rescheduleAppointmentSchema = z.object({
   body: z.object({
-    status: z.enum(['requested', 'confirmed', 'completed', 'cancelled', 'no-show']),
-    cancellationReason: z.string().max(500).optional(),
+    appointmentDate: z.string().min(1, 'Date is required'),
+    timeSlot: z.string().min(1, 'Time slot is required'),
   }),
 });
 

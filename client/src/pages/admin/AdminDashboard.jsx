@@ -35,11 +35,18 @@ const AdminDashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <SkeletonCard />
-        <SkeletonCard />
-        <SkeletonCard />
-        <SkeletonCard />
+      <div className="workspace">
+        <div className="page-header">
+          <div className="space-y-2">
+            <div className="h-7 w-40 animate-pulse rounded-md bg-surface-subtle" />
+            <div className="h-4 w-64 animate-pulse rounded-md bg-surface-subtle" />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
       </div>
     );
   }
@@ -114,7 +121,7 @@ const AdminDashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-        <div className="card p-5 lg:col-span-2">
+        <div className="card p-5 sm:p-6 lg:col-span-2">
           <div className="mb-5 flex items-start justify-between gap-3">
             <div>
               <h2 className="panel-title">Weekly consultations</h2>
@@ -124,35 +131,36 @@ const AdminDashboard = () => {
           <div className="h-[260px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
                 <XAxis
                   dataKey="name"
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: '#94a3b8', fontSize: 11 }}
+                  tick={{ fill: '#94A3B8', fontSize: 11 }}
                   dy={5}
                 />
                 <YAxis
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: '#94a3b8', fontSize: 11 }}
+                  tick={{ fill: '#94A3B8', fontSize: 11 }}
                   allowDecimals={false}
                 />
                 <Tooltip
-                  cursor={{ fill: '#f8fafc' }}
+                  cursor={{ fill: '#F0F9FF' }}
                   contentStyle={{
                     borderRadius: '12px',
-                    border: '1px solid #e2e8f0',
+                    border: '1px solid #E2E8F0',
                     fontSize: '12px',
+                    boxShadow: '0 8px 24px -8px rgba(15,23,42,0.12)',
                   }}
                 />
-                <Bar dataKey="appointments" fill="#0f172a" radius={[6, 6, 0, 0]} barSize={28} />
+                <Bar dataKey="appointments" fill="#0EA5E9" radius={[6, 6, 0, 0]} barSize={28} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div className="card flex flex-col p-5">
+        <div className="card flex flex-col p-5 sm:p-6">
           <h2 className="panel-title mb-1 flex items-center gap-2">
             <ShieldAlert className="h-4 w-4 text-ink-faint" strokeWidth={1.75} />
             Recent audit activity

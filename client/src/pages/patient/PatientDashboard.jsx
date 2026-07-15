@@ -7,12 +7,21 @@ import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { useAuth } from '../../contexts/AuthContext';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { formatDoctorName } from '../../utils/format';
 import Tabs from '../../components/ui/Tabs';
 import EmptyState from '../../components/ui/EmptyState';
 import DataValue from '../../components/ui/DataValue';
 import StatusBadge from '../../components/ui/StatusBadge';
+import ActivityFeed from '../../components/ui/ActivityFeed';
+
+const CHART = {
+  grid: '#F1F5F9',
+  tick: '#94A3B8',
+  pulse: '#0EA5E9', // brand sky-500
+  systolic: '#059669', // success emerald
+  tooltipBorder: '#E2E8F0',
+};
 
 const PatientDashboard = () => {
   const { user } = useAuth();
@@ -22,6 +31,24 @@ const PatientDashboard = () => {
     queryKey: ['patientProfile', user?._id],
     queryFn: async () => {
       const res = await api.get(`/patients/${user._id}`);
+      return res.data.data;
+    },
+    enabled: !!user?._id,
+  });
+
+  const { data: allergies } = useQuery({
+    queryKey: ['myAllergies', user?._id],
+    queryFn: async () => {
+      const res = await api.get(`/patients/${user._id}/allergies`);
+      return res.data.data;
+    },
+    enabled: !!user?._id,
+  });
+
+  const { data: conditions } = useQuery({
+    queryKey: ['myConditions', user?._id],
+    queryFn: async () => {
+      const res = await api.get(`/patients/${user._id}/conditions`);
       return res.data.data;
     },
     enabled: !!user?._id,
@@ -70,10 +97,18 @@ const PatientDashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <SkeletonCard />
-        <SkeletonCard />
-        <SkeletonCard />
+      <div className="workspace">
+        <div className="page-header">
+          <div className="space-y-2">
+            <div className="h-7 w-48 animate-pulse rounded-md bg-surface-subtle" />
+            <div className="h-4 w-72 animate-pulse rounded-md bg-surface-subtle" />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
       </div>
     );
   }
@@ -88,6 +123,12 @@ const PatientDashboard = () => {
         diastolic: r.vitals.bloodPressureDiastolic || 0,
       }))
       .reverse() || [];
+
+  const severeAllergies = (allergies || []).filter((a) => a.severity === 'Severe');
+  const otherAllergies = (allergies || []).filter((a) => a.severity !== 'Severe');
+  const activeConditions = (conditions || []).filter((c) => c.status === 'Active');
+  const hasAlerts =
+    (allergies?.length || 0) > 0 || (activeConditions?.length || 0) > 0;
 
   const tabs = [
     { id: 'overview', label: 'Appointments' },
@@ -144,116 +185,61 @@ const PatientDashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-        <div className="space-y-5 lg:col-span-1">
-          <div id="patient-health-profile" className="card space-y-4 p-5">
-            <h3 className="panel-title border-b border-line-soft pb-3">Health profile</h3>
-            <div className="space-y-3.5">
-              <div className="meta-row">
-                <span className="meta-label">Blood group</span>
-                <DataValue
-                  as="span"
-                  className="meta-value"
-                  emptyClassName="meta-value data-empty"
-                  value={profile?.bloodGroup}
-                  empty="Not on file"
-                />
-              </div>
-              <div className="meta-row">
-                <span className="meta-label">Emergency contact</span>
-                <DataValue
-                  as="span"
-                  className="meta-value"
-                  emptyClassName="meta-value data-empty"
-                  value={
-                    profile?.emergencyContact?.name
-                      ? `${profile.emergencyContact.name}${
-                          profile.emergencyContact.relationship
-                            ? ` (${profile.emergencyContact.relationship})`
-                            : ''
-                        }`
-                      : null
-                  }
-                  empty="Not on file"
-                />
-              </div>
-              <div className="meta-row">
-                <span className="meta-label">Insurance</span>
-                <DataValue
-                  as="span"
-                  className="meta-value"
-                  emptyClassName="meta-value data-empty"
-                  value={profile?.insuranceProvider}
-                  empty="Not on file"
-                />
-              </div>
-              <div className="meta-row">
-                <span className="meta-label">Policy ID</span>
-                <DataValue
-                  as="span"
-                  className="meta-value font-mono text-xs"
-                  emptyClassName="meta-value data-empty"
-                  value={profile?.insuranceNumber}
-                  empty="Not on file"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="card space-y-3 p-5">
-            <h3 className="panel-title flex items-center gap-2">
-              <ShieldAlert className="h-4 w-4 text-ink-faint" strokeWidth={1.75} />
-              Medical alerts
-            </h3>
-            <p className="text-xs leading-relaxed tracking-[-0.01em] text-ink-muted">
-              Allergy and condition alerts appear here when recorded by your care team.
-            </p>
-          </div>
-        </div>
-
-        <div className="space-y-5 lg:col-span-2">
+        {/* Primary column: care activity */}
+        <div className="space-y-5 lg:col-span-2 lg:order-1">
           {vitalsChartData.length > 0 && (
-            <div id="vitals-trend" className="card p-5">
-              <h3 className="panel-title mb-1">Vitals trends</h3>
-              <p className="panel-meta mb-4">From your recent consultations</p>
-              <div className="h-[210px] w-full">
+            <div id="vitals-trend" className="card p-5 sm:p-6">
+              <div className="mb-5 flex items-start justify-between gap-3">
+                <div>
+                  <h2 className="panel-title">Vitals trends</h2>
+                  <p className="panel-meta">From your recent consultations</p>
+                </div>
+              </div>
+              <div className="h-[220px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={vitalsChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <LineChart data={vitalsChartData} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={CHART.grid} />
                     <XAxis
                       dataKey="date"
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fill: '#94a3b8', fontSize: 11 }}
+                      tick={{ fill: CHART.tick, fontSize: 11 }}
                     />
                     <YAxis
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fill: '#94a3b8', fontSize: 11 }}
+                      tick={{ fill: CHART.tick, fontSize: 11 }}
                     />
                     <Tooltip
                       contentStyle={{
                         borderRadius: '12px',
-                        border: '1px solid #e2e8f0',
+                        border: `1px solid ${CHART.tooltipBorder}`,
                         fontSize: '12px',
                         boxShadow: '0 8px 24px -8px rgba(15,23,42,0.12)',
                       }}
+                    />
+                    <Legend
+                      wrapperStyle={{ fontSize: '11px', paddingTop: '8px' }}
+                      iconType="circle"
+                      iconSize={8}
                     />
                     <Line
                       type="monotone"
                       dataKey="pulse"
                       name="Pulse (bpm)"
-                      stroke="#0f172a"
-                      strokeWidth={2}
+                      stroke={CHART.pulse}
+                      strokeWidth={2.25}
                       dot={false}
-                      activeDot={{ r: 4 }}
+                      activeDot={{ r: 4, fill: CHART.pulse }}
                     />
                     <Line
                       type="monotone"
                       dataKey="systolic"
                       name="Systolic (mmHg)"
-                      stroke="#64748b"
+                      stroke={CHART.systolic}
                       strokeWidth={2}
                       dot={false}
+                      activeDot={{ r: 4, fill: CHART.systolic }}
                     />
                   </LineChart>
                 </ResponsiveContainer>
@@ -365,6 +351,125 @@ const PatientDashboard = () => {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+
+        {/* Sidebar: profile + alerts + activity */}
+        <div className="space-y-5 lg:col-span-1 lg:order-2">
+          <div
+            className={
+              hasAlerts
+                ? 'card space-y-3 border-danger-border/60 p-5 ring-1 ring-danger/10'
+                : 'card space-y-3 p-5'
+            }
+          >
+            <h3 className="panel-title flex items-center gap-2">
+              <ShieldAlert
+                className={`h-4 w-4 ${hasAlerts ? 'text-danger' : 'text-ink-faint'}`}
+                strokeWidth={1.75}
+              />
+              Medical alerts
+            </h3>
+            {!hasAlerts ? (
+              <p className="text-xs leading-relaxed text-ink-muted">
+                No allergies or active conditions on file. Your care team will record alerts here.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {severeAllergies.map((a) => (
+                  <div
+                    key={a._id}
+                    className="rounded-lg border border-danger-border bg-danger-soft px-3 py-2"
+                  >
+                    <p className="text-xs font-medium text-danger">
+                      Allergy · {a.allergen}
+                    </p>
+                    {a.reaction && (
+                      <p className="mt-0.5 text-2xs text-danger/80">{a.reaction}</p>
+                    )}
+                  </div>
+                ))}
+                {otherAllergies.map((a) => (
+                  <div
+                    key={a._id}
+                    className="rounded-lg border border-warning-border bg-warning-soft px-3 py-2"
+                  >
+                    <p className="text-xs font-medium text-warning">
+                      Allergy · {a.allergen}
+                      {a.severity ? ` (${a.severity})` : ''}
+                    </p>
+                  </div>
+                ))}
+                {activeConditions.map((c) => (
+                  <div
+                    key={c._id}
+                    className="rounded-lg border border-line bg-surface-subtle px-3 py-2"
+                  >
+                    <p className="text-xs font-medium text-ink-secondary">
+                      Condition · {c.conditionName}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div id="patient-health-profile" className="card space-y-4 p-5">
+            <h3 className="panel-title border-b border-line-soft pb-3">Health profile</h3>
+            <div className="space-y-3.5">
+              <div className="meta-row">
+                <span className="meta-label">Blood group</span>
+                <DataValue
+                  as="span"
+                  className="meta-value"
+                  emptyClassName="meta-value data-empty"
+                  value={profile?.bloodGroup}
+                  empty="Not on file"
+                />
+              </div>
+              <div className="meta-row">
+                <span className="meta-label">Emergency contact</span>
+                <DataValue
+                  as="span"
+                  className="meta-value"
+                  emptyClassName="meta-value data-empty"
+                  value={
+                    profile?.emergencyContact?.name
+                      ? `${profile.emergencyContact.name}${
+                          profile.emergencyContact.relationship
+                            ? ` (${profile.emergencyContact.relationship})`
+                            : ''
+                        }`
+                      : null
+                  }
+                  empty="Not on file"
+                />
+              </div>
+              <div className="meta-row">
+                <span className="meta-label">Insurance</span>
+                <DataValue
+                  as="span"
+                  className="meta-value"
+                  emptyClassName="meta-value data-empty"
+                  value={profile?.insuranceProvider}
+                  empty="Not on file"
+                />
+              </div>
+              <div className="meta-row">
+                <span className="meta-label">Policy ID</span>
+                <DataValue
+                  as="span"
+                  className="meta-value font-mono text-xs"
+                  emptyClassName="meta-value data-empty"
+                  value={profile?.insuranceNumber}
+                  empty="Not on file"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="card space-y-3 p-5">
+            <ActivityFeed limit={5} />
           </div>
         </div>
       </div>

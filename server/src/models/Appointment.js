@@ -30,6 +30,17 @@ const appointmentSchema = new mongoose.Schema(
       default: 'requested',
     },
     notes: String,
+    /** Front-desk queue: not_arrived → waiting → in_room → done */
+    queueStatus: {
+      type: String,
+      enum: ['not_arrived', 'waiting', 'in_room', 'done'],
+      default: 'not_arrived',
+    },
+    /** Short visit summary when marked completed */
+    visitSummary: {
+      type: String,
+      maxlength: 4000,
+    },
     cancellationReason: String,
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,

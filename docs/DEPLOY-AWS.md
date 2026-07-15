@@ -95,7 +95,13 @@ COOKIE_SAMESITE=lax
 > Use `COOKIE_SECURE=true` and `CLIENT_URL=https://your-domain.com` only after HTTPS is working.
 
 ```bash
+# Free port 80 if a default web server is installed (common on Ubuntu AMIs)
+sudo systemctl stop apache2 2>/dev/null || true
+sudo systemctl disable apache2 2>/dev/null || true
+sudo systemctl stop nginx 2>/dev/null || true
+
 docker compose --env-file .env.docker up --build -d
+# Seed demo users (Sarah, John, admin, etc.) — required for login chips
 docker compose --env-file .env.docker --profile seed run --rm seed
 ```
 
@@ -109,7 +115,25 @@ docker compose --env-file .env.docker --profile seed run --rm seed
 | Doctor | `sarah@clinova.com` / `password123` |
 | Patient | `john@example.com` / `password123` |
 
+Or use **Sign in → Portfolio demo** one-click chips on `/login`.
+
 Health check: `http://YOUR_PUBLIC_IP/health`
+
+### Disk full / failed builds
+
+Small instances fill up after a few image rebuilds:
+
+```bash
+df -h
+docker system df
+cd ~/Clinova
+docker compose --env-file .env.docker down
+docker system prune -af
+docker builder prune -af
+# Do NOT prune volumes unless you want to wipe Mongo data
+docker compose --env-file .env.docker up --build -d
+docker compose --env-file .env.docker --profile seed run --rm seed
+```
 
 ### 7. HTTPS with a domain (recommended)
 

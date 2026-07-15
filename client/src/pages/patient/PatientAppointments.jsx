@@ -1,8 +1,18 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../../api/axios';
 import { format } from 'date-fns';
-import { Plus, X, Calendar as CalendarIcon, Clock, Stethoscope, FileText, CheckCircle, List } from 'lucide-react';
+import {
+  Plus,
+  X,
+  Calendar as CalendarIcon,
+  Clock,
+  Stethoscope,
+  FileText,
+  CheckCircle,
+  List,
+  CalendarClock,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import InteractiveCalendar from '../../components/InteractiveCalendar';
 import { SkeletonTable } from '../../components/SkeletonLoader';
@@ -12,24 +22,40 @@ import EmptyState from '../../components/ui/EmptyState';
 import DataValue from '../../components/ui/DataValue';
 import StatusBadge from '../../components/ui/StatusBadge';
 import SegmentedControl from '../../components/ui/SegmentedControl';
+import { CLINIC_TIME_SLOTS } from '../../utils/timeSlots';
+
+const emptyForm = {
+  doctor: '',
+  appointmentDate: '',
+  timeSlot: '',
+  reason: '',
+};
 
 const PatientAppointments = () => {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState('list');
-
-  const [formData, setFormData] = useState({
-    doctor: '',
+  const [formData, setFormData] = useState(emptyForm);
+  const [cancelTarget, setCancelTarget] = useState(null);
+  const [cancelReason, setCancelReason] = useState('');
+  const [rescheduleTarget, setRescheduleTarget] = useState(null);
+  const [rescheduleForm, setRescheduleForm] = useState({
     appointmentDate: '',
     timeSlot: '',
-    reason: '',
   });
 
-  const closeModal = useCallback(() => setIsModalOpen(false), []);
+  const closeModal = useCallback(() => {
+    setIsModalOpen(false);
+    setFormData(emptyForm);
+  }, []);
   const openModal = useCallback(() => setIsModalOpen(true), []);
 
   const setField = useCallback((key, value) => {
-    setFormData((prev) => ({ ...prev, [key]: value }));
+    setFormData((prev) => {
+      const next = { ...prev, [key]: value };
+      if (key === 'doctor' || key === 'appointmentDate') next.timeSlot = '';
+      return next;
+    });
   }, []);
 
   const { data: appointments, isLoading } = useQuery({
@@ -51,32 +77,50 @@ const PatientAppointments = () => {
       const res = await api.get('/doctors?accepting=true');
       const list = res.data?.data;
       if (!Array.isArray(list)) return [];
-      // Only profiles with a linked user id can be booked
-      return list.filter((d) => {
-        const userId = d?.user?._id ?? d?.user;
-        return Boolean(userId);
-      });
+      return list.filter((d) => Boolean(d?.user?._id ?? d?.user));
     },
   });
 
   const bookableDoctors = doctors || [];
-
   const doctorUserId = (doc) => String(doc?.user?._id ?? doc?.user ?? '');
+
+  const slotsDoctorId = formData.doctor || (rescheduleTarget?.doctor?._id ?? rescheduleTarget?.doctor);
+  const slotsDate = formData.appointmentDate || rescheduleForm.appointmentDate;
+  const slotsEnabled = Boolean(slotsDoctorId && slotsDate);
+
+  const { data: slotsData, isFetching: slotsLoading } = useQuery({
+    queryKey: ['appointmentSlots', slotsDoctorId, slotsDate],
+    enabled: slotsEnabled,
+    queryFn: async () => {
+      const res = await api.get('/appointments/slots', {
+        params: { doctorId: slotsDoctorId, date: slotsDate },
+      });
+      return res.data.data;
+    },
+  });
+
+  const availableSlots = useMemo(() => {
+    if (!slotsData?.slots) return CLINIC_TIME_SLOTS;
+    return slotsData.slots.filter((s) => s.available).map((s) => s.slot);
+  }, [slotsData]);
+
+  const rescheduleAvailableSlots = useMemo(() => {
+    if (!rescheduleTarget || !slotsData?.slots) return CLINIC_TIME_SLOTS;
+    const current = rescheduleTarget.timeSlot;
+    return slotsData.slots
+      .filter((s) => s.available || s.slot === current)
+      .map((s) => s.slot);
+  }, [slotsData, rescheduleTarget]);
 
   const createAppointment = useMutation({
     mutationFn: async (payload) => {
-      const res = await api.post('/appointments', {
-        doctor: payload.doctor,
-        appointmentDate: payload.appointmentDate,
-        timeSlot: payload.timeSlot,
-        reason: payload.reason,
-      });
+      const res = await api.post('/appointments', payload);
       return res.data.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['myAppointments'] });
+      queryClient.invalidateQueries({ queryKey: ['appointmentSlots'] });
       closeModal();
-      setFormData({ doctor: '', appointmentDate: '', timeSlot: '', reason: '' });
       toast.success('Appointment requested — waiting for doctor to accept');
     },
     onError: (error) => {
@@ -85,19 +129,41 @@ const PatientAppointments = () => {
   });
 
   const cancelAppointment = useMutation({
-    mutationFn: async (appointmentId) => {
-      const res = await api.patch(`/appointments/${appointmentId}/status`, {
+    mutationFn: async ({ id, reason }) => {
+      const res = await api.patch(`/appointments/${id}/status`, {
         status: 'cancelled',
-        cancellationReason: 'Cancelled by patient',
+        cancellationReason: reason || 'Cancelled by patient',
       });
       return res.data.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['myAppointments'] });
+      queryClient.invalidateQueries({ queryKey: ['appointmentSlots'] });
+      setCancelTarget(null);
+      setCancelReason('');
       toast.success('Appointment cancelled');
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to cancel appointment');
+    },
+  });
+
+  const rescheduleAppointment = useMutation({
+    mutationFn: async ({ id, appointmentDate, timeSlot }) => {
+      const res = await api.patch(`/appointments/${id}/reschedule`, {
+        appointmentDate,
+        timeSlot,
+      });
+      return res.data.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['myAppointments'] });
+      queryClient.invalidateQueries({ queryKey: ['appointmentSlots'] });
+      setRescheduleTarget(null);
+      toast.success('Appointment rescheduled — doctor will reconfirm if needed');
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to reschedule');
     },
   });
 
@@ -124,6 +190,14 @@ const PatientAppointments = () => {
       appointmentDate: formData.appointmentDate,
       timeSlot: formData.timeSlot,
       reason: formData.reason.trim(),
+    });
+  };
+
+  const openReschedule = (apt) => {
+    setRescheduleTarget(apt);
+    setRescheduleForm({
+      appointmentDate: format(new Date(apt.appointmentDate), 'yyyy-MM-dd'),
+      timeSlot: apt.timeSlot || '',
     });
   };
 
@@ -159,12 +233,7 @@ const PatientAppointments = () => {
               { id: 'calendar', label: 'Calendar view', icon: CalendarIcon },
             ]}
           />
-
-          <button
-            type="button"
-            onClick={openModal}
-            className="btn btn-primary flex-1 sm:flex-none"
-          >
+          <button type="button" onClick={openModal} className="btn btn-primary flex-1 sm:flex-none">
             <Plus className="h-4 w-4" />
             Book visit
           </button>
@@ -172,10 +241,7 @@ const PatientAppointments = () => {
       </div>
 
       {viewMode === 'calendar' ? (
-        <InteractiveCalendar
-          events={appointments || []}
-          onSelectEvent={handleSelectEvent}
-        />
+        <InteractiveCalendar events={appointments || []} onSelectEvent={handleSelectEvent} />
       ) : (
         <div className="table-wrap">
           <div className="overflow-x-auto">
@@ -198,11 +264,7 @@ const PatientAppointments = () => {
                         title="No appointments on file"
                         description="You don't have any visits scheduled yet."
                         action={
-                          <button
-                            type="button"
-                            onClick={openModal}
-                            className="btn btn-secondary"
-                          >
+                          <button type="button" onClick={openModal} className="btn btn-secondary">
                             Book appointment
                           </button>
                         }
@@ -225,19 +287,9 @@ const PatientAppointments = () => {
                         </div>
                       </td>
                       <td className="table-cell whitespace-nowrap">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className="flex h-9 w-9 items-center justify-center rounded-full bg-ink text-xs font-medium text-ink-inverse"
-                            aria-hidden
-                          >
-                            {(apt.doctor?.name || 'D').charAt(0).toUpperCase()}
-                          </div>
-                          <div>
-                            <p className="font-medium text-ink">
-                              {formatDoctorName(apt.doctor?.name)}
-                            </p>
-                          </div>
-                        </div>
+                        <p className="font-medium text-ink">
+                          {formatDoctorName(apt.doctor?.name)}
+                        </p>
                       </td>
                       <td className="table-cell">
                         <p className="line-clamp-2 max-w-xs">
@@ -249,15 +301,27 @@ const PatientAppointments = () => {
                       </td>
                       <td className="table-cell whitespace-nowrap text-right">
                         {['requested', 'confirmed'].includes(apt.status) && (
-                          <button
-                            type="button"
-                            onClick={() => cancelAppointment.mutate(apt._id)}
-                            disabled={cancelAppointment.isPending}
-                            className="btn btn-sm btn-soft-danger"
-                          >
-                            <X className="h-3.5 w-3.5" />
-                            Cancel
-                          </button>
+                          <div className="flex flex-wrap justify-end gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => openReschedule(apt)}
+                              className="btn btn-sm btn-secondary"
+                            >
+                              <CalendarClock className="h-3.5 w-3.5" />
+                              Reschedule
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setCancelTarget(apt);
+                                setCancelReason('');
+                              }}
+                              className="btn btn-sm btn-soft-danger"
+                            >
+                              <X className="h-3.5 w-3.5" />
+                              Cancel
+                            </button>
+                          </div>
                         )}
                       </td>
                     </tr>
@@ -269,12 +333,8 @@ const PatientAppointments = () => {
         </div>
       )}
 
-      <Modal
-        open={isModalOpen}
-        onClose={closeModal}
-        title="Book appointment"
-        panelClassName="max-w-md"
-      >
+      {/* Book modal */}
+      <Modal open={isModalOpen} onClose={closeModal} title="Book appointment" panelClassName="max-w-md">
         <form onSubmit={handleSubmit} className="space-y-4 p-6">
           <div>
             <label htmlFor="book-doctor" className="label flex items-center gap-1.5">
@@ -301,13 +361,11 @@ const PatientAppointments = () => {
                 className="rounded-lg border border-warning-border bg-warning-soft px-3 py-2.5 text-sm text-warning"
                 role="status"
               >
-                No doctors are accepting appointments right now. Ask the clinic to turn
-                on booking for a practitioner, then try again.
+                No doctors are accepting appointments right now.
               </div>
             ) : (
               <select
                 id="book-doctor"
-                name="doctor"
                 required
                 className="select"
                 value={formData.doctor}
@@ -316,11 +374,10 @@ const PatientAppointments = () => {
                 <option value="">Choose a specialist…</option>
                 {bookableDoctors.map((doc) => {
                   const id = doctorUserId(doc);
-                  const name = doc.user?.name || 'Doctor';
-                  const spec = doc.specialization || 'General';
                   return (
                     <option key={doc._id || id} value={id}>
-                      {formatDoctorName(name)} — {spec}
+                      {formatDoctorName(doc.user?.name || 'Doctor')} —{' '}
+                      {doc.specialization || 'General'}
                     </option>
                   );
                 })}
@@ -351,20 +408,26 @@ const PatientAppointments = () => {
               </label>
               <select
                 id="book-time"
-                name="timeSlot"
                 required
                 className="select"
                 value={formData.timeSlot}
+                disabled={!formData.doctor || !formData.appointmentDate || slotsLoading}
                 onChange={(e) => setField('timeSlot', e.target.value)}
               >
-                <option value="">Time…</option>
-                {['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM', '04:00 PM'].map(
-                  (t) => (
-                    <option key={t} value={t}>
-                      {t}
-                    </option>
-                  )
-                )}
+                <option value="">
+                  {!formData.doctor || !formData.appointmentDate
+                    ? 'Pick doctor & date'
+                    : slotsLoading
+                      ? 'Loading…'
+                      : availableSlots.length
+                        ? 'Time…'
+                        : 'No open slots'}
+                </option>
+                {availableSlots.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
@@ -376,7 +439,6 @@ const PatientAppointments = () => {
             </label>
             <textarea
               id="book-reason"
-              name="reason"
               required
               className="input min-h-[88px] resize-none py-2.5"
               rows={3}
@@ -388,15 +450,11 @@ const PatientAppointments = () => {
           </div>
 
           <p className="text-center text-xs leading-snug text-ink-faint">
-            Today or a future date. Your doctor will accept or decline the request.
+            Only open slots are shown. Your doctor will accept or decline the request.
           </p>
 
           <div className="flex justify-end gap-2 border-t border-line pt-4">
-            <button
-              type="button"
-              onClick={closeModal}
-              className="btn btn-secondary"
-            >
+            <button type="button" onClick={closeModal} className="btn btn-secondary">
               Cancel
             </button>
             <button
@@ -405,7 +463,8 @@ const PatientAppointments = () => {
                 createAppointment.isPending ||
                 doctorsLoading ||
                 doctorsError ||
-                bookableDoctors.length === 0
+                bookableDoctors.length === 0 ||
+                (formData.doctor && formData.appointmentDate && availableSlots.length === 0)
               }
               className="btn btn-primary"
             >
@@ -415,6 +474,156 @@ const PatientAppointments = () => {
                 <CheckCircle className="h-3.5 w-3.5" aria-hidden />
               )}
               {createAppointment.isPending ? 'Requesting…' : 'Request appointment'}
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Cancel with reason */}
+      <Modal
+        open={!!cancelTarget}
+        onClose={() => setCancelTarget(null)}
+        title="Cancel appointment"
+        panelClassName="max-w-md"
+      >
+        <div className="space-y-4 p-6">
+          <p className="text-sm text-ink-muted">
+            Cancel visit with {formatDoctorName(cancelTarget?.doctor?.name)} on{' '}
+            {cancelTarget
+              ? format(new Date(cancelTarget.appointmentDate), 'MMM dd, yyyy')
+              : ''}{' '}
+            at {cancelTarget?.timeSlot}?
+          </p>
+          <div>
+            <label htmlFor="cancel-reason" className="label">
+              Reason (optional)
+            </label>
+            <textarea
+              id="cancel-reason"
+              className="input min-h-[72px] resize-none py-2.5"
+              rows={2}
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              placeholder="e.g. Schedule conflict"
+            />
+          </div>
+          <div className="flex justify-end gap-2 border-t border-line pt-4">
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => setCancelTarget(null)}
+            >
+              Keep visit
+            </button>
+            <button
+              type="button"
+              className="btn btn-soft-danger"
+              disabled={cancelAppointment.isPending}
+              onClick={() =>
+                cancelAppointment.mutate({
+                  id: cancelTarget._id,
+                  reason: cancelReason.trim() || 'Cancelled by patient',
+                })
+              }
+            >
+              Confirm cancel
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Reschedule */}
+      <Modal
+        open={!!rescheduleTarget}
+        onClose={() => setRescheduleTarget(null)}
+        title="Reschedule appointment"
+        panelClassName="max-w-md"
+      >
+        <form
+          className="space-y-4 p-6"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!rescheduleForm.appointmentDate || !rescheduleForm.timeSlot) {
+              toast.error('Pick a date and open time slot');
+              return;
+            }
+            rescheduleAppointment.mutate({
+              id: rescheduleTarget._id,
+              appointmentDate: rescheduleForm.appointmentDate,
+              timeSlot: rescheduleForm.timeSlot,
+            });
+          }}
+        >
+          <p className="text-sm text-ink-muted">
+            {formatDoctorName(rescheduleTarget?.doctor?.name)} · current{' '}
+            {rescheduleTarget
+              ? format(new Date(rescheduleTarget.appointmentDate), 'MMM dd')
+              : ''}{' '}
+            at {rescheduleTarget?.timeSlot}
+          </p>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="label" htmlFor="rs-date">
+                New date
+              </label>
+              <input
+                id="rs-date"
+                type="date"
+                required
+                className="input"
+                min={new Date().toISOString().split('T')[0]}
+                value={rescheduleForm.appointmentDate}
+                onChange={(e) =>
+                  setRescheduleForm((p) => ({
+                    ...p,
+                    appointmentDate: e.target.value,
+                    timeSlot: '',
+                  }))
+                }
+              />
+            </div>
+            <div>
+              <label className="label" htmlFor="rs-time">
+                New time
+              </label>
+              <select
+                id="rs-time"
+                required
+                className="select"
+                value={rescheduleForm.timeSlot}
+                disabled={!rescheduleForm.appointmentDate || slotsLoading}
+                onChange={(e) =>
+                  setRescheduleForm((p) => ({ ...p, timeSlot: e.target.value }))
+                }
+              >
+                <option value="">
+                  {slotsLoading ? 'Loading…' : rescheduleAvailableSlots.length ? 'Time…' : 'No slots'}
+                </option>
+                {rescheduleAvailableSlots.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <p className="text-xs text-ink-faint">
+            Confirmed visits return to “requested” so your doctor can reconfirm the new time.
+          </p>
+          <div className="flex justify-end gap-2 border-t border-line pt-4">
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => setRescheduleTarget(null)}
+            >
+              Back
+            </button>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={rescheduleAppointment.isPending || rescheduleAvailableSlots.length === 0}
+            >
+              Save new time
             </button>
           </div>
         </form>

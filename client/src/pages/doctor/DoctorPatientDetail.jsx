@@ -5,7 +5,7 @@ import api from '../../api/axios';
 import {
   ArrowLeft, Plus, FileText, Heart, Thermometer, Activity,
   CheckCircle, Paperclip, AlertTriangle, Stethoscope, Droplet,
-  RotateCcw,
+  RotateCcw, Printer,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -16,6 +16,7 @@ import DataValue from '../../components/ui/DataValue';
 import EmptyState from '../../components/ui/EmptyState';
 import AlertBanner from '../../components/ui/AlertBanner';
 import Modal from '../../components/ui/Modal';
+import { printPrescription } from '../../components/PrintPrescription';
 import StatusBadge from '../../components/ui/StatusBadge';
 
 const TABS = ['Overview', 'Timeline', 'Lab Reports', 'Prescriptions'];
@@ -596,6 +597,28 @@ const DoctorPatientDetail = () => {
                       </div>
                       <div className="flex items-center gap-2">
                         <StatusBadge status={report.status} className="uppercase tracking-wider" />
+                        {report.status === 'completed' && (
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-soft-success"
+                            onClick={async () => {
+                              try {
+                                await api.patch(`/lab-reports/${report._id}/status`, {
+                                  status: 'reviewed',
+                                });
+                                queryClient.invalidateQueries({
+                                  queryKey: ['patientLabReports', patientId],
+                                });
+                                toast.success('Lab marked reviewed — visible to patient as reviewed');
+                              } catch (err) {
+                                toast.error(err.response?.data?.message || 'Could not mark reviewed');
+                              }
+                            }}
+                          >
+                            <CheckCircle className="h-3.5 w-3.5" />
+                            Mark reviewed
+                          </button>
+                        )}
                         <button
                           type="button"
                           onClick={() => reorderLab.mutate(report)}
@@ -697,7 +720,23 @@ const DoctorPatientDetail = () => {
                           By {formatDoctorName(rx.doctor?.name)}
                         </p>
                       </div>
-                      <StatusBadge status={rx.status || 'active'} className="uppercase tracking-wider" />
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          className="btn btn-secondary btn-sm"
+                          onClick={() => {
+                            const ok = printPrescription(rx, {
+                              patientName: patient?.user?.name,
+                              doctorName: formatDoctorName(rx.doctor?.name),
+                            });
+                            if (!ok) toast.error('Allow pop-ups to print');
+                          }}
+                        >
+                          <Printer className="h-3.5 w-3.5" />
+                          Print
+                        </button>
+                        <StatusBadge status={rx.status || 'active'} className="uppercase tracking-wider" />
+                      </div>
                     </div>
                     <ul className="space-y-2">
                       {(rx.medicines || []).map((med, i) => {

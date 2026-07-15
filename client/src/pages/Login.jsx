@@ -23,7 +23,11 @@ const Login = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
     resolver: zodResolver(loginSchema),
   });
 
@@ -42,83 +46,95 @@ const Login = () => {
 
   return (
     <div className="flex min-h-screen bg-surface">
-      {/* Left — cinematic brand panel */}
-      <div className="relative hidden overflow-hidden lg:flex lg:w-[48%] xl:w-1/2">
+      {/* Brand panel — atmosphere only */}
+      <div className="relative hidden overflow-hidden lg:flex lg:w-[46%] xl:w-[48%]">
         <img src={HERO_BG} alt="" className="absolute inset-0 h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/50 to-black/30" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/55 to-black/35" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/45 to-transparent" />
 
-        <div className="relative z-10 flex w-full flex-col justify-between p-12 text-white">
+        <div className="relative z-10 flex w-full flex-col justify-between p-10 xl:p-14 text-white">
           <BrandMark size="md" tone="light" asLink />
 
           <div className="max-w-md">
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+              className="mb-4 text-2xs font-medium uppercase tracking-[0.16em] text-white/45"
+            >
+              Clinical workspace
+            </motion.p>
             <motion.h1
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className="mb-4 font-display text-[clamp(2rem,3vw,2.5rem)] font-normal leading-[1.12] tracking-[-0.02em]"
+              className="mb-4 font-display text-[clamp(2rem,3.2vw,2.65rem)] font-normal leading-[1.1] tracking-[-0.02em]"
             >
               Healthcare for Good.
               <br />
-              <span className="italic text-white/80">Today. Tomorrow. Always.</span>
+              <span className="italic text-white/75">Today. Tomorrow. Always.</span>
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className="text-md font-normal leading-[1.65] tracking-[-0.01em] text-white/70"
+              transition={{ delay: 0.08, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              className="max-w-sm text-md font-normal leading-[1.65] tracking-[-0.01em] text-white/65"
             >
-              Access your records, connect with clinicians, and manage care from one secure workspace.
+              Access records, connect with clinicians, and manage care from one secure workspace.
             </motion.p>
           </div>
 
-          <p className="text-xs font-normal text-white/50">
+          <p className="text-xs font-normal text-white/40">
             © {new Date().getFullYear()} Clinova
           </p>
         </div>
       </div>
 
-      {/* Right — form */}
-      <div className="flex flex-1 flex-col justify-center px-4 py-10 sm:px-10 sm:py-12 lg:px-16 xl:px-24">
+      {/* Form panel — primary focus */}
+      <div className="flex flex-1 flex-col justify-center px-5 py-10 sm:px-10 sm:py-14 lg:px-14 xl:px-20">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
           className="mx-auto w-full max-w-[400px]"
         >
-          <div className="mb-6 lg:hidden">
+          <div className="mb-8 lg:hidden">
             <BrandMark size="sm" tone="dark" asLink />
           </div>
 
-          <div>
-            <h2 className="page-title">Sign in</h2>
-            <p className="page-subtitle">Welcome back. Enter your details to continue.</p>
-          </div>
+          <header className="mb-8">
+            <h1 className="text-2xl font-medium tracking-[-0.03em] text-ink sm:text-[1.625rem]">
+              Sign in
+            </h1>
+            <p className="mt-1.5 text-sm leading-relaxed text-ink-muted">
+              Welcome back. Enter your credentials to continue.
+            </p>
+          </header>
 
-          <div className="card mt-6 p-5 sm:mt-8 sm:p-7">
-            <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
+          <div className="card p-6 shadow-md sm:p-8">
+            <form className="space-y-5" onSubmit={handleSubmit(onSubmit)} noValidate>
               <div>
-                <label className="label">Email address</label>
+                <label className="label" htmlFor="login-email">
+                  Email address
+                </label>
                 <input
+                  id="login-email"
                   {...register('email')}
                   type="email"
                   autoComplete="email"
+                  autoFocus
                   placeholder="you@example.com"
                   className={`input ${errors.email ? 'input-error' : ''}`}
                 />
-                {errors.email && (
-                  <p className="field-error">{errors.email.message}</p>
-                )}
+                {errors.email && <p className="field-error">{errors.email.message}</p>}
               </div>
 
               <div>
-                <div className="mb-1.5 flex items-center justify-between">
-                  <label className="label mb-0">Password</label>
-                  <a href="#" className="text-xs font-medium text-ink-muted transition-colors hover:text-ink">
-                    Forgot password?
-                  </a>
-                </div>
+                <label className="label" htmlFor="login-password">
+                  Password
+                </label>
                 <input
+                  id="login-password"
                   {...register('password')}
                   type="password"
                   autoComplete="current-password"
@@ -134,23 +150,26 @@ const Login = () => {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="btn btn-primary group relative w-full py-2.5"
+                  className="btn btn-primary w-full py-2.5"
                 >
                   {isLoading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
                     <>
                       Sign in
-                      <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                      <ArrowRight className="h-3.5 w-3.5" />
                     </>
                   )}
                 </button>
               </div>
             </form>
 
-            <p className="mt-7 text-center text-sm font-normal text-ink-muted">
+            <p className="mt-6 text-center text-sm text-ink-muted">
               Don&apos;t have an account?{' '}
-              <Link to="/register" className="font-medium text-ink underline-offset-4 hover:underline">
+              <Link
+                to="/register"
+                className="font-medium text-ink underline-offset-4 hover:underline"
+              >
                 Create one
               </Link>
             </p>

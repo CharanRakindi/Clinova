@@ -12,6 +12,7 @@ import {
   Loader2,
   Lock,
   Info,
+  Download,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -59,6 +60,25 @@ export default function Profile() {
       ['doctor', 'admin', 'receptionist', 'lab_technician'].includes(user.role),
     [user]
   );
+  const [exporting, setExporting] = useState(false);
+
+  const exportMyData = async () => {
+    try {
+      setExporting(true);
+      const res = await api.get('/export/me', { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `clinova-export-${Date.now()}.json`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+      toast.success('Export downloaded');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Export failed');
+    } finally {
+      setExporting(false);
+    }
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -151,6 +171,17 @@ export default function Profile() {
               : 'Update your personal details. Staff email is managed by an administrator.'}
           </p>
         </div>
+        {isPatient && (
+          <button
+            type="button"
+            className="btn btn-secondary"
+            disabled={exporting}
+            onClick={exportMyData}
+          >
+            <Download className="h-3.5 w-3.5" />
+            {exporting ? 'Exporting…' : 'Export my data'}
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">

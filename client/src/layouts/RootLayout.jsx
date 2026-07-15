@@ -13,6 +13,7 @@ import {
   Clock,
   Lock,
   X,
+  MessageSquare,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import api from '../api/axios';
@@ -76,20 +77,23 @@ const RootLayout = () => {
 
   const navigation = {
     patient: [
-      { name: 'Dashboard', href: '/patient/dashboard', icon: LayoutDashboard },
-      { name: 'Appointments', href: '/patient/appointments', icon: Calendar },
-      { name: 'Medical Records', href: '/patient/records', icon: FileText },
-      { name: 'Profile & Settings', href: '/profile', icon: User },
+      { name: 'Dashboard', href: '/patient/dashboard', icon: LayoutDashboard, mobile: true },
+      { name: 'Appointments', href: '/patient/appointments', icon: Calendar, mobile: true },
+      { name: 'Records', href: '/patient/records', icon: FileText, mobile: true },
+      { name: 'Messages', href: '/messages', icon: MessageSquare, mobile: true },
+      { name: 'Profile', href: '/profile', icon: User, mobile: true },
     ],
     doctor: [
       { name: 'Dashboard', href: '/doctor/dashboard', icon: LayoutDashboard },
       { name: 'Patients', href: '/doctor/patients', icon: Users },
+      { name: 'Messages', href: '/messages', icon: MessageSquare },
       { name: 'Profile & Settings', href: '/profile', icon: User },
     ],
     admin: [
       { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
       { name: 'Users', href: '/admin/users', icon: Users },
       { name: 'Audit Logs', href: '/admin/audit-logs', icon: FileText },
+      { name: 'Messages', href: '/messages', icon: MessageSquare },
       { name: 'Profile & Settings', href: '/profile', icon: User },
     ],
     receptionist: [
@@ -183,21 +187,21 @@ const RootLayout = () => {
       <OnboardingTour />
       <KeyboardShortcutsHelp />
 
-      {/* Top bar */}
+      {/* Top bar — light, uncluttered workspace chrome */}
       <header
         className={cn(
-          'sticky top-0 z-30 border-b transition-all duration-product',
+          'sticky top-0 z-30 border-b transition-[background-color,box-shadow,border-color] duration-product',
           scrolled
-            ? 'border-line bg-surface-muted/90 shadow-sm backdrop-blur-xl'
-            : 'border-line bg-surface-muted/75 backdrop-blur-md'
+            ? 'border-line bg-surface/90 shadow-xs backdrop-blur-xl'
+            : 'border-line-soft bg-surface-muted/80 backdrop-blur-md'
         )}
       >
-        <div className="flex h-14 items-center justify-between gap-2 px-3 sm:px-6 lg:px-8">
+        <div className="flex h-14 items-center justify-between gap-3 px-3 sm:px-6 lg:px-8">
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             <button
               type="button"
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="tap-target -ml-1 inline-flex items-center justify-center rounded-xl p-2 text-ink-muted transition-colors hover:bg-surface-subtle hover:text-ink lg:hidden"
+              className="tap-target -ml-1 inline-flex items-center justify-center rounded-lg p-2 text-ink-muted transition-colors hover:bg-surface-subtle hover:text-ink lg:hidden"
               aria-label="Toggle menu"
             >
               <Menu className="h-5 w-5" />
@@ -207,27 +211,28 @@ const RootLayout = () => {
               <BrandMark size="sm" tone="dark" asLink />
             </div>
 
-            <div className="hidden items-center gap-2 text-xs font-normal text-ink-muted lg:flex">
-              <Clock className="h-3.5 w-3.5 text-ink-faint" />
-              <span>
+            <div className="hidden items-center gap-2 text-xs text-ink-faint lg:flex">
+              <Clock className="h-3.5 w-3.5" aria-hidden />
+              <span className="tabular-nums">
                 {currentTime.toLocaleDateString(undefined, {
                   weekday: 'short',
                   month: 'short',
                   day: 'numeric',
                 })}
               </span>
-              <span className="text-ink-faint">·</span>
-              <span className="font-mono text-ink-muted tabular-nums">
+              <span className="text-line-strong" aria-hidden>
+                ·
+              </span>
+              <span className="font-mono tabular-nums">
                 {currentTime.toLocaleTimeString(undefined, {
                   hour: '2-digit',
                   minute: '2-digit',
-                  second: '2-digit',
                 })}
               </span>
             </div>
           </div>
 
-          <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             <button
               id="search-trigger"
               type="button"
@@ -236,41 +241,42 @@ const RootLayout = () => {
                   new KeyboardEvent('keydown', { key: 'k', metaKey: true })
                 )
               }
-              className="hidden items-center gap-2 rounded-full border border-line bg-surface-subtle px-3 py-1.5 text-xs font-normal text-ink-faint transition-colors hover:bg-surface-subtle sm:flex"
+              className="hidden items-center gap-2 rounded-full border border-line bg-surface px-3 py-1.5 text-xs text-ink-faint shadow-xs transition-colors hover:border-line-strong hover:text-ink-muted sm:flex"
             >
               <Search className="h-3.5 w-3.5" />
               <span>Search</span>
-              <kbd className="rounded-md border border-line bg-white px-1.5 py-0.5 font-mono text-2xs text-ink-muted">
+              <kbd className="rounded border border-line bg-surface-subtle px-1.5 py-0.5 font-mono text-2xs text-ink-faint">
                 ⌘K
               </kbd>
             </button>
 
             <button
               type="button"
-              className="rounded-xl p-2 text-ink-faint transition-colors hover:bg-surface-subtle hover:text-ink-secondary sm:hidden"
+              className="rounded-lg p-2 text-ink-faint transition-colors hover:bg-surface-subtle hover:text-ink-secondary sm:hidden"
               onClick={() =>
                 document.dispatchEvent(
                   new KeyboardEvent('keydown', { key: 'k', metaKey: true })
                 )
               }
+              aria-label="Search"
             >
               <Search className="h-5 w-5" />
             </button>
 
             <NotificationCenter />
 
-            <div className="mx-0.5 hidden h-5 w-px bg-line sm:block" aria-hidden />
+            <div className="mx-1 hidden h-4 w-px bg-line sm:block" aria-hidden />
 
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2.5 pl-0.5">
               <div className="hidden flex-col items-end sm:flex">
-                <span className="text-sm font-medium leading-none text-ink-secondary">
+                <span className="text-sm font-medium leading-none tracking-[-0.01em] text-ink">
                   {user?.name}
                 </span>
-                <span className="mt-1 rounded-full bg-surface-subtle px-2 py-0.5 text-2xs font-medium uppercase tracking-wider text-ink-muted">
+                <span className="mt-1 text-2xs font-medium capitalize tracking-wide text-ink-faint">
                   {user?.role?.replace('_', ' ')}
                 </span>
               </div>
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-ink text-xs font-medium text-white ring-2 ring-white">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-ink text-xs font-medium text-white shadow-xs">
                 {user?.name?.charAt(0).toUpperCase()}
               </div>
             </div>
@@ -280,8 +286,9 @@ const RootLayout = () => {
               onClick={logout}
               className="rounded-lg p-2 text-ink-faint transition-colors duration-product hover:bg-danger-soft hover:text-danger"
               title="Log out"
+              aria-label="Log out"
             >
-              <LogOut className="h-4.5 w-4.5" />
+              <LogOut className="h-4 w-4" />
             </button>
           </div>
         </div>
@@ -298,7 +305,7 @@ const RootLayout = () => {
         {/* Sidebar */}
         <aside
           className={cn(
-            'fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-sidebar shadow-premium-lg transition-transform duration-product ease-out lg:static lg:translate-x-0 lg:shadow-none',
+            'bg-about-dark fixed inset-y-0 left-0 z-50 flex w-64 flex-col shadow-premium-lg transition-transform duration-product ease-out lg:static lg:translate-x-0 lg:shadow-none',
             isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
           )}
         >
@@ -340,7 +347,7 @@ const RootLayout = () => {
                     className={cn(
                       'group flex items-center justify-between rounded-xl px-3 py-2.5 transition-colors duration-product',
                       isActive
-                        ? 'bg-white/[0.12] text-white'
+                        ? 'bg-white/[0.1] text-white ring-1 ring-sky-400/20'
                         : 'text-white/50 hover:bg-white/[0.06] hover:text-white'
                     )}
                   >
@@ -348,7 +355,9 @@ const RootLayout = () => {
                       <Icon
                         className={cn(
                           'h-[18px] w-[18px] transition-colors',
-                          isActive ? 'text-white' : 'text-white/35 group-hover:text-white/65'
+                          isActive
+                            ? 'text-sky-300'
+                            : 'text-white/35 group-hover:text-white/65'
                         )}
                         strokeWidth={1.75}
                       />
@@ -356,9 +365,7 @@ const RootLayout = () => {
                         {item.name}
                       </span>
                     </div>
-                    {isActive && (
-                      <span className="h-1.5 w-1.5 rounded-full bg-white/90" />
-                    )}
+                    {isActive && <span className="dot-live" aria-hidden />}
                   </Link>
                 </motion.div>
               );
@@ -368,7 +375,7 @@ const RootLayout = () => {
           <div className="border-t border-white/[0.06] p-4">
             <div className="flex items-center justify-between rounded-xl bg-white/[0.04] px-3.5 py-3">
               <div className="flex items-center gap-2.5">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-success" aria-hidden />
+                <span className="dot-live animate-pulse" aria-hidden />
                 <span className="text-2xs font-normal tracking-[-0.01em] text-white/50">
                   System online
                 </span>
@@ -395,7 +402,12 @@ const RootLayout = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-              className="mx-auto max-w-content p-3 pb-[max(1rem,env(safe-area-inset-bottom))] sm:p-6 lg:p-8"
+              className={cn(
+                'mx-auto max-w-content p-3 sm:p-6 lg:p-8',
+                user?.role === 'patient'
+                  ? 'pb-[max(5.5rem,env(safe-area-inset-bottom))] lg:pb-8'
+                  : 'pb-[max(1rem,env(safe-area-inset-bottom))]'
+              )}
             >
               <ErrorBoundary>
                 <Outlet />
@@ -404,6 +416,38 @@ const RootLayout = () => {
           </AnimatePresence>
         </main>
       </div>
+
+      {/* Patient mobile bottom nav */}
+      {user?.role === 'patient' && (
+        <nav
+          className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden"
+          aria-label="Patient primary"
+        >
+          <div className="mx-auto flex max-w-content items-stretch justify-around px-1 pt-1">
+            {navItems
+              .filter((i) => i.mobile)
+              .map((item) => {
+                const Icon = item.icon;
+                const active =
+                  location.pathname === item.href ||
+                  (item.href !== '/' && location.pathname.startsWith(item.href + '/'));
+                return (
+                  <Link
+                    key={item.href}
+                    to={item.href}
+                    className={cn(
+                      'flex min-w-0 flex-1 flex-col items-center gap-0.5 px-1 py-2 text-2xs font-medium',
+                      active ? 'text-sky-600' : 'text-ink-faint'
+                    )}
+                  >
+                    <Icon className="h-5 w-5" strokeWidth={active ? 2 : 1.75} />
+                    <span className="truncate">{item.name}</span>
+                  </Link>
+                );
+              })}
+          </div>
+        </nav>
+      )}
     </div>
   );
 };

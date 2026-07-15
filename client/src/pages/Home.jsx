@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import api from '../api/axios';
 import {
   motion,
   useScroll,
   useTransform,
-  useSpring,
   useInView,
   AnimatePresence,
+  useReducedMotion,
 } from 'framer-motion';
 import {
   ArrowRight,
@@ -84,30 +86,18 @@ const SERVICES = [
   },
 ];
 
-const DOCTORS = [
+const FALLBACK_DOCTORS = [
   {
-    name: 'Sarah Chen',
+    name: 'Sarah Jenkins',
     role: 'Cardiology',
     img: AVATARS[0],
     bio: 'Preventive heart care and long-term risk management.',
   },
   {
-    name: 'James Okonkwo',
-    role: 'Internal Medicine',
+    name: 'Michael Chen',
+    role: 'Neurology',
     img: AVATARS[1],
-    bio: 'Whole-person primary care with evidence-based plans.',
-  },
-  {
-    name: 'Maya Patel',
-    role: 'Family Medicine',
-    img: AVATARS[2],
-    bio: 'Family-focused consultations and wellness programs.',
-  },
-  {
-    name: 'Ethan Brooks',
-    role: 'Diagnostics',
-    img: AVATARS[3],
-    bio: 'Lab-informed diagnosis and rapid test coordination.',
+    bio: 'Whole-person specialty care with evidence-based plans.',
   },
 ];
 
@@ -152,6 +142,7 @@ function WordReveal({
   step = 70,
   onDone,
 }) {
+  const reduce = useReducedMotion();
   const words = useMemo(
     () =>
       lines.map((line) =>
@@ -160,11 +151,15 @@ function WordReveal({
     [lines]
   );
   const totalWords = words.reduce((s, line) => s + line.length, 0);
-  const [visibleCount, setVisibleCount] = useState(0);
+  const [visibleCount, setVisibleCount] = useState(reduce ? totalWords : 0);
   const onDoneRef = useRef(onDone);
   onDoneRef.current = onDone;
 
   useEffect(() => {
+    if (reduce) {
+      onDoneRef.current?.();
+      return undefined;
+    }
     let wordIndex = 0;
     const timers = [];
     const start = window.setTimeout(() => {
@@ -180,7 +175,7 @@ function WordReveal({
       window.clearTimeout(start);
       timers.forEach(clearTimeout);
     };
-  }, [delay, step, totalWords]);
+  }, [delay, step, totalWords, reduce]);
 
   let flatIndex = 0;
   return (
@@ -197,7 +192,7 @@ function WordReveal({
                 <span
                   key={`${lineIdx}-${index}`}
                   className={`${wordClassName} inline transition-all duration-500 ease-out ${
-                    isVisible ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
+                    isVisible ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0 blur-[2px]'
                   }`}
                   style={{ display: 'inline-block' }}
                 >
@@ -212,19 +207,126 @@ function WordReveal({
   );
 }
 
-function Reveal({ children, className = '', delay = 0, y = 24 }) {
+function Reveal({ children, className = '', delay = 0, y = 28, blur = true }) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: '-8% 0px' });
+  const reduce = useReducedMotion();
+  // once: false so animations re-run when scrolling back into view
+  const inView = useInView(ref, { once: false, amount: 0.2, margin: '0px 0px -8% 0px' });
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.7, delay, ease: EASE }}
+      initial={
+        reduce
+          ? false
+          : { opacity: 0, y, filter: blur ? 'blur(8px)' : 'blur(0px)' }
+      }
+      animate={
+        reduce
+          ? { opacity: 1, y: 0, filter: 'blur(0px)' }
+          : inView
+            ? { opacity: 1, y: 0, filter: 'blur(0px)' }
+            : { opacity: 0, y, filter: blur ? 'blur(8px)' : 'blur(0px)' }
+      }
+      transition={{
+        duration: reduce ? 0.01 : inView ? 0.65 : 0.35,
+        delay: reduce || !inView ? 0 : delay,
+        ease: EASE,
+      }}
       className={className}
     >
       {children}
     </motion.div>
+  );
+}
+
+function Stagger({ children, className = '', delay = 0, stagger = 0.07 }) {
+  const ref = useRef(null);
+  const reduce = useReducedMotion();
+  const inView = useInView(ref, { once: false, amount: 0.15, margin: '0px 0px -6% 0px' });
+  return (
+    <motion.div
+      ref={ref}
+      className={className}
+      initial="hidden"
+      animate={inView || reduce ? 'show' : 'hidden'}
+      variants={{
+        hidden: {},
+        show: {
+          transition: {
+            staggerChildren: reduce ? 0 : stagger,
+            delayChildren: reduce || !inView ? 0 : delay,
+          },
+        },
+      }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+const staggerItem = {
+  hidden: { opacity: 0, y: 18, filter: 'blur(6px)' },
+  show: {
+    opacity: 1,
+    y: 0,
+    filter: 'blur(0px)',
+    transition: { duration: 0.55, ease: EASE },
+  },
+};
+
+/** Count-up when scrolled into view (marketing stats). */
+function CountUp({ value, className = '' }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: false, amount: 0.4 });
+  const reduce = useReducedMotion();
+  const match = String(value).match(/^([\d.]+)(.*)$/);
+  const target = match ? parseFloat(match[1]) : 0;
+  const suffix = match ? match[2] : String(value);
+  const isInt = Number.isInteger(target);
+  const [display, setDisplay] = useState(reduce ? target : 0);
+
+  useEffect(() => {
+    if (!inView) {
+      if (!reduce) setDisplay(0);
+      return undefined;
+    }
+    if (reduce) {
+      setDisplay(target);
+      return undefined;
+    }
+    const start = performance.now();
+    const dur = 1200;
+    let raf;
+    const tick = (now) => {
+      const t = Math.min(1, (now - start) / dur);
+      // ease-out cubic
+      const e = 1 - (1 - t) ** 3;
+      const v = target * e;
+      setDisplay(isInt ? Math.round(v) : Math.round(v * 10) / 10);
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [inView, target, isInt, reduce]);
+
+  return (
+    <span ref={ref} className={className}>
+      {display}
+      {suffix}
+    </span>
+  );
+}
+
+function FloatingOrb({ className, duration = 12, delay = 0, x = 12, y = 18 }) {
+  const reduce = useReducedMotion();
+  if (reduce) return <div className={className} aria-hidden />;
+  return (
+    <motion.div
+      className={className}
+      aria-hidden
+      animate={{ x: [0, x, -x * 0.6, 0], y: [0, -y, y * 0.5, 0], scale: [1, 1.06, 0.97, 1] }}
+      transition={{ duration, delay, repeat: Infinity, ease: 'easeInOut' }}
+    />
   );
 }
 
@@ -247,14 +349,39 @@ const Home = () => {
   const [scrolled, setScrolled] = useState(false);
   const handleHeadingDone = useCallback(() => setHeadingDone(true), []);
 
+  const { data: apiDoctors } = useQuery({
+    queryKey: ['landingDoctors'],
+    queryFn: async () => {
+      try {
+        const res = await api.get('/doctors?accepting=true');
+        return res.data.data || [];
+      } catch {
+        return [];
+      }
+    },
+    staleTime: 60_000,
+  });
+
+  const DOCTORS = useMemo(() => {
+    if (Array.isArray(apiDoctors) && apiDoctors.length > 0) {
+      return apiDoctors.slice(0, 4).map((d, i) => ({
+        name: d.user?.name || 'Clinician',
+        role: d.specialization || 'General practice',
+        img: AVATARS[i % AVATARS.length],
+        bio: d.department?.name
+          ? `${d.specialization || 'Care'} · ${d.department.name}`
+          : 'Available for new appointment requests.',
+      }));
+    }
+    return FALLBACK_DOCTORS;
+  }, [apiDoctors]);
+
   const heroRef = useRef(null);
-  const { scrollYProgress } = useScroll();
   const { scrollYProgress: heroProgress } = useScroll({
     target: heroRef,
     offset: ['start start', 'end start'],
   });
 
-  const progressScale = useSpring(scrollYProgress, { stiffness: 140, damping: 30 });
   // Lighter parallax on small screens (less jank / fewer layout shifts)
   const [isMobile, setIsMobile] = useState(
     typeof window !== 'undefined' ? window.matchMedia('(max-width: 640px)').matches : false
@@ -289,14 +416,7 @@ const Home = () => {
   const navSolid = scrolled || menuOpen;
 
   return (
-    <div className="overflow-x-hidden bg-surface-muted text-slate-900 antialiased selection:bg-slate-900 selection:text-white">
-      {/* Scroll progress */}
-      <motion.div
-        className="fixed left-0 top-0 z-[100] h-[2px] origin-left bg-slate-900"
-        style={{ scaleX: progressScale, width: '100%' }}
-        aria-hidden
-      />
-
+    <div className="overflow-x-hidden bg-surface-muted text-ink antialiased">
       {/* ── Nav ── */}
       <header
         className={`fixed inset-x-0 top-0 z-50 pt-[env(safe-area-inset-top)] transition-[background,border,box-shadow] duration-product ${
@@ -349,14 +469,14 @@ const Home = () => {
             </Link>
             <Link
               to="/register"
-              className={`group hidden items-center gap-1.5 rounded-full px-4 py-[7px] text-sm font-medium tracking-[-0.01em] transition-all md:inline-flex ${
+              className={`hidden items-center gap-1.5 rounded-full px-4 py-[7px] text-sm font-medium tracking-[-0.01em] md:inline-flex ${
                 navSolid
-                  ? 'bg-slate-900 text-white hover:bg-slate-800'
-                  : 'bg-white text-slate-900 hover:bg-white/92'
+                  ? 'bg-slate-900 text-white'
+                  : 'bg-white text-slate-900'
               }`}
             >
               Book appointment
-              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+              <ArrowRight className="h-3.5 w-3.5" />
             </Link>
 
             <button
@@ -423,7 +543,7 @@ const Home = () => {
       <section
         ref={heroRef}
         id="home"
-        className="relative flex min-h-[100svh] flex-col justify-end overflow-hidden bg-slate-950 text-white"
+        className="relative flex min-h-[100svh] flex-col justify-end overflow-hidden bg-surface-inverse text-white"
       >
         <motion.div
           className="absolute inset-0"
@@ -438,8 +558,26 @@ const Home = () => {
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/55 to-black/35" />
           <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/25 to-black/20 sm:via-black/15 sm:to-transparent" />
           <div className="landing-grain pointer-events-none absolute inset-0 opacity-30 mix-blend-overlay" />
-          <div className="pointer-events-none absolute -left-20 top-1/3 hidden h-64 w-64 rounded-full bg-sky-500/15 blur-[90px] sm:block" />
-          <div className="pointer-events-none absolute bottom-0 right-0 hidden h-80 w-80 rounded-full bg-emerald-500/10 blur-[100px] sm:block" />
+          <FloatingOrb
+            className="pointer-events-none absolute -left-20 top-1/3 hidden h-64 w-64 rounded-full bg-sky-500/20 blur-[90px] sm:block"
+            duration={14}
+            x={20}
+            y={28}
+          />
+          <FloatingOrb
+            className="pointer-events-none absolute bottom-0 right-0 hidden h-80 w-80 rounded-full bg-emerald-500/15 blur-[100px] sm:block"
+            duration={16}
+            delay={1.2}
+            x={-24}
+            y={-22}
+          />
+          <FloatingOrb
+            className="pointer-events-none absolute right-1/4 top-1/4 hidden h-40 w-40 rounded-full bg-cyan-400/10 blur-[70px] lg:block"
+            duration={11}
+            delay={0.5}
+            x={16}
+            y={-14}
+          />
         </motion.div>
 
         <motion.div
@@ -452,14 +590,18 @@ const Home = () => {
             }`}
           >
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.12, duration: 0.55, ease: EASE }}
+              initial={{ opacity: 0, y: 12, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ delay: 0.12, duration: 0.6, ease: EASE }}
               className="mb-5 inline-flex max-w-full items-center gap-2 rounded-full border border-white/12 bg-white/[0.08] px-2 py-1 backdrop-blur-md sm:mb-6"
             >
-              <span className="shrink-0 rounded-full bg-white px-2 py-0.5 text-2xs font-medium uppercase tracking-[0.06em] text-slate-900 sm:text-2xs">
+              <motion.span
+                className="relative shrink-0 rounded-full bg-white px-2 py-0.5 text-2xs font-medium uppercase tracking-[0.06em] text-slate-900 sm:text-2xs"
+                animate={{ boxShadow: ['0 0 0 0 rgba(255,255,255,0)', '0 0 0 6px rgba(255,255,255,0.12)', '0 0 0 0 rgba(255,255,255,0)'] }}
+                transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+              >
                 Trusted
-              </span>
+              </motion.span>
               <span className="truncate pr-1.5 text-xs font-normal tracking-[-0.01em] text-white/90 sm:text-sm">
                 20,000+ Patients Worldwide
               </span>
@@ -497,25 +639,29 @@ const Home = () => {
             </div>
 
             <motion.div
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: mounted ? 1 : 0, y: mounted ? 0 : 14 }}
-              transition={{ delay: 0.5, duration: 0.55, ease: EASE }}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: mounted ? 1 : 0, y: mounted ? 0 : 16 }}
+              transition={{ delay: 0.5, duration: 0.6, ease: EASE }}
               className="mt-7 flex w-full flex-col gap-2.5 sm:mt-8 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center"
             >
-              <Link
-                to="/register"
-                className="group inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-white px-5 py-3 text-sm font-medium tracking-[-0.01em] text-slate-900 shadow-[0_10px_32px_rgba(0,0,0,0.28)] transition-[box-shadow,background-color] duration-product hover:bg-white/95 sm:w-auto sm:py-2.5"
-              >
-                Book An Appointment
-                <ArrowRight className="h-3.5 w-3.5 transition-transform duration-product ease-out group-hover:translate-x-0.5" />
-              </Link>
-              <a
-                href="#about"
-                className="group inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-white/45 bg-white/[0.06] px-5 py-3 text-sm font-medium tracking-[-0.01em] text-white backdrop-blur-sm transition-colors duration-product hover:bg-white/12 sm:w-auto sm:py-2.5"
-              >
-                About Us
-                <ArrowRight className="h-3.5 w-3.5 transition-transform duration-product ease-out group-hover:translate-x-0.5" />
-              </a>
+              <div className="w-full sm:w-auto">
+                <Link
+                  to="/register"
+                  className="inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-white px-5 py-3 text-sm font-medium tracking-[-0.01em] text-slate-900 shadow-[0_10px_32px_rgba(0,0,0,0.28)] sm:w-auto sm:py-2.5"
+                >
+                  Book An Appointment
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </div>
+              <div className="w-full sm:w-auto">
+                <a
+                  href="#about"
+                  className="inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-white/45 bg-white/[0.06] px-5 py-3 text-sm font-medium tracking-[-0.01em] text-white backdrop-blur-sm sm:w-auto sm:py-2.5"
+                >
+                  About Us
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </a>
+              </div>
             </motion.div>
           </div>
 
@@ -543,11 +689,14 @@ const Home = () => {
               <div className="min-w-0">
                 <div className="flex items-center gap-0.5" aria-label="5-star rating">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <Star
+                    <motion.span
                       key={i}
-                      className="h-3 w-3 fill-amber-400 text-amber-400"
-                      strokeWidth={0}
-                    />
+                      initial={{ opacity: 0, scale: 0.4, y: 4 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      transition={{ delay: 0.85 + i * 0.06, duration: 0.35, ease: EASE }}
+                    >
+                      <Star className="h-3 w-3 fill-amber-400 text-amber-400" strokeWidth={0} />
+                    </motion.span>
                   ))}
                 </div>
                 <p className="mt-0.5 text-xs font-normal tracking-[-0.01em] text-white/80">
@@ -608,50 +757,56 @@ const Home = () => {
                 premium workspace — so clinicians spend less time on software and more time with
                 patients.
               </p>
-              <div className="mt-5 flex flex-wrap gap-2 sm:mt-7">
+              <Stagger className="mt-5 flex flex-wrap gap-2 sm:mt-7" delay={0.12} stagger={0.08}>
                 {[
                   { icon: Lock, label: 'Encrypted by default' },
                   { icon: Activity, label: 'Live care sync' },
                   { icon: Stethoscope, label: 'Built for clinics' },
                 ].map(({ icon: Icon, label }) => (
-                  <span
+                  <motion.span
                     key={label}
+                    variants={staggerItem}
+                    whileHover={{ y: -2, scale: 1.02 }}
                     className="inline-flex items-center gap-2 rounded-full border border-slate-200/90 bg-white px-3.5 py-1.5 text-xs font-medium tracking-[-0.01em] text-slate-600 shadow-sm"
                   >
-                    <Icon className="h-3.5 w-3.5 text-slate-400" strokeWidth={1.75} />
+                    <Icon className="h-3.5 w-3.5 text-sky-500" strokeWidth={1.75} />
                     {label}
-                  </span>
+                  </motion.span>
                 ))}
-              </div>
+              </Stagger>
             </Reveal>
           </div>
 
-          <div className="mt-10 grid grid-cols-1 gap-3 sm:mt-14 sm:grid-cols-3 sm:gap-4">
+          <Stagger
+            className="mt-10 grid grid-cols-1 gap-3 sm:mt-14 sm:grid-cols-3 sm:gap-4"
+            delay={0.05}
+            stagger={0.09}
+          >
             {[
               { value: '20K+', label: 'Patients supported', sub: 'Across care journeys' },
               { value: '99.9%', label: 'Platform uptime', sub: 'Always ready for care' },
-              { value: '5 roles', label: 'One workspace', sub: 'Patient to admin' },
-            ].map((stat, i) => (
-              <Reveal key={stat.label} delay={i * 0.06}>
-                <div className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-premium transition-all duration-product hover:-translate-y-0.5 hover:shadow-premium-lg sm:p-7">
-                  <p className="font-display text-[2.35rem] leading-none tracking-[-0.03em] text-slate-900 sm:text-[3rem]">
-                    {stat.value}
-                  </p>
-                  <p className="mt-2.5 text-sm font-medium tracking-[-0.01em] text-slate-800 sm:mt-3">
-                    {stat.label}
-                  </p>
-                  <p className="mt-0.5 text-xs leading-snug text-slate-500">{stat.sub}</p>
-                </div>
-              </Reveal>
+              { value: '5', label: 'roles · One workspace', sub: 'Patient to admin' },
+            ].map((stat) => (
+              <motion.div
+                key={stat.label}
+                variants={staggerItem}
+                whileHover={{ y: -4, transition: { duration: 0.25, ease: EASE } }}
+                className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-premium transition-shadow duration-product hover:shadow-premium-lg sm:p-7"
+              >
+                <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-sky-400/0 transition-colors duration-product group-hover:bg-sky-400/10" />
+                <p className="font-display text-[2.35rem] leading-none tracking-[-0.03em] text-slate-900 sm:text-[3rem]">
+                  <CountUp value={stat.value} />
+                </p>
+                <p className="mt-2.5 text-sm font-medium tracking-[-0.01em] text-slate-800 sm:mt-3">
+                  {stat.label}
+                </p>
+                <p className="mt-0.5 text-xs leading-snug text-slate-500">{stat.sub}</p>
+              </motion.div>
             ))}
-          </div>
+          </Stagger>
 
           <Reveal delay={0.1} className="mt-3 sm:mt-4">
-            <div className="relative overflow-hidden rounded-2xl bg-slate-950 px-5 py-8 text-white sm:rounded-[1.5rem] sm:px-11 sm:py-12">
-              <div className="pointer-events-none absolute inset-0" aria-hidden>
-                <div className="absolute -left-16 top-0 h-56 w-56 rounded-full bg-sky-500/15 blur-[90px]" />
-                <div className="absolute bottom-0 right-0 h-64 w-64 rounded-full bg-emerald-400/10 blur-[100px]" />
-              </div>
+            <div className="surface-inverse-panel px-5 py-8 sm:rounded-[1.5rem] sm:px-11 sm:py-12">
               <div className="relative grid grid-cols-1 gap-10 lg:grid-cols-2 lg:items-center lg:gap-14">
                 <div>
                   <Eyebrow light>Built for every care role</Eyebrow>
@@ -670,11 +825,11 @@ const Home = () => {
                       key={item}
                       initial={{ opacity: 0, x: 10 }}
                       whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
+                      viewport={{ once: false, amount: 0.4 }}
                       transition={{ delay: 0.08 + i * 0.05, ease: EASE }}
                       className="flex items-start gap-3 text-base leading-snug tracking-[-0.01em] text-white/70"
                     >
-                      <span className="mt-[0.4rem] h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400/90" />
+                      <span className="dot-live mt-[0.4rem]" />
                       {item}
                     </motion.li>
                   ))}
@@ -701,23 +856,33 @@ const Home = () => {
             </p>
           </Reveal>
 
-          <div className="mt-8 grid grid-cols-1 gap-3 sm:mt-12 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
-            {SERVICES.map(({ icon: Icon, title, body }, i) => (
-              <Reveal key={title} delay={i * 0.05}>
-                <article className="group flex h-full flex-col rounded-2xl border border-slate-200/80 bg-surface-muted p-5 transition-all duration-product hover:-translate-y-0.5 hover:border-slate-300/90 hover:bg-white hover:shadow-premium-lg sm:p-6">
-                  <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/90 bg-white text-slate-700 shadow-sm transition-transform duration-product group-hover:scale-[1.04] sm:mb-7">
-                    <Icon className="h-[18px] w-[18px]" strokeWidth={1.6} />
-                  </div>
-                  <h3 className="text-md font-medium tracking-[-0.015em] text-slate-900">
-                    {title}
-                  </h3>
-                  <p className="mt-2 text-sm leading-[1.65] tracking-[-0.01em] text-slate-600">
-                    {body}
-                  </p>
-                </article>
-              </Reveal>
+          <Stagger
+            className="mt-8 grid grid-cols-1 gap-3 sm:mt-12 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4"
+            stagger={0.08}
+          >
+            {SERVICES.map(({ icon: Icon, title, body }) => (
+              <motion.article
+                key={title}
+                variants={staggerItem}
+                whileHover={{ y: -6, transition: { duration: 0.28, ease: EASE } }}
+                className="group flex h-full flex-col rounded-2xl border border-slate-200/80 bg-surface-muted p-5 transition-[border-color,box-shadow,background-color] duration-product hover:border-sky-200/80 hover:bg-white hover:shadow-premium-lg sm:p-6"
+              >
+                <motion.div
+                  className="mb-5 flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/90 bg-white text-slate-700 shadow-sm sm:mb-7"
+                  whileHover={{ scale: 1.08, rotate: -4 }}
+                  transition={{ type: 'spring', stiffness: 320, damping: 18 }}
+                >
+                  <Icon className="h-[18px] w-[18px] text-sky-600" strokeWidth={1.6} />
+                </motion.div>
+                <h3 className="text-md font-medium tracking-[-0.015em] text-slate-900">
+                  {title}
+                </h3>
+                <p className="mt-2 text-sm leading-[1.65] tracking-[-0.01em] text-slate-600">
+                  {body}
+                </p>
+              </motion.article>
             ))}
-          </div>
+          </Stagger>
         </div>
       </section>
 
@@ -737,10 +902,10 @@ const Home = () => {
             <Reveal delay={0.06} className="w-full sm:w-auto">
               <Link
                 to="/register"
-                className="group inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-slate-900 px-5 py-3 text-sm font-medium tracking-[-0.01em] text-white transition-colors duration-product hover:bg-slate-800 sm:w-auto sm:py-2.5"
+                className="inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-slate-900 px-5 py-3 text-sm font-medium tracking-[-0.01em] text-white sm:w-auto sm:py-2.5"
               >
                 Book a visit
-                <ArrowRight className="h-3.5 w-3.5 transition-transform duration-product ease-out group-hover:translate-x-0.5" />
+                <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </Reveal>
           </div>
@@ -750,20 +915,20 @@ const Home = () => {
             {DOCTORS.map((doc, i) => (
               <Reveal
                 key={doc.name}
-                delay={i * 0.05}
+                delay={i * 0.06}
                 className="w-[78vw] max-w-[280px] shrink-0 snap-center sm:w-auto sm:max-w-none"
               >
-                <article className="group h-full overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-premium transition-all duration-product hover:-translate-y-0.5 hover:shadow-premium-lg">
+                <article className="group h-full overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-premium">
                   <div className="relative aspect-[4/5] overflow-hidden bg-slate-100 sm:aspect-[3/4]">
                     <img
                       src={doc.img}
                       alt={doc.name}
-                      className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+                      className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]"
                       loading="lazy"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent" />
                     <div className="absolute inset-x-0 bottom-0 p-4 text-white sm:p-5">
-                      <p className="text-2xs font-medium uppercase tracking-[0.14em] text-white/60">
+                      <p className="text-2xs font-medium uppercase tracking-[0.14em] text-sky-200/80">
                         {doc.role}
                       </p>
                       <h3 className="mt-1 text-md font-medium tracking-[-0.015em] sm:text-md">
@@ -797,38 +962,55 @@ const Home = () => {
             </p>
           </Reveal>
 
-          <div className="mt-8 grid grid-cols-1 gap-3 sm:mt-12 sm:gap-4 md:grid-cols-3">
-            {BLOG_POSTS.map((post, i) => (
-              <Reveal key={post.title} delay={i * 0.06}>
-                <article className="group flex h-full flex-col rounded-2xl border border-slate-200/80 bg-surface-muted p-5 transition-all duration-product hover:-translate-y-0.5 hover:border-slate-300/90 hover:bg-white hover:shadow-premium-lg sm:p-7">
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="rounded-full border border-slate-200/90 bg-white px-2.5 py-0.5 text-2xs font-medium uppercase tracking-[0.1em] text-slate-500">
-                      {post.tag}
-                    </span>
-                    <span className="inline-flex items-center gap-1 text-2xs tabular-nums text-slate-400">
-                      <Clock className="h-3 w-3" strokeWidth={1.75} />
-                      {post.date}
-                    </span>
-                  </div>
-                  <h3 className="mt-5 text-md font-medium leading-snug tracking-[-0.02em] text-slate-900">
-                    {post.title}
-                  </h3>
-                  <p className="mt-2.5 flex-1 text-sm leading-[1.65] tracking-[-0.01em] text-slate-600">
-                    {post.excerpt}
-                  </p>
-                </article>
-              </Reveal>
+          <Stagger
+            className="mt-8 grid grid-cols-1 gap-3 sm:mt-12 sm:gap-4 md:grid-cols-3"
+            stagger={0.09}
+          >
+            {BLOG_POSTS.map((post) => (
+              <motion.article
+                key={post.title}
+                variants={staggerItem}
+                whileHover={{ y: -5, transition: { duration: 0.28, ease: EASE } }}
+                className="group flex h-full flex-col rounded-2xl border border-slate-200/80 bg-surface-muted p-5 transition-[border-color,box-shadow,background-color] duration-product hover:border-sky-200/70 hover:bg-white hover:shadow-premium-lg sm:p-7"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <span className="rounded-full border border-slate-200/90 bg-white px-2.5 py-0.5 text-2xs font-medium uppercase tracking-[0.1em] text-slate-500">
+                    {post.tag}
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-2xs tabular-nums text-slate-400">
+                    <Clock className="h-3 w-3" strokeWidth={1.75} />
+                    {post.date}
+                  </span>
+                </div>
+                <h3 className="mt-5 text-md font-medium leading-snug tracking-[-0.02em] text-slate-900">
+                  {post.title}
+                </h3>
+                <p className="mt-2.5 flex-1 text-sm leading-[1.65] tracking-[-0.01em] text-slate-600">
+                  {post.excerpt}
+                </p>
+              </motion.article>
             ))}
-          </div>
+          </Stagger>
         </div>
       </section>
 
       {/* ── Final CTA ── */}
-      <section className="relative overflow-hidden bg-slate-950 py-14 text-white sm:py-24">
+      <section className="bg-about-dark relative overflow-hidden py-14 text-white sm:py-24">
         <div className="pointer-events-none absolute inset-0" aria-hidden>
-          <div className="absolute left-1/2 top-0 h-[280px] w-[280px] -translate-x-1/2 rounded-full bg-sky-500/15 blur-[110px] sm:h-[380px] sm:w-[380px]" />
-          <div className="absolute bottom-0 left-1/4 hidden h-56 w-56 rounded-full bg-emerald-400/10 blur-[90px] sm:block" />
           <div className="landing-grain absolute inset-0 opacity-25 mix-blend-overlay" />
+          <FloatingOrb
+            className="absolute left-1/2 top-0 h-[280px] w-[280px] -translate-x-1/2 rounded-full bg-sky-500/20 blur-[110px] sm:h-[380px] sm:w-[380px]"
+            duration={18}
+            y={30}
+            x={40}
+          />
+          <FloatingOrb
+            className="absolute bottom-0 left-1/4 hidden h-56 w-56 rounded-full bg-emerald-400/15 blur-[90px] sm:block"
+            duration={14}
+            delay={0.8}
+            y={-20}
+            x={-16}
+          />
         </div>
 
         <div className="relative mx-auto max-w-[38rem] px-4 text-center sm:px-8">
@@ -846,14 +1028,14 @@ const Home = () => {
             <div className="mt-8 flex w-full flex-col items-stretch justify-center gap-2.5 sm:mt-9 sm:flex-row sm:flex-wrap sm:items-center">
               <Link
                 to="/register"
-                className="group inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-white px-6 py-3 text-sm font-medium tracking-[-0.01em] text-slate-900 shadow-lg transition-[box-shadow,background-color] duration-product hover:bg-white/95 hover:shadow-xl sm:w-auto"
+                className="inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-white px-6 py-3 text-sm font-medium tracking-[-0.01em] text-slate-900 shadow-lg sm:w-auto"
               >
                 Create free account
-                <ArrowRight className="h-3.5 w-3.5 transition-transform duration-product ease-out group-hover:translate-x-0.5" />
+                <ArrowRight className="h-3.5 w-3.5" />
               </Link>
               <Link
                 to="/login"
-                className="inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-white/25 px-6 py-3 text-sm font-medium tracking-[-0.01em] text-white transition-colors duration-product hover:bg-white/10 sm:w-auto"
+                className="inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-white/25 px-6 py-3 text-sm font-medium tracking-[-0.01em] text-white sm:w-auto"
               >
                 Sign in to portal
               </Link>
@@ -863,7 +1045,7 @@ const Home = () => {
       </section>
 
       {/* ── Footer ── */}
-      <footer className="border-t border-white/[0.08] bg-slate-950 pb-[max(2rem,env(safe-area-inset-bottom))] pt-9 text-white sm:pb-9 sm:pt-11">
+      <footer className="border-t border-white/[0.08] bg-surface-inverse pb-[max(2rem,env(safe-area-inset-bottom))] pt-9 text-white sm:pb-9 sm:pt-11">
         <div className="mx-auto max-w-[1340px] px-4 sm:px-8 lg:px-10">
           <div className="flex flex-col gap-7 lg:flex-row lg:items-start lg:justify-between lg:gap-9">
             <div>
@@ -882,6 +1064,9 @@ const Home = () => {
                   {link.label}
                 </a>
               ))}
+              <Link to="/security" className="py-1 transition-colors hover:text-white">
+                Security
+              </Link>
               <Link to="/login" className="py-1 transition-colors hover:text-white">
                 Sign in
               </Link>

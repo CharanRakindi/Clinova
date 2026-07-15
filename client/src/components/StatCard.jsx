@@ -35,7 +35,7 @@ const StatCard = ({
       className={cn(
         'group relative flex flex-col justify-between rounded-xl border bg-surface p-5 transition-[border-color,box-shadow] duration-product ease-product',
         emphasis
-          ? 'border-ink/15 shadow-md ring-1 ring-ink/5'
+          ? 'border-brand/20 shadow-md ring-1 ring-brand/10'
           : 'border-line-soft shadow-sm hover:border-line hover:shadow-md',
         className
       )}
@@ -87,7 +87,7 @@ const StatCard = ({
         >
           <span>{actionText}</span>
           <ChevronRight
-            className="h-3.5 w-3.5 text-ink-faint transition-transform duration-product ease-product group-hover:translate-x-0.5"
+            className="h-3.5 w-3.5 text-ink-faint"
             aria-hidden
           />
         </ActionTag>

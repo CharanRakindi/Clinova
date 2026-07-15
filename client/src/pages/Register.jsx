@@ -30,7 +30,11 @@ const Register = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
     resolver: zodResolver(registerSchema),
   });
 
@@ -49,65 +53,83 @@ const Register = () => {
 
   return (
     <div className="flex min-h-screen bg-surface">
-      <div className="relative hidden overflow-hidden lg:flex lg:w-[48%] xl:w-1/2">
+      {/* Brand panel — mirrors login */}
+      <div className="relative hidden overflow-hidden lg:flex lg:w-[46%] xl:w-[48%]">
         <img src={HERO_BG} alt="" className="absolute inset-0 h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/50 to-black/30" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/55 to-black/35" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/45 to-transparent" />
 
-        <div className="relative z-10 flex w-full flex-col justify-between p-12 text-white">
+        <div className="relative z-10 flex w-full flex-col justify-between p-10 xl:p-14 text-white">
           <BrandMark size="md" tone="light" asLink />
 
           <div className="max-w-md">
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+              className="mb-4 text-2xs font-medium uppercase tracking-[0.16em] text-white/45"
+            >
+              Patient registration
+            </motion.p>
             <motion.h1
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className="mb-4 font-display text-[clamp(2rem,3vw,2.5rem)] font-normal leading-[1.12] tracking-[-0.02em]"
+              className="mb-4 font-display text-[clamp(2rem,3.2vw,2.65rem)] font-normal leading-[1.1] tracking-[-0.02em]"
             >
               Join modern care,
               <br />
-              <span className="italic text-white/80">built around you.</span>
+              <span className="italic text-white/75">built around you.</span>
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className="text-md font-normal leading-[1.65] tracking-[-0.01em] text-white/70"
+              transition={{ delay: 0.08, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              className="max-w-sm text-md font-normal leading-[1.65] tracking-[-0.01em] text-white/65"
             >
               Create your account in seconds and step into a calm, secure health workspace.
             </motion.p>
           </div>
 
-          <p className="text-xs font-normal text-white/50">
+          <p className="text-xs font-normal text-white/40">
             © {new Date().getFullYear()} Clinova
           </p>
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col justify-center px-4 py-10 sm:px-10 sm:py-12 lg:px-16 xl:px-24">
+      {/* Form panel — same structure as login */}
+      <div className="flex flex-1 flex-col justify-center px-5 py-10 sm:px-10 sm:py-14 lg:px-14 xl:px-20">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
           className="mx-auto w-full max-w-[400px]"
         >
-          <div className="mb-6 lg:hidden">
+          <div className="mb-8 lg:hidden">
             <BrandMark size="sm" tone="dark" asLink />
           </div>
 
-          <div>
-            <h2 className="page-title">Create an account</h2>
-            <p className="page-subtitle">Fill in your details below to get started.</p>
-          </div>
+          <header className="mb-8">
+            <h1 className="text-2xl font-medium tracking-[-0.03em] text-ink sm:text-[1.625rem]">
+              Create an account
+            </h1>
+            <p className="mt-1.5 text-sm leading-relaxed text-ink-muted">
+              Patient registration only. Staff accounts are issued by your administrator.
+            </p>
+          </header>
 
-          <div className="card mt-6 p-5 sm:mt-8 sm:p-7">
-            <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+          <div className="card p-6 shadow-md sm:p-8">
+            <form className="space-y-5" onSubmit={handleSubmit(onSubmit)} noValidate>
               <div>
-                <label className="label">Full name</label>
+                <label className="label" htmlFor="register-name">
+                  Full name
+                </label>
                 <input
+                  id="register-name"
                   {...register('name')}
                   type="text"
                   autoComplete="name"
+                  autoFocus
                   placeholder="Jane Doe"
                   className={`input ${errors.name ? 'input-error' : ''}`}
                 />
@@ -115,8 +137,11 @@ const Register = () => {
               </div>
 
               <div>
-                <label className="label">Email address</label>
+                <label className="label" htmlFor="register-email">
+                  Email address
+                </label>
                 <input
+                  id="register-email"
                   {...register('email')}
                   type="email"
                   autoComplete="email"
@@ -127,38 +152,46 @@ const Register = () => {
               </div>
 
               <div>
-                <label className="label">Password</label>
+                <label className="label" htmlFor="register-password">
+                  Password
+                </label>
                 <input
+                  id="register-password"
                   {...register('password')}
                   type="password"
                   autoComplete="new-password"
                   placeholder="Min. 8 characters"
                   className={`input ${errors.password ? 'input-error' : ''}`}
                 />
-                {errors.password && <p className="field-error">{errors.password.message}</p>}
+                {errors.password && (
+                  <p className="field-error">{errors.password.message}</p>
+                )}
               </div>
 
-              <div className="pt-2">
+              <div className="pt-1">
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="btn btn-primary group w-full py-2.5"
+                  className="btn btn-primary w-full py-2.5"
                 >
                   {isLoading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
                     <>
                       Create account
-                      <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                      <ArrowRight className="h-3.5 w-3.5" />
                     </>
                   )}
                 </button>
               </div>
             </form>
 
-            <p className="mt-7 text-center text-sm font-normal text-ink-muted">
+            <p className="mt-6 text-center text-sm text-ink-muted">
               Already have an account?{' '}
-              <Link to="/login" className="font-medium text-ink underline-offset-4 hover:underline">
+              <Link
+                to="/login"
+                className="font-medium text-ink underline-offset-4 hover:underline"
+              >
                 Sign in
               </Link>
             </p>

@@ -3,7 +3,7 @@ import api from '../../api/axios';
 import StatCard from '../../components/StatCard';
 import InteractiveCalendar from '../../components/InteractiveCalendar';
 import { SkeletonCard } from '../../components/SkeletonLoader';
-import { Calendar, Users, CheckCircle, Clock, ChevronRight, PenTool, Check, ToggleLeft, ToggleRight, FlaskConical, Plus, X, RotateCcw, CheckCheck } from 'lucide-react';
+import { Calendar, Users, CheckCircle, Clock, ChevronRight, PenTool, Check, FlaskConical, Plus, X, RotateCcw, CheckCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
@@ -15,6 +15,7 @@ import { cn } from '../../utils/cn';
 import EmptyState from '../../components/ui/EmptyState';
 import Modal from '../../components/ui/Modal';
 import StatusBadge from '../../components/ui/StatusBadge';
+import ActivityFeed from '../../components/ui/ActivityFeed';
 
 const DoctorDashboard = () => {
   const queryClient = useQueryClient();
@@ -154,29 +155,62 @@ const DoctorDashboard = () => {
   });
 
   const updateStatus = useMutation({
-    mutationFn: async ({ id, status, cancellationReason }) => {
+    mutationFn: async ({ id, status, cancellationReason, visitSummary }) => {
       const res = await api.patch(`/appointments/${id}/status`, {
         status,
         ...(cancellationReason ? { cancellationReason } : {}),
+        ...(visitSummary ? { visitSummary } : {}),
       });
       return res.data.data;
     },
-    onSuccess: (_, { status }) => {
+    onMutate: async ({ id, status }) => {
+      await queryClient.cancelQueries({ queryKey: ['doctorAppointments'] });
+      const prev = queryClient.getQueryData(['doctorAppointments']);
+      queryClient.setQueryData(['doctorAppointments'], (old) => {
+        if (!Array.isArray(old)) return old;
+        return old.map((a) => (a._id === id ? { ...a, status } : a));
+      });
+      return { prev };
+    },
+    onSuccess: (data, { status }) => {
       queryClient.invalidateQueries({ queryKey: ['doctorAppointments'] });
       queryClient.invalidateQueries({ queryKey: ['doctorStats'] });
+      queryClient.invalidateQueries({ queryKey: ['activityFeed'] });
       const labels = {
         confirmed: 'Appointment accepted',
         cancelled: 'Appointment declined',
         completed: 'Consultation completed',
       };
-      toast.success(labels[status] || `Appointment marked as ${status}`);
+      toast.success(labels[status] || `Appointment marked as ${status}`, {
+        description:
+          status === 'completed' && data?.visitSummary
+            ? data.visitSummary.slice(0, 100)
+            : undefined,
+      });
     },
-    onError: (error) => {
+    onError: (error, _vars, ctx) => {
+      if (ctx?.prev) queryClient.setQueryData(['doctorAppointments'], ctx.prev);
       toast.error(error.response?.data?.message || 'Failed to update status');
     },
   });
 
-  if (isLoading) return <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-4"><SkeletonCard /><SkeletonCard /><SkeletonCard /><SkeletonCard /></div>;
+  if (isLoading) {
+    return (
+      <div className="workspace">
+        <div className="page-header">
+          <div className="space-y-2">
+            <div className="h-7 w-52 animate-pulse rounded-md bg-surface-subtle" />
+            <div className="h-4 w-72 animate-pulse rounded-md bg-surface-subtle" />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
+      </div>
+    );
+  }
 
   const todayStr = format(new Date(), 'yyyy-MM-dd');
   const startOfToday = new Date();
@@ -225,41 +259,52 @@ const DoctorDashboard = () => {
         <div>
           <h1 className="page-title">{formatDoctorName(user?.name)}</h1>
           <p className="page-subtitle">
-            {todayAppointments.length} today · {pendingRequests.length} pending request
-            {pendingRequests.length === 1 ? '' : 's'} · {upcomingConfirmed.length} upcoming
+            {todayAppointments.length} today
+            {pendingRequests.length > 0 && (
+              <>
+                {' · '}
+                <span className="text-warning font-medium">
+                  {pendingRequests.length} pending
+                </span>
+              </>
+            )}
+            {upcomingConfirmed.length > 0 && (
+              <> · {upcomingConfirmed.length} upcoming</>
+            )}
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          {/* Availability — quiet secondary control */}
+          <button
+            type="button"
+            disabled={toggleAvailability.isPending || !myDoctorProfile}
+            onClick={() => toggleAvailability.mutate(!isAvailable)}
+            className={cn(
+              'inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
+              isAvailable
+                ? 'border-success-border bg-success-soft text-success'
+                : 'border-line bg-surface-subtle text-ink-muted'
+            )}
+            title="Controls whether patients can request appointments with you"
+          >
+            <span
+              className={cn(
+                'h-1.5 w-1.5 rounded-full',
+                isAvailable ? 'bg-success' : 'bg-ink-faint'
+              )}
+              aria-hidden
+            />
+            {isAvailable ? 'Accepting patients' : 'Not accepting'}
+          </button>
+
           <button
             type="button"
             onClick={() => setIsLabModalOpen(true)}
             className="btn btn-primary"
           >
             <FlaskConical className="h-3.5 w-3.5" />
-            Request lab report
-          </button>
-
-          <button
-            type="button"
-            disabled={toggleAvailability.isPending || !myDoctorProfile}
-            onClick={() => toggleAvailability.mutate(!isAvailable)}
-            className="btn btn-secondary"
-            title="Controls whether patients can request appointments with you"
-          >
-            <span
-              className={cn(
-                'h-2 w-2 rounded-full',
-                isAvailable ? 'bg-success' : 'bg-ink-faint'
-              )}
-              aria-hidden
-            />
-            <span>Accepting: {isAvailable ? 'Yes' : 'No'}</span>
-            {isAvailable ? (
-              <ToggleRight className="ml-1 h-5 w-5 text-ink-faint" aria-hidden />
-            ) : (
-              <ToggleLeft className="ml-1 h-5 w-5 text-ink-faint" aria-hidden />
-            )}
+            Request lab
           </button>
         </div>
       </div>
@@ -303,7 +348,128 @@ const DoctorDashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-        <div className="space-y-5 lg:col-span-1">
+        {/* Primary focus: today's queue (wide column) */}
+        <div className="space-y-5 lg:col-span-2 lg:order-1">
+          <div
+            id="consultations-queue"
+            className="card space-y-4 border-brand/20 p-5 shadow-md ring-1 ring-brand/10 sm:p-6"
+          >
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <div>
+                <h2 className="panel-title flex items-center gap-2 text-ink">
+                  <Clock className="h-4 w-4 text-brand" strokeWidth={1.75} />
+                  Today&apos;s queue
+                </h2>
+                <p className="panel-meta">
+                  {todayAppointments.length} visit
+                  {todayAppointments.length === 1 ? '' : 's'} scheduled · open charts or mark complete
+                </p>
+              </div>
+              {pendingRequests.length > 0 && (
+                <a
+                  href="#pending-requests"
+                  className="badge badge-warning"
+                >
+                  {pendingRequests.length} pending
+                </a>
+              )}
+            </div>
+
+            <div className="max-h-[min(520px,60vh)] space-y-2 overflow-y-auto pr-1">
+              <AnimatePresence initial={false}>
+                {todayAppointments.length === 0 ? (
+                  <EmptyState
+                    compact
+                    title="Nothing scheduled today"
+                    description="Confirmed and requested visits for today appear here first."
+                  />
+                ) : (
+                  todayAppointments.map((apt, idx) => (
+                    <motion.div
+                      key={apt._id}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      className={cn(
+                        'list-row',
+                        idx === 0 &&
+                          apt.status !== 'completed' &&
+                          'border-sky-200/80 bg-sky-50/40',
+                        apt.status === 'completed' && 'opacity-60'
+                      )}
+                    >
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p
+                            className={cn(
+                              'truncate text-sm font-medium tracking-[-0.01em] text-ink',
+                              apt.status === 'completed' && 'line-through text-ink-faint'
+                            )}
+                          >
+                            {apt.patient?.name}
+                          </p>
+                          {idx === 0 && apt.status !== 'completed' && (
+                            <span className="badge badge-info">Up next</span>
+                          )}
+                        </div>
+                        <p className="mt-0.5 text-2xs text-ink-faint">
+                          {apt.timeSlot} · <span className="capitalize">{apt.status}</span>
+                          {apt.reason ? ` · ${apt.reason}` : ''}
+                        </p>
+                      </div>
+                      <div className="flex shrink-0 gap-1">
+                        {apt.status === 'requested' && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              updateStatus.mutate({ id: apt._id, status: 'confirmed' })
+                            }
+                            className="btn-icon btn-icon-success"
+                            title="Accept request"
+                            aria-label="Accept request"
+                          >
+                            <CheckCheck className="h-3.5 w-3.5" />
+                          </button>
+                        )}
+                        {['requested', 'confirmed'].includes(apt.status) && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const summary = window.prompt(
+                                'Optional visit summary for the patient (leave blank for default):',
+                                `Completed visit for: ${apt.reason || 'consultation'}`
+                              );
+                              if (summary === null) return;
+                              updateStatus.mutate({
+                                id: apt._id,
+                                status: 'completed',
+                                visitSummary: summary.trim() || undefined,
+                              });
+                            }}
+                            className="btn-icon btn-icon-success"
+                            title="Complete consultation"
+                            aria-label="Complete consultation"
+                          >
+                            <Check className="h-3.5 w-3.5" />
+                          </button>
+                        )}
+                        <Link
+                          to={`/doctor/patients/${apt.patient?._id}`}
+                          className="btn-icon"
+                          aria-label={`Open chart for ${apt.patient?.name || 'patient'}`}
+                        >
+                          <ChevronRight className="h-4 w-4" />
+                        </Link>
+                      </div>
+                    </motion.div>
+                  ))
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-5 lg:col-span-1 lg:order-2">
           {/* Pending accept/decline (includes future dates) */}
           <div id="pending-requests" className="card space-y-4 p-5">
             <div>
@@ -311,7 +477,7 @@ const DoctorDashboard = () => {
                 <CheckCheck className="h-4 w-4 text-ink-faint" strokeWidth={1.75} />
                 Pending requests
               </h3>
-              <p className="panel-meta">Accept or decline patient bookings (today &amp; future)</p>
+              <p className="panel-meta">Accept or decline (today &amp; future)</p>
             </div>
             <div className="max-h-[280px] space-y-2 overflow-y-auto pr-1">
               {pendingRequests.length === 0 ? (
@@ -362,87 +528,6 @@ const DoctorDashboard = () => {
             </div>
           </div>
 
-          <div id="consultations-queue" className="card space-y-4 p-5">
-            <div>
-              <h3 className="panel-title flex items-center gap-2">
-                <Clock className="h-4 w-4 text-ink-faint" strokeWidth={1.75} />
-                Today&apos;s queue
-              </h3>
-              <p className="panel-meta">Prioritized by time slot</p>
-            </div>
-            
-            <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1">
-              <AnimatePresence initial={false}>
-                {todayAppointments.length === 0 ? (
-                  <EmptyState compact title="Nothing scheduled today" description="Today's consultations will list here." />
-                ) : (
-                  todayAppointments.map((apt) => (
-                    <motion.div
-                      key={apt._id}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0 }}
-                      className={cn(
-                        'list-row',
-                        apt.status === 'completed' && 'opacity-60'
-                      )}
-                    >
-                      <div className="min-w-0">
-                        <p
-                          className={cn(
-                            'truncate text-sm font-medium tracking-[-0.01em] text-ink-secondary',
-                            apt.status === 'completed' && 'line-through text-ink-faint'
-                          )}
-                        >
-                          {apt.patient?.name}
-                        </p>
-                        <p className="mt-0.5 text-2xs text-ink-faint">
-                          {apt.timeSlot} · <span className="capitalize">{apt.status}</span>
-                          {apt.reason ? ` · ${apt.reason}` : ''}
-                        </p>
-                      </div>
-                      <div className="flex shrink-0 gap-1">
-                        {apt.status === 'requested' && (
-                          <button
-                            type="button"
-                            onClick={() =>
-                              updateStatus.mutate({ id: apt._id, status: 'confirmed' })
-                            }
-                            className="btn-icon btn-icon-success"
-                            title="Accept request"
-                            aria-label="Accept request"
-                          >
-                            <CheckCheck className="h-3.5 w-3.5" />
-                          </button>
-                        )}
-                        {['requested', 'confirmed'].includes(apt.status) && (
-                          <button
-                            type="button"
-                            onClick={() =>
-                              updateStatus.mutate({ id: apt._id, status: 'completed' })
-                            }
-                            className="btn-icon btn-icon-success"
-                            title="Complete consultation"
-                            aria-label="Complete consultation"
-                          >
-                            <Check className="h-3.5 w-3.5" />
-                          </button>
-                        )}
-                        <Link
-                          to={`/doctor/patients/${apt.patient?._id}`}
-                          className="btn-icon"
-                          aria-label={`Open chart for ${apt.patient?.name || 'patient'}`}
-                        >
-                          <ChevronRight className="h-4 w-4" />
-                        </Link>
-                      </div>
-                    </motion.div>
-                  ))
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
-
           {upcomingConfirmed.length > 0 && (
             <div className="card space-y-4 p-5">
               <div>
@@ -469,6 +554,10 @@ const DoctorDashboard = () => {
               </div>
             </div>
           )}
+
+          <div className="card space-y-3 p-5">
+            <ActivityFeed limit={5} />
+          </div>
 
           {/* Quick Notes Pad */}
           <div className="card space-y-4 p-5">

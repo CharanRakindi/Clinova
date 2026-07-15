@@ -7,6 +7,70 @@ import { parsePagination } from '../utils/pagination.js';
 
 const VALID_STATUSES = ['requested', 'confirmed', 'completed', 'cancelled', 'no-show'];
 
+const CLINIC_SLOTS = [
+  '09:00 AM',
+  '10:00 AM',
+  '11:00 AM',
+  '02:00 PM',
+  '03:00 PM',
+  '04:00 PM',
+];
+
+// @desc    Available time slots for a doctor on a date
+// @route   GET /api/v1/appointments/slots?doctorId=&date=YYYY-MM-DD
+// @access  Private
+export const getAvailableSlots = async (req, res, next) => {
+  try {
+    const doctorId = req.query.doctorId;
+    const date = req.query.date;
+    if (!doctorId || !date) {
+      return res.status(400).json({
+        success: false,
+        message: 'doctorId and date (YYYY-MM-DD) are required',
+      });
+    }
+
+    const day = new Date(date);
+    if (Number.isNaN(day.getTime())) {
+      return res.status(400).json({ success: false, message: 'Invalid date' });
+    }
+
+    const doctorUser = await User.findById(doctorId);
+    if (!doctorUser || doctorUser.role !== 'doctor') {
+      return res.status(400).json({ success: false, message: 'Invalid doctor' });
+    }
+
+    // Match appointments stored as date strings or Date at midnight UTC/local
+    const start = new Date(date);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(date);
+    end.setHours(23, 59, 59, 999);
+
+    const taken = await Appointment.find({
+      doctor: doctorId,
+      status: { $in: ['requested', 'confirmed'] },
+      appointmentDate: { $gte: start, $lte: end },
+    }).select('timeSlot');
+
+    const takenSet = new Set(taken.map((a) => a.timeSlot));
+    const available = CLINIC_SLOTS.filter((s) => !takenSet.has(s));
+
+    res.status(200).json({
+      success: true,
+      data: {
+        slots: CLINIC_SLOTS.map((slot) => ({
+          slot,
+          available: !takenSet.has(slot),
+        })),
+        available,
+        taken: [...takenSet],
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Get appointments (scoped by role)
 // @route   GET /api/v1/appointments
 // @access  Private
@@ -172,7 +236,28 @@ export const createAppointment = async (req, res, next) => {
 // @access  Private
 export const updateAppointmentStatus = async (req, res, next) => {
   try {
-    const { status, cancellationReason } = req.body;
+    const { status, cancellationReason, visitSummary, queueStatus } = req.body;
+
+    // Queue-only update (receptionist check-in board)
+    if (queueStatus && !status) {
+      const appointment = await Appointment.findById(req.params.id);
+      if (!appointment) {
+        return res.status(404).json({ success: false, message: 'Appointment not found' });
+      }
+      if (!['receptionist', 'admin', 'doctor'].includes(req.user.role)) {
+        return res.status(403).json({ success: false, message: 'Forbidden' });
+      }
+      const allowedQ = ['not_arrived', 'waiting', 'in_room', 'done'];
+      if (!allowedQ.includes(queueStatus)) {
+        return res.status(400).json({ success: false, message: 'Invalid queue status' });
+      }
+      appointment.queueStatus = queueStatus;
+      await appointment.save();
+      const populated = await Appointment.findById(appointment._id)
+        .populate('patient', 'name email profileImage')
+        .populate('doctor', 'name email profileImage');
+      return res.status(200).json({ success: true, data: populated });
+    }
 
     if (!VALID_STATUSES.includes(status)) {
       return res.status(400).json({
@@ -220,6 +305,14 @@ export const updateAppointmentStatus = async (req, res, next) => {
     if (status === 'cancelled') {
       appointment.cancellationReason = cancellationReason || 'Cancelled';
     }
+    if (status === 'completed') {
+      appointment.queueStatus = 'done';
+      if (visitSummary) {
+        appointment.visitSummary = String(visitSummary).trim().slice(0, 4000);
+      } else if (!appointment.visitSummary) {
+        appointment.visitSummary = `Visit completed on ${new Date().toLocaleDateString('en-US')}. Reason: ${appointment.reason || 'n/a'}.`;
+      }
+    }
 
     await appointment.save();
 
@@ -254,3 +347,127 @@ export const updateAppointmentStatus = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Reschedule appointment (date / time)
+// @route   PATCH /api/v1/appointments/:id/reschedule
+// @access  Private (patient own, staff)
+export const rescheduleAppointment = async (req, res, next) => {
+  try {
+    const { appointmentDate, timeSlot } = req.body;
+    if (!appointmentDate || !timeSlot) {
+      return res.status(400).json({
+        success: false,
+        message: 'appointmentDate and timeSlot are required',
+      });
+    }
+    if (!CLINIC_SLOTS.includes(timeSlot)) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid time slot. Allowed: ${CLINIC_SLOTS.join(', ')}`,
+      });
+    }
+
+    const day = new Date(appointmentDate);
+    if (Number.isNaN(day.getTime())) {
+      return res.status(400).json({ success: false, message: 'Invalid appointment date' });
+    }
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    const apptDay = new Date(day);
+    apptDay.setHours(0, 0, 0, 0);
+    if (apptDay < startOfToday) {
+      return res.status(400).json({
+        success: false,
+        message: 'Appointments can only be rescheduled to today or a future date',
+      });
+    }
+
+    const appointment = await Appointment.findById(req.params.id);
+    if (!appointment) {
+      return res.status(404).json({ success: false, message: 'Appointment not found' });
+    }
+
+    const role = req.user.role;
+    const userId = req.user._id.toString();
+    if (role === 'patient') {
+      if (appointment.patient.toString() !== userId) {
+        return res.status(403).json({ success: false, message: 'Forbidden' });
+      }
+    } else if (role === 'doctor') {
+      if (appointment.doctor.toString() !== userId) {
+        return res.status(403).json({ success: false, message: 'Forbidden' });
+      }
+    } else if (role !== 'receptionist' && role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Forbidden' });
+    }
+
+    if (!['requested', 'confirmed'].includes(appointment.status)) {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot reschedule a ${appointment.status} appointment`,
+      });
+    }
+
+    const conflict = await Appointment.findOne({
+      _id: { $ne: appointment._id },
+      doctor: appointment.doctor,
+      appointmentDate: day,
+      timeSlot,
+      status: { $in: ['requested', 'confirmed'] },
+    });
+    if (conflict) {
+      return res.status(400).json({
+        success: false,
+        message: 'Time slot is already booked for this doctor',
+      });
+    }
+
+    appointment.appointmentDate = day;
+    appointment.timeSlot = timeSlot;
+    // Patient reschedule of a confirmed visit goes back to requested
+    if (role === 'patient' && appointment.status === 'confirmed') {
+      appointment.status = 'requested';
+    }
+    await appointment.save();
+
+    sendToUser(appointment.doctor, 'notification', {
+      message:
+        role === 'patient'
+          ? `${req.user.name} rescheduled an appointment`
+          : `Appointment rescheduled to ${timeSlot}`,
+      timestamp: new Date(),
+    });
+    if (appointment.patient.toString() !== userId) {
+      sendToUser(appointment.patient, 'notification', {
+        message: `Your appointment was rescheduled to ${formatFriendly(day)} at ${timeSlot}`,
+        timestamp: new Date(),
+      });
+    }
+
+    const populated = await Appointment.findById(appointment._id)
+      .populate('patient', 'name email profileImage')
+      .populate('doctor', 'name email profileImage');
+
+    res.status(200).json({ success: true, data: populated });
+  } catch (error) {
+    if (error?.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: 'Time slot is already booked for this doctor',
+      });
+    }
+    next(error);
+  }
+};
+
+function formatFriendly(d) {
+  try {
+    return new Date(d).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  } catch {
+    return String(d);
+  }
+}
