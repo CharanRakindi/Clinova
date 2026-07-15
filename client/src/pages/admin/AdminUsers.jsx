@@ -227,7 +227,7 @@ const AdminUsers = () => {
 
         {/* Table */}
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-100">
+          <table className="min-w-full divide-y divide-line-soft">
             <thead className="bg-surface-subtle/60">
               <tr>
                 <SortHeader label="User details" sortKey="name" sortConfig={sortConfig} onSort={handleSort} />
@@ -237,7 +237,7 @@ const AdminUsers = () => {
                 <th scope="col" className="px-6 py-3.5 text-right text-2xs font-medium uppercase tracking-wider text-ink-faint">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-50 bg-white">
+            <tbody className="divide-y divide-line-soft bg-surface">
               {(!paginatedUsers || paginatedUsers.length === 0) ? (
                 <tr>
                   <td colSpan="5" className="px-6 py-8">

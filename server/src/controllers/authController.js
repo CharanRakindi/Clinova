@@ -286,9 +286,9 @@ export const getMe = async (req, res, next) => {
   }
 };
 
-// @desc    Update own basic profile (name, phone, DOB, gender, address)
+// @desc    Update own basic profile (name, phone, DOB, gender, address; email for patients)
 // @route   PATCH /api/v1/auth/profile
-// @access  Private — email is never changeable here (admin only)
+// @access  Private — staff email remains admin-only; patients may change their own email
 export const updateProfile = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id);
@@ -296,15 +296,16 @@ export const updateProfile = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    // Explicitly reject email / role attempts from clients
-    if (req.body.email !== undefined || req.body.role !== undefined) {
+    // Role is never self-service
+    if (req.body.role !== undefined) {
       return res.status(403).json({
         success: false,
-        message: 'Email and role can only be changed by an administrator',
+        message: 'Role can only be changed by an administrator',
       });
     }
 
-    const { name, phone, dateOfBirth, gender, address } = req.body;
+    const { name, email, phone, dateOfBirth, gender, address } = req.body;
+    const auditMeta = { action: 'UPDATE_PROFILE' };
 
     if (name !== undefined) {
       const cleanName = String(name)
@@ -315,6 +316,44 @@ export const updateProfile = async (req, res, next) => {
         return res.status(400).json({ success: false, message: 'Name must be at least 2 characters' });
       }
       user.name = cleanName;
+    }
+
+    if (email !== undefined) {
+      // Staff/clinical accounts: email stays admin-managed for account control
+      if (user.role !== 'patient') {
+        return res.status(403).json({
+          success: false,
+          message: 'Staff email can only be changed by an administrator',
+        });
+      }
+
+      const normalizedEmail = String(email || '').toLowerCase().trim();
+      if (!normalizedEmail) {
+        return res.status(400).json({ success: false, message: 'Email is required' });
+      }
+      if (normalizedEmail.endsWith('@clinova.com')) {
+        return res.status(400).json({
+          success: false,
+          message:
+            'Emails ending in @clinova.com are reserved for hospital staff. Please use a personal email.',
+        });
+      }
+
+      if (normalizedEmail !== user.email) {
+        const taken = await User.findOne({
+          email: normalizedEmail,
+          _id: { $ne: user._id },
+        });
+        if (taken) {
+          return res.status(400).json({
+            success: false,
+            message: 'An account with this email already exists',
+          });
+        }
+        auditMeta.previousEmail = user.email;
+        auditMeta.newEmail = normalizedEmail;
+        user.email = normalizedEmail;
+      }
     }
 
     if (phone !== undefined) {
@@ -363,7 +402,7 @@ export const updateProfile = async (req, res, next) => {
       user._id,
       req.ip,
       req.headers['user-agent'],
-      { action: 'UPDATE_PROFILE' }
+      auditMeta
     );
 
     const safe = await User.findById(user._id);
@@ -373,6 +412,13 @@ export const updateProfile = async (req, res, next) => {
       data: safe,
     });
   } catch (error) {
+    // Duplicate key from unique email index
+    if (error?.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: 'An account with this email already exists',
+      });
+    }
     next(error);
   }
 };

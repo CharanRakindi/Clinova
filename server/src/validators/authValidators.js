@@ -49,17 +49,28 @@ export const activateSchema = z.object({
   }),
 });
 
-/** Self-service profile update — never accepts email or role */
+/**
+ * Self-service profile update.
+ * Email is optional in the payload; controller only applies it for patients.
+ * Role is never accepted.
+ */
 export const updateProfileSchema = z.object({
-  body: z.object({
-    name: z.string().min(2, 'Name must be at least 2 characters').max(120).optional(),
-    phone: z.string().max(40).optional().or(z.literal('')),
-    dateOfBirth: z
-      .union([z.string().min(1), z.null(), z.literal('')])
-      .optional(),
-    gender: z
-      .enum(['male', 'female', 'other', 'prefer_not_to_say', ''])
-      .optional(),
-    address: addressSchema,
-  }),
+  body: z
+    .object({
+      name: z.string().min(2, 'Name must be at least 2 characters').max(120).optional(),
+      email: z
+        .string()
+        .email('Invalid email address')
+        .max(254)
+        .optional(),
+      phone: z.string().max(40).optional().or(z.literal('')),
+      dateOfBirth: z
+        .union([z.string().min(1), z.null(), z.literal('')])
+        .optional(),
+      gender: z
+        .enum(['male', 'female', 'other', 'prefer_not_to_say', ''])
+        .optional(),
+      address: addressSchema,
+    })
+    .strict(),
 });

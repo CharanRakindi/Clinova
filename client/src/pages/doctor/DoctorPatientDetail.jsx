@@ -586,7 +586,7 @@ const DoctorPatientDetail = () => {
             ) : (
               <div className="grid grid-cols-1 gap-4">
                 {labReports.map((report) => (
-                  <div key={report._id} className="card p-5 bg-white border border-line hover:border-line-strong transition-colors">
+                  <div key={report._id} className="card border border-line p-5 transition-colors duration-product hover:border-line-strong">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-line-soft">
                       <div>
                         <h4 className="font-medium text-base text-ink">{report.testName}</h4>
@@ -847,7 +847,7 @@ const DoctorPatientDetail = () => {
                 />
               </div>
 
-              <div className="rounded-2xl border border-line bg-surface-subtle/40 p-5">
+              <div className="rounded-lg border border-line bg-surface-subtle/40 p-5">
                 <label className="mb-4 flex items-center gap-2 text-sm font-medium text-ink-secondary">
                   <Activity className="h-4 w-4 text-ink-faint" /> Patient vitals
                 </label>
@@ -894,7 +894,7 @@ const DoctorPatientDetail = () => {
                 />
               </div>
 
-              <div className="rounded-2xl border border-line bg-surface-subtle/40 p-5">
+              <div className="rounded-lg border border-line bg-surface-subtle/40 p-5">
                 <FileUpload
                   onUploadSuccess={handleUploadSuccess}
                   label="Attach report (PDF or image)"

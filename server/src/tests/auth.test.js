@@ -133,3 +133,63 @@ describe('GET /api/v1/auth/me', () => {
     expect(res.status).toBe(401);
   });
 });
+
+describe('PATCH /api/v1/auth/profile', () => {
+  it('allows patients to update their email', async () => {
+    const reg = await request(app).post('/api/v1/auth/register').send({
+      name: 'Email Changer',
+      email: 'old@example.com',
+      password: 'password123',
+    });
+    const cookies = reg.headers['set-cookie'];
+
+    const res = await request(app)
+      .patch('/api/v1/auth/profile')
+      .set('Cookie', cookies)
+      .send({ email: 'new@example.com', name: 'Email Changer' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.email).toBe('new@example.com');
+
+    const me = await request(app).get('/api/v1/auth/me').set('Cookie', cookies);
+    expect(me.body.data.email).toBe('new@example.com');
+  });
+
+  it('rejects patient email that is already taken', async () => {
+    await request(app).post('/api/v1/auth/register').send({
+      name: 'Taken',
+      email: 'taken@example.com',
+      password: 'password123',
+    });
+    const reg = await request(app).post('/api/v1/auth/register').send({
+      name: 'Other',
+      email: 'other@example.com',
+      password: 'password123',
+    });
+    const cookies = reg.headers['set-cookie'];
+
+    const res = await request(app)
+      .patch('/api/v1/auth/profile')
+      .set('Cookie', cookies)
+      .send({ email: 'taken@example.com' });
+
+    expect(res.status).toBe(400);
+    expect(res.body.success).toBe(false);
+  });
+
+  it('rejects reserved @clinova.com emails for patients', async () => {
+    const reg = await request(app).post('/api/v1/auth/register').send({
+      name: 'Patient',
+      email: 'patient-mail@example.com',
+      password: 'password123',
+    });
+    const cookies = reg.headers['set-cookie'];
+
+    const res = await request(app)
+      .patch('/api/v1/auth/profile')
+      .set('Cookie', cookies)
+      .send({ email: 'someone@clinova.com' });
+
+    expect(res.status).toBe(400);
+  });
+});

@@ -58,7 +58,7 @@ const DoctorPatients = () => {
 
         {/* Table */}
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-100">
+          <table className="min-w-full divide-y divide-line-soft">
             <thead className="bg-surface-subtle/60">
               <tr>
                 <th scope="col" className="px-6 py-3.5 text-left text-2xs font-medium uppercase tracking-wider text-ink-faint">Patient Details</th>
@@ -67,7 +67,7 @@ const DoctorPatients = () => {
                 <th scope="col" className="px-6 py-3.5 text-right text-2xs font-medium uppercase tracking-wider text-ink-faint">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-50 bg-white">
+            <tbody className="divide-y divide-line-soft bg-surface">
               {(!filteredPatients || filteredPatients.length === 0) ? (
                 <tr>
                   <td colSpan="4" className="px-6 py-8">

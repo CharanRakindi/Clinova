@@ -113,6 +113,9 @@
   .field-error {
     @apply mt-1.5 text-xs font-medium text-danger;
   }
+  .input-error {
+    @apply border-danger-border bg-danger-soft focus:border-danger focus:ring-danger/10;
+  }
 
   /* —— Surfaces —— */
   .card {

@@ -117,7 +117,7 @@ export default function AuditLogs() {
                 <th className="px-6 py-3.5">Details</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-50 text-sm font-medium bg-white">
+            <tbody className="divide-y divide-line-soft bg-surface text-sm font-medium">
               {isLoading ? (
                 Array.from({ length: 6 }).map((_, i) => (
                   <tr key={i}>

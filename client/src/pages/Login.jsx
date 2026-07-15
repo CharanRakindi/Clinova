@@ -41,7 +41,7 @@ const Login = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-white">
+    <div className="flex min-h-screen bg-surface">
       {/* Left — cinematic brand panel */}
       <div className="relative hidden overflow-hidden lg:flex lg:w-[48%] xl:w-1/2">
         <img src={HERO_BG} alt="" className="absolute inset-0 h-full w-full object-cover" />
@@ -91,12 +91,8 @@ const Login = () => {
           </div>
 
           <div>
-            <h2 className="text-xl font-medium tracking-[-0.025em] text-ink sm:text-2xl">
-              Sign in
-            </h2>
-            <p className="mt-1.5 text-sm font-normal leading-snug tracking-[-0.01em] text-ink-muted">
-              Welcome back. Enter your details to continue.
-            </p>
+            <h2 className="page-title">Sign in</h2>
+            <p className="page-subtitle">Welcome back. Enter your details to continue.</p>
           </div>
 
           <div className="card mt-6 p-5 sm:mt-8 sm:p-7">
@@ -108,7 +104,7 @@ const Login = () => {
                   type="email"
                   autoComplete="email"
                   placeholder="you@example.com"
-                  className={`input ${errors.email ? 'border-red-400 bg-red-50/50 focus:ring-red-500/10' : ''}`}
+                  className={`input ${errors.email ? 'input-error' : ''}`}
                 />
                 {errors.email && (
                   <p className="field-error">{errors.email.message}</p>
@@ -127,7 +123,7 @@ const Login = () => {
                   type="password"
                   autoComplete="current-password"
                   placeholder="••••••••"
-                  className={`input ${errors.password ? 'border-red-400 bg-red-50/50 focus:ring-red-500/10' : ''}`}
+                  className={`input ${errors.password ? 'input-error' : ''}`}
                 />
                 {errors.password && (
                   <p className="field-error">{errors.password.message}</p>

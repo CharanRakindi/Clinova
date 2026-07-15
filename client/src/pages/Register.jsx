@@ -48,7 +48,7 @@ const Register = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-white">
+    <div className="flex min-h-screen bg-surface">
       <div className="relative hidden overflow-hidden lg:flex lg:w-[48%] xl:w-1/2">
         <img src={HERO_BG} alt="" className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/50 to-black/30" />
@@ -96,12 +96,8 @@ const Register = () => {
           </div>
 
           <div>
-            <h2 className="text-xl font-medium tracking-[-0.025em] text-ink sm:text-2xl">
-              Create an account
-            </h2>
-            <p className="mt-1.5 text-sm font-normal leading-snug tracking-[-0.01em] text-ink-muted">
-              Fill in your details below to get started.
-            </p>
+            <h2 className="page-title">Create an account</h2>
+            <p className="page-subtitle">Fill in your details below to get started.</p>
           </div>
 
           <div className="card mt-6 p-5 sm:mt-8 sm:p-7">
@@ -113,7 +109,7 @@ const Register = () => {
                   type="text"
                   autoComplete="name"
                   placeholder="Jane Doe"
-                  className={`input ${errors.name ? 'border-red-400 bg-red-50/50' : ''}`}
+                  className={`input ${errors.name ? 'input-error' : ''}`}
                 />
                 {errors.name && <p className="field-error">{errors.name.message}</p>}
               </div>
@@ -125,7 +121,7 @@ const Register = () => {
                   type="email"
                   autoComplete="email"
                   placeholder="you@example.com"
-                  className={`input ${errors.email ? 'border-red-400 bg-red-50/50' : ''}`}
+                  className={`input ${errors.email ? 'input-error' : ''}`}
                 />
                 {errors.email && <p className="field-error">{errors.email.message}</p>}
               </div>
@@ -137,7 +133,7 @@ const Register = () => {
                   type="password"
                   autoComplete="new-password"
                   placeholder="Min. 8 characters"
-                  className={`input ${errors.password ? 'border-red-400 bg-red-50/50' : ''}`}
+                  className={`input ${errors.password ? 'input-error' : ''}`}
                 />
                 {errors.password && <p className="field-error">{errors.password.message}</p>}
               </div>

@@ -330,7 +330,7 @@ export default function ReceptionistDashboard() {
                     <th className="table-head text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-50 text-sm font-medium">
+                <tbody className="divide-y divide-line-soft text-sm font-medium">
                   {!appointments || appointments.length === 0 ? (
                     <tr>
                       <td colSpan={5} className="px-4 py-8">
