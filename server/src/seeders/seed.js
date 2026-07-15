@@ -93,6 +93,7 @@ const seedData = async () => {
         experienceYears: 12,
         qualifications: ['MBBS', 'MD Cardiology'],
         consultationFee: 500,
+        isAcceptingPatients: true,
       },
       {
         user: doctorUsers[1]._id,
@@ -103,6 +104,7 @@ const seedData = async () => {
         experienceYears: 8,
         qualifications: ['MBBS', 'DM Neurology'],
         consultationFee: 600,
+        isAcceptingPatients: true,
       },
     ]);
 

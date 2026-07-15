@@ -33,17 +33,37 @@ const PatientAppointments = () => {
     },
   });
 
-  const { data: doctors } = useQuery({
+  const {
+    data: doctors,
+    isLoading: doctorsLoading,
+    isError: doctorsError,
+    refetch: refetchDoctors,
+  } = useQuery({
     queryKey: ['doctorsAccepting'],
     queryFn: async () => {
       const res = await api.get('/doctors?accepting=true');
-      return res.data.data;
+      const list = res.data?.data;
+      if (!Array.isArray(list)) return [];
+      // Only profiles with a linked user id can be booked
+      return list.filter((d) => {
+        const userId = d?.user?._id ?? d?.user;
+        return Boolean(userId);
+      });
     },
   });
 
+  const bookableDoctors = doctors || [];
+
+  const doctorUserId = (doc) => String(doc?.user?._id ?? doc?.user ?? '');
+
   const createAppointment = useMutation({
-    mutationFn: async (newApt) => {
-      const res = await api.post('/appointments', newApt);
+    mutationFn: async (payload) => {
+      const res = await api.post('/appointments', {
+        doctor: payload.doctor,
+        appointmentDate: payload.appointmentDate,
+        timeSlot: payload.timeSlot,
+        reason: payload.reason,
+      });
       return res.data.data;
     },
     onSuccess: () => {
@@ -76,7 +96,11 @@ const PatientAppointments = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.doctor || !formData.appointmentDate || !formData.timeSlot || !formData.reason) {
+    if (!formData.doctor) {
+      toast.error('Please select a doctor');
+      return;
+    }
+    if (!formData.appointmentDate || !formData.timeSlot || !formData.reason?.trim()) {
       toast.error('Please fill all fields');
       return;
     }
@@ -88,7 +112,12 @@ const PatientAppointments = () => {
       toast.error('Please choose today or a future date');
       return;
     }
-    createAppointment.mutate(formData);
+    createAppointment.mutate({
+      doctor: formData.doctor,
+      appointmentDate: formData.appointmentDate,
+      timeSlot: formData.timeSlot,
+      reason: formData.reason.trim(),
+    });
   };
 
   const handleSelectEvent = (event) => {
@@ -241,34 +270,67 @@ const PatientAppointments = () => {
       >
         <form onSubmit={handleSubmit} className="space-y-4 p-6">
           <div>
-            <label className="label flex items-center gap-1.5">
-              <Stethoscope className="h-3.5 w-3.5 text-ink-faint" />
+            <label htmlFor="book-doctor" className="label flex items-center gap-1.5">
+              <Stethoscope className="h-3.5 w-3.5 text-ink-faint" aria-hidden />
               Select doctor
             </label>
-            <select
-              className="input appearance-none"
-              value={formData.doctor}
-              onChange={(e) => setFormData({ ...formData, doctor: e.target.value })}
-            >
-              <option value="" disabled>
-                Choose a specialist
-              </option>
-              {doctors?.map((doc) => (
-                <option key={doc._id} value={doc.user?._id}>
-                  Dr. {doc.user?.name} — {doc.specialization}
-                </option>
-              ))}
-            </select>
+            {doctorsLoading ? (
+              <p className="text-sm text-ink-faint" role="status">
+                Loading available doctors…
+              </p>
+            ) : doctorsError ? (
+              <div className="rounded-lg border border-danger-border bg-danger-soft px-3 py-2.5 text-sm text-danger">
+                <p>Could not load doctors.</p>
+                <button
+                  type="button"
+                  className="mt-1.5 text-xs font-medium underline underline-offset-2"
+                  onClick={() => refetchDoctors()}
+                >
+                  Try again
+                </button>
+              </div>
+            ) : bookableDoctors.length === 0 ? (
+              <div
+                className="rounded-lg border border-warning-border bg-warning-soft px-3 py-2.5 text-sm text-warning"
+                role="status"
+              >
+                No doctors are accepting appointments right now. Ask the clinic to turn
+                on booking for a practitioner, then try again.
+              </div>
+            ) : (
+              <select
+                id="book-doctor"
+                name="doctor"
+                required
+                className="select"
+                value={formData.doctor}
+                onChange={(e) => setFormData({ ...formData, doctor: e.target.value })}
+              >
+                <option value="">Choose a specialist…</option>
+                {bookableDoctors.map((doc) => {
+                  const id = doctorUserId(doc);
+                  const name = doc.user?.name || 'Doctor';
+                  const spec = doc.specialization || 'General';
+                  return (
+                    <option key={doc._id || id} value={id}>
+                      {formatDoctorName(name)} — {spec}
+                    </option>
+                  );
+                })}
+              </select>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="label flex items-center gap-1.5">
-                <CalendarIcon className="h-3.5 w-3.5 text-ink-faint" />
+              <label htmlFor="book-date" className="label flex items-center gap-1.5">
+                <CalendarIcon className="h-3.5 w-3.5 text-ink-faint" aria-hidden />
                 Date
               </label>
               <input
+                id="book-date"
                 type="date"
+                required
                 className="input"
                 value={formData.appointmentDate}
                 min={new Date().toISOString().split('T')[0]}
@@ -278,18 +340,19 @@ const PatientAppointments = () => {
               />
             </div>
             <div>
-              <label className="label flex items-center gap-1.5">
-                <Clock className="h-3.5 w-3.5 text-ink-faint" />
+              <label htmlFor="book-time" className="label flex items-center gap-1.5">
+                <Clock className="h-3.5 w-3.5 text-ink-faint" aria-hidden />
                 Time
               </label>
               <select
-                className="input appearance-none"
+                id="book-time"
+                name="timeSlot"
+                required
+                className="select"
                 value={formData.timeSlot}
                 onChange={(e) => setFormData({ ...formData, timeSlot: e.target.value })}
               >
-                <option value="" disabled>
-                  Time
-                </option>
+                <option value="">Time…</option>
                 {['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM', '04:00 PM'].map(
                   (t) => (
                     <option key={t} value={t}>
@@ -302,11 +365,13 @@ const PatientAppointments = () => {
           </div>
 
           <div>
-            <label className="label flex items-center gap-1.5">
-              <FileText className="h-3.5 w-3.5 text-ink-faint" />
+            <label htmlFor="book-reason" className="label flex items-center gap-1.5">
+              <FileText className="h-3.5 w-3.5 text-ink-faint" aria-hidden />
               Reason for visit
             </label>
             <textarea
+              id="book-reason"
+              required
               className="input min-h-[88px] resize-none py-2.5"
               rows={3}
               value={formData.reason}
@@ -329,13 +394,18 @@ const PatientAppointments = () => {
             </button>
             <button
               type="submit"
-              disabled={createAppointment.isPending}
+              disabled={
+                createAppointment.isPending ||
+                doctorsLoading ||
+                doctorsError ||
+                bookableDoctors.length === 0
+              }
               className="btn btn-primary"
             >
               {createAppointment.isPending ? (
                 <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
               ) : (
-                <CheckCircle className="h-3.5 w-3.5" />
+                <CheckCircle className="h-3.5 w-3.5" aria-hidden />
               )}
               {createAppointment.isPending ? 'Requesting…' : 'Request appointment'}
             </button>

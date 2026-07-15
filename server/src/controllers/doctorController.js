@@ -15,14 +15,25 @@ export const getDoctors = async (req, res, next) => {
 
     const filter = {};
     // Booking UIs can request only doctors currently accepting patients
+    // Treat missing field as accepting (schema default is true)
     if (req.query.accepting === 'true') {
       filter.isAcceptingPatients = { $ne: false };
     }
 
     const doctors = await DoctorProfile.find(filter)
-      .populate('user', userFields)
-      .populate('department', 'name');
-    res.status(200).json({ success: true, data: doctors });
+      .populate({
+        path: 'user',
+        select: userFields,
+        // Never surface inactive / deleted accounts as bookable
+        match: { isActive: { $ne: false }, role: 'doctor' },
+      })
+      .populate('department', 'name')
+      .sort({ specialization: 1 });
+
+    // Drop profiles whose user failed match (inactive / wrong role / missing)
+    const data = doctors.filter((d) => d.user && d.user._id);
+
+    res.status(200).json({ success: true, data });
   } catch (error) {
     next(error);
   }

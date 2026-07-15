@@ -278,7 +278,7 @@ export default function Profile() {
                 </label>
                 <select
                   id="profile-gender"
-                  className="input appearance-none"
+                  className="select"
                   value={form.gender}
                   onChange={(e) => setField('gender', e.target.value)}
                 >

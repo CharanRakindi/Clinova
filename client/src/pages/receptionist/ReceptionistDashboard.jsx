@@ -239,14 +239,16 @@ export default function ReceptionistDashboard() {
                 <select
                   value={aptData.patientId}
                   onChange={(e) => setAptData({ ...aptData, patientId: e.target.value })}
-                  className="input cursor-pointer"
+                  className="select"
                 >
                   <option value="">Choose patient…</option>
-                  {patients?.map((p) => (
-                    <option key={p.user?._id} value={p.user?._id}>
-                      {p.user?.name} ({p.patientId})
-                    </option>
-                  ))}
+                  {(patients || [])
+                    .filter((p) => p.user?._id)
+                    .map((p) => (
+                      <option key={p.user._id} value={String(p.user._id)}>
+                        {p.user?.name} ({p.patientId})
+                      </option>
+                    ))}
                 </select>
               </div>
 
@@ -255,14 +257,16 @@ export default function ReceptionistDashboard() {
                 <select
                   value={aptData.doctorId}
                   onChange={(e) => setAptData({ ...aptData, doctorId: e.target.value })}
-                  className="input cursor-pointer"
+                  className="select"
                 >
                   <option value="">Choose doctor…</option>
-                  {doctors?.map((d) => (
-                    <option key={d.user?._id} value={d.user?._id}>
-                      {d.user?.name} — {d.specialization}
-                    </option>
-                  ))}
+                  {(doctors || [])
+                    .filter((d) => d.user?._id)
+                    .map((d) => (
+                      <option key={d.user._id} value={String(d.user._id)}>
+                        {d.user?.name} — {d.specialization}
+                      </option>
+                    ))}
                 </select>
               </div>
 

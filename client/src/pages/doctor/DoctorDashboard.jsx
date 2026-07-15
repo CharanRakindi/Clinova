@@ -82,6 +82,9 @@ const DoctorDashboard = () => {
     onSuccess: (data) => {
       setIsAvailable(data.isAcceptingPatients !== false);
       queryClient.invalidateQueries({ queryKey: ['myDoctorProfile', user?._id] });
+      // Patient booking list filters on accepting=true
+      queryClient.invalidateQueries({ queryKey: ['doctorsAccepting'] });
+      queryClient.invalidateQueries({ queryKey: ['doctors'] });
       toast.success(
         data.isAcceptingPatients !== false
           ? 'You are now accepting appointment requests'

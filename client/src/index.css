@@ -107,6 +107,13 @@
   .input {
     @apply flex h-10 w-full rounded-lg border border-line bg-surface px-3.5 py-2 text-sm font-normal text-ink placeholder:text-ink-faint transition-colors duration-product focus:border-ink-muted focus:outline-none focus:ring-4 focus:ring-ink/5 disabled:cursor-not-allowed disabled:bg-surface-subtle disabled:text-ink-faint;
   }
+  /*
+   * Native <select> must not use display:flex / appearance-none alone —
+   * that breaks the dropdown in several browsers and looks unclickable.
+   */
+  .select {
+    @apply block h-10 w-full cursor-pointer appearance-auto rounded-lg border border-line bg-surface px-3.5 py-2 text-sm font-normal text-ink transition-colors duration-product focus:border-ink-muted focus:outline-none focus:ring-4 focus:ring-ink/5 disabled:cursor-not-allowed disabled:bg-surface-subtle disabled:text-ink-faint;
+  }
   .label {
     @apply mb-1.5 block text-sm font-medium text-ink-secondary;
   }
