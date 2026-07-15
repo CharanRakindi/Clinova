@@ -70,14 +70,14 @@ export default function Activate() {
         <BrandMark size="md" tone="dark" asLink />
       </div>
       <div className="card w-full max-w-md p-6 sm:p-8">
-        <h1 className="text-2xl font-medium tracking-[-0.025em] text-slate-900">
+        <h1 className="text-2xl font-medium tracking-[-0.025em] text-ink">
           Activate your account
         </h1>
-        <p className="mt-1.5 text-sm text-slate-500">
+        <p className="mt-1.5 text-sm text-ink-muted">
           Set a password using the one-time invite from your clinic. The link expires in 48 hours.
         </p>
         {!token && (
-          <p className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+          <p className="mt-4 rounded-lg border border-danger-border bg-danger-soft px-3 py-2 text-sm text-danger" role="alert">
             This page requires a valid invite link.
           </p>
         )}
@@ -101,9 +101,9 @@ export default function Activate() {
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Activate <ArrowRight className="h-3.5 w-3.5" /></>}
           </button>
         </form>
-        <p className="mt-6 text-center text-sm text-slate-500">
+        <p className="mt-6 text-center text-sm text-ink-muted">
           Already activated?{' '}
-          <Link to="/login" className="font-medium text-slate-900 underline-offset-4 hover:underline">
+          <Link to="/login" className="font-medium text-ink underline-offset-4 hover:underline">
             Sign in
           </Link>
         </p>

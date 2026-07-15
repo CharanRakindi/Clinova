@@ -5,6 +5,8 @@ import SkeletonLoader from '../../components/SkeletonLoader';
 import { FileText, Search, ArrowLeft, ArrowRight, Download, Filter } from 'lucide-react';
 import { format } from 'date-fns';
 import EmptyState from '../../components/ui/EmptyState';
+import StatusBadge from '../../components/ui/StatusBadge';
+import DataValue from '../../components/ui/DataValue';
 
 export default function AuditLogs() {
   const [page, setPage] = useState(1);
@@ -28,7 +30,7 @@ export default function AuditLogs() {
     const rows = data.data.map(log => [
       new Date(log.timestamp).toISOString(),
       log.actor?.name || 'System',
-      log.actor?.email || 'N/A',
+      log.actor?.email || '',
       log.actorRole,
       log.action,
       log.resourceType,
@@ -71,7 +73,7 @@ export default function AuditLogs() {
       {/* Filters */}
       <div className="card p-4 flex flex-col md:flex-row gap-4 items-center justify-between">
         <div className="relative w-full md:max-w-xs">
-          <Search className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
+          <Search className="absolute left-3 top-3 w-4 h-4 text-ink-faint" />
           <input
             type="text"
             placeholder="Search action, IP address..."
@@ -83,7 +85,7 @@ export default function AuditLogs() {
 
         <div className="flex gap-3 w-full md:w-auto">
           <div className="flex items-center gap-2 w-full md:w-auto">
-            <Filter className="w-4 h-4 text-slate-400" />
+            <Filter className="w-4 h-4 text-ink-faint" />
             <select
               value={actionFilter}
               onChange={(e) => { setActionFilter(e.target.value); setPage(1); }}
@@ -104,8 +106,8 @@ export default function AuditLogs() {
       <div className="card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
-            <thead className="bg-slate-50/60">
-              <tr className="text-2xs font-medium text-slate-400 uppercase tracking-wider border-b border-slate-100">
+            <thead className="bg-surface-subtle/60">
+              <tr className="text-2xs font-medium text-ink-faint uppercase tracking-wider border-b border-line-soft">
                 <th className="px-6 py-3.5">Timestamp</th>
                 <th className="px-6 py-3.5">Actor</th>
                 <th className="px-6 py-3.5">Role</th>
@@ -140,38 +142,39 @@ export default function AuditLogs() {
                 </tr>
               ) : (
                 data.data.map((log) => (
-                  <tr key={log._id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="px-6 py-3.5 whitespace-nowrap text-2xs font-mono text-slate-400">
+                  <tr key={log._id} className="hover:bg-surface-subtle/50 transition-colors">
+                    <td className="px-6 py-3.5 whitespace-nowrap text-2xs font-mono text-ink-faint">
                       {format(new Date(log.timestamp), 'yyyy-MM-dd HH:mm:ss')}
                     </td>
                     <td className="px-6 py-3.5">
                       <div className="flex flex-col">
-                        <span className="font-medium text-slate-800">{log.actor?.name || 'System'}</span>
-                        <span className="text-2xs font-medium text-slate-400">{log.actor?.email || 'N/A'}</span>
+                        <span className="font-medium text-ink-secondary">
+                          {log.actor?.name || 'System'}
+                        </span>
+                        <DataValue
+                          as="span"
+                          className="text-2xs font-medium"
+                          emptyClassName="text-2xs data-empty"
+                          value={log.actor?.email}
+                          empty="No email on file"
+                        />
                       </div>
                     </td>
-                    <td className="px-6 py-3.5 whitespace-nowrap">
-                      <span className="text-2xs uppercase font-medium text-slate-500 bg-slate-50 border border-slate-100 rounded px-1.5 py-0.5">
+                    <td className="whitespace-nowrap px-6 py-3.5">
+                      <span className="badge badge-neutral uppercase">
                         {log.actorRole}
                       </span>
                     </td>
-                    <td className="px-6 py-3.5 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-0.5 rounded text-2xs font-medium border ${
-                        log.action === 'CREATE' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
-                        log.action === 'LOGIN' ? 'bg-indigo-50 text-indigo-700 border-indigo-100' :
-                        log.action === 'UPDATE' ? 'bg-amber-50 text-amber-700 border-amber-100' :
-                        'bg-slate-50 text-slate-600 border-slate-200'
-                      }`}>
-                        {log.action}
-                      </span>
+                    <td className="whitespace-nowrap px-6 py-3.5">
+                      <StatusBadge status={log.action} preserveCase />
                     </td>
-                    <td className="px-6 py-3.5 whitespace-nowrap text-slate-500">
+                    <td className="px-6 py-3.5 whitespace-nowrap text-ink-muted">
                       {log.resourceType}
                     </td>
-                    <td className="px-6 py-3.5 font-mono text-2xs text-slate-400">
+                    <td className="px-6 py-3.5 font-mono text-2xs text-ink-faint">
                       {log.ipAddress}
                     </td>
-                    <td className="px-6 py-3.5 max-w-xs truncate text-2xs text-slate-400" title={JSON.stringify(log.metadata)}>
+                    <td className="px-6 py-3.5 max-w-xs truncate text-2xs text-ink-faint" title={JSON.stringify(log.metadata)}>
                       {JSON.stringify(log.metadata || {})}
                     </td>
                   </tr>
@@ -183,8 +186,8 @@ export default function AuditLogs() {
 
         {/* Pagination controls */}
         {data?.pagination && data.pagination.pages > 1 && (
-          <div className="px-6 py-3.5 border-t border-slate-100 flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-400">
+          <div className="px-6 py-3.5 border-t border-line-soft flex items-center justify-between">
+            <span className="text-xs font-medium text-ink-faint">
               Showing page {page} of {data.pagination.pages}
             </span>
             <div className="flex gap-2">

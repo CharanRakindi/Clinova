@@ -9,8 +9,10 @@ const ProtectedRoute = () => {
     return (
       <div className="flex min-h-screen items-center justify-center bg-surface-muted">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="h-7 w-7 animate-spin text-slate-400" />
-          <p className="text-sm font-normal text-slate-400">Loading Clinova…</p>
+          <Loader2 className="h-7 w-7 animate-spin text-ink-faint" aria-hidden />
+          <p className="text-sm font-normal text-ink-faint" role="status">
+            Loading Clinova…
+          </p>
         </div>
       </div>
     );

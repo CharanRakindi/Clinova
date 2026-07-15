@@ -13,7 +13,7 @@
   }
 
   body {
-    @apply bg-surface-muted text-ink antialiased selection:bg-slate-200 selection:text-ink;
+    @apply bg-surface-muted text-ink antialiased selection:bg-line selection:text-ink;
     font-feature-settings: 'cv11', 'ss01', 'ss03';
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -78,7 +78,26 @@
     @apply bg-transparent text-ink-muted hover:bg-surface-subtle hover:text-ink;
   }
   .btn-danger {
-    @apply bg-danger text-white shadow-xs hover:bg-rose-700;
+    @apply bg-danger text-white shadow-xs hover:bg-danger/90;
+  }
+  /* Soft semantic actions — no raw emerald/rose stacks */
+  .btn-soft-success {
+    @apply border border-success-border bg-success-soft text-success hover:bg-success/10;
+  }
+  .btn-soft-danger {
+    @apply border border-danger-border bg-danger-soft text-danger hover:bg-danger/10;
+  }
+  .btn-soft-warning {
+    @apply border border-warning-border bg-warning-soft text-warning hover:bg-warning/10;
+  }
+  .btn-icon {
+    @apply inline-flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition-colors duration-product ease-product hover:bg-surface-subtle hover:text-ink;
+  }
+  .btn-icon-success {
+    @apply text-success hover:bg-success-soft;
+  }
+  .btn-icon-danger {
+    @apply text-danger hover:bg-danger-soft;
   }
   .btn-sm {
     @apply px-3 py-1.5 text-xs;
@@ -177,7 +196,7 @@
     @apply text-right font-medium text-ink-secondary;
   }
 
-  /* —— Badges: flat, no border+fill+shadow stack —— */
+  /* —— Badges: flat fill only — never border+fill+shadow stack —— */
   .badge {
     @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-2xs font-medium;
   }
@@ -195,6 +214,14 @@
   }
   .badge-info {
     @apply bg-info-soft text-info;
+  }
+
+  /* Meta chips (vitals, tags) — one quiet language */
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full bg-surface-subtle px-3 py-1.5 text-xs font-medium text-ink-secondary;
+  }
+  .chip-outline {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-medium text-ink-secondary;
   }
 
   /* —— Tables —— */

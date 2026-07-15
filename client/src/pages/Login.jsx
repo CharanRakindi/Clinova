@@ -91,10 +91,10 @@ const Login = () => {
           </div>
 
           <div>
-            <h2 className="text-xl font-medium tracking-[-0.025em] text-slate-900 sm:text-2xl">
+            <h2 className="text-xl font-medium tracking-[-0.025em] text-ink sm:text-2xl">
               Sign in
             </h2>
-            <p className="mt-1.5 text-sm font-normal leading-snug tracking-[-0.01em] text-slate-500">
+            <p className="mt-1.5 text-sm font-normal leading-snug tracking-[-0.01em] text-ink-muted">
               Welcome back. Enter your details to continue.
             </p>
           </div>
@@ -118,7 +118,7 @@ const Login = () => {
               <div>
                 <div className="mb-1.5 flex items-center justify-between">
                   <label className="label mb-0">Password</label>
-                  <a href="#" className="text-xs font-medium text-slate-500 transition-colors hover:text-slate-900">
+                  <a href="#" className="text-xs font-medium text-ink-muted transition-colors hover:text-ink">
                     Forgot password?
                   </a>
                 </div>
@@ -152,9 +152,9 @@ const Login = () => {
               </div>
             </form>
 
-            <p className="mt-7 text-center text-sm font-normal text-slate-500">
+            <p className="mt-7 text-center text-sm font-normal text-ink-muted">
               Don&apos;t have an account?{' '}
-              <Link to="/register" className="font-medium text-slate-900 underline-offset-4 hover:underline">
+              <Link to="/register" className="font-medium text-ink underline-offset-4 hover:underline">
                 Create one
               </Link>
             </p>

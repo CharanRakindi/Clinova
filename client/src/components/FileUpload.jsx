@@ -93,8 +93,8 @@ export default function FileUpload({
           className={cn(
             'flex cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed p-8 transition-all',
             isDragging
-              ? 'border-slate-400 bg-slate-100'
-              : 'border-slate-200 bg-slate-50/80 hover:border-slate-300 hover:bg-slate-50'
+              ? 'border-ink-faint bg-surface-subtle'
+              : 'border-line bg-surface-subtle/80 hover:border-line-strong hover:bg-surface-subtle'
           )}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -104,14 +104,14 @@ export default function FileUpload({
           <UploadCloud
             className={cn(
               'mb-3 h-9 w-9 transition-colors',
-              isDragging ? 'text-slate-700' : 'text-slate-400'
+              isDragging ? 'text-ink-secondary' : 'text-ink-faint'
             )}
             strokeWidth={1.5}
           />
-          <p className="mb-1 text-center text-sm font-medium text-slate-700">
+          <p className="mb-1 text-center text-sm font-medium text-ink-secondary">
             Drag & drop your file here
           </p>
-          <p className="text-center text-xs font-normal text-slate-400">
+          <p className="text-center text-xs font-normal text-ink-faint">
             or click to browse · PDF, images, documents
           </p>
           <input
@@ -123,15 +123,15 @@ export default function FileUpload({
           />
         </div>
       ) : (
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-2xl border border-line bg-white p-4 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-3 overflow-hidden">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-100 bg-slate-50">
-                <FileIcon className="h-4.5 w-4.5 text-slate-500" strokeWidth={1.75} />
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-line-soft bg-surface-subtle">
+                <FileIcon className="h-4.5 w-4.5 text-ink-muted" strokeWidth={1.75} />
               </div>
               <div className="overflow-hidden">
-                <p className="truncate text-sm font-medium text-slate-900">{file.name}</p>
-                <p className="text-xs font-normal text-slate-400">
+                <p className="truncate text-sm font-medium text-ink">{file.name}</p>
+                <p className="text-xs font-normal text-ink-faint">
                   {(file.size / 1024 / 1024).toFixed(2)} MB
                 </p>
               </div>
@@ -141,8 +141,9 @@ export default function FileUpload({
               <button
                 type="button"
                 onClick={clearFile}
-                className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-500"
+                className="btn-icon btn-icon-danger"
                 title="Remove file"
+                aria-label="Remove file"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -150,8 +151,11 @@ export default function FileUpload({
           </div>
 
           {uploadedUrl ? (
-            <div className="flex items-center justify-center gap-2 rounded-xl bg-emerald-50 py-2.5 text-sm font-medium text-emerald-700">
-              <CheckCircle className="h-4 w-4" />
+            <div
+              role="status"
+              className="flex items-center justify-center gap-2 rounded-lg bg-success-soft py-2.5 text-sm font-medium text-success"
+            >
+              <CheckCircle className="h-4 w-4" aria-hidden />
               Upload complete
             </div>
           ) : (

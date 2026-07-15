@@ -43,9 +43,9 @@ const DoctorPatients = () => {
 
       <div className="card overflow-hidden">
         {/* Filters */}
-        <div className="flex items-center gap-3 border-b border-slate-100 p-4">
+        <div className="flex items-center gap-3 border-b border-line-soft p-4">
           <div className="relative w-full max-w-md flex-1">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-faint" />
             <input
               type="text"
               className="input pl-9"
@@ -59,12 +59,12 @@ const DoctorPatients = () => {
         {/* Table */}
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-slate-100">
-            <thead className="bg-slate-50/60">
+            <thead className="bg-surface-subtle/60">
               <tr>
-                <th scope="col" className="px-6 py-3.5 text-left text-2xs font-medium uppercase tracking-wider text-slate-400">Patient Details</th>
-                <th scope="col" className="px-6 py-3.5 text-left text-2xs font-medium uppercase tracking-wider text-slate-400">Patient ID</th>
-                <th scope="col" className="px-6 py-3.5 text-left text-2xs font-medium uppercase tracking-wider text-slate-400">Blood Group</th>
-                <th scope="col" className="px-6 py-3.5 text-right text-2xs font-medium uppercase tracking-wider text-slate-400">Actions</th>
+                <th scope="col" className="px-6 py-3.5 text-left text-2xs font-medium uppercase tracking-wider text-ink-faint">Patient Details</th>
+                <th scope="col" className="px-6 py-3.5 text-left text-2xs font-medium uppercase tracking-wider text-ink-faint">Patient ID</th>
+                <th scope="col" className="px-6 py-3.5 text-left text-2xs font-medium uppercase tracking-wider text-ink-faint">Blood Group</th>
+                <th scope="col" className="px-6 py-3.5 text-right text-2xs font-medium uppercase tracking-wider text-ink-faint">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50 bg-white">

@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { formatDoctorName } from '../../utils/format';
 import EmptyState from '../../components/ui/EmptyState';
+import StatusBadge from '../../components/ui/StatusBadge';
 
 export default function ReceptionistDashboard() {
   const queryClient = useQueryClient();
@@ -149,7 +150,7 @@ export default function ReceptionistDashboard() {
           <div id="receptionist-register-form" className="card space-y-4 p-5">
             <div>
               <h3 className="section-title flex items-center gap-2">
-                <UserPlus className="h-4 w-4 text-slate-400" />
+                <UserPlus className="h-4 w-4 text-ink-faint" />
                 Register new patient
               </h3>
               <p className="section-subtitle">Create a standard EHR record</p>
@@ -207,10 +208,15 @@ export default function ReceptionistDashboard() {
                 Register patient
               </button>
               {lastTempPassword && (
-                <div className="rounded-xl border border-amber-100 bg-amber-50 p-3 text-xs text-amber-900">
+                <div
+                  role="status"
+                  className="rounded-lg border border-warning-border bg-warning-soft p-3 text-xs text-warning"
+                >
                   <p className="font-medium">One-time activation link (48h — share securely):</p>
-                  <p className="mt-1 break-all font-mono text-xs">{lastTempPassword}</p>
-                  <p className="mt-1 text-amber-800/80">
+                  <p className="mt-1 break-all font-mono text-xs text-ink-secondary">
+                    {lastTempPassword}
+                  </p>
+                  <p className="mt-1 text-warning/80">
                     Patient sets their own password via this link. It is not a login password.
                   </p>
                 </div>
@@ -221,7 +227,7 @@ export default function ReceptionistDashboard() {
           <div className="card space-y-4 p-5">
             <div>
               <h3 className="section-title flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-slate-400" />
+                <Calendar className="h-4 w-4 text-ink-faint" />
                 Schedule consultation
               </h3>
               <p className="section-subtitle">Assign patients to practitioner slots</p>
@@ -337,48 +343,46 @@ export default function ReceptionistDashboard() {
                     </tr>
                   ) : (
                     appointments.map((apt) => (
-                      <tr key={apt._id} className="hover:bg-slate-50/50 transition-colors group">
+                      <tr key={apt._id} className="hover:bg-surface-subtle/50 transition-colors group">
                         <td className="px-4 py-3.5">
                           <div className="flex flex-col">
-                            <span className="font-medium text-slate-800">{apt.patient?.name}</span>
-                            <span className="text-2xs font-medium text-slate-400">{apt.patient?.email}</span>
+                            <span className="font-medium text-ink-secondary">{apt.patient?.name}</span>
+                            <span className="text-2xs font-medium text-ink-faint">{apt.patient?.email}</span>
                           </div>
                         </td>
-                        <td className="px-4 py-3.5 text-slate-600 font-medium">
+                        <td className="px-4 py-3.5 text-ink-muted font-medium">
                           <span>{formatDoctorName(apt.doctor?.name)}</span>
                         </td>
-                        <td className="px-4 py-3.5 text-slate-500">
+                        <td className="px-4 py-3.5 text-ink-muted">
                           <div className="flex flex-col">
                             <span>{format(new Date(apt.appointmentDate), 'MMM dd, yyyy')}</span>
-                            <span className="text-2xs font-medium text-slate-400">{apt.timeSlot}</span>
+                            <span className="text-2xs font-medium text-ink-faint">{apt.timeSlot}</span>
                           </div>
                         </td>
                         <td className="px-4 py-3.5">
-                          <span className={`inline-flex px-2 py-0.5 rounded text-2xs font-medium uppercase tracking-wider border ${
-                            apt.status === 'confirmed' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
-                            apt.status === 'requested' ? 'bg-amber-50 text-amber-700 border-amber-100' :
-                            'bg-slate-50 text-slate-700 border-slate-200'
-                          }`}>
-                            {apt.status}
-                          </span>
+                          <StatusBadge status={apt.status} className="uppercase tracking-wider" />
                         </td>
                         <td className="px-4 py-3.5 text-right">
-                          <div className="flex gap-1 justify-end opacity-80 group-hover:opacity-100 transition-opacity">
+                          <div className="flex justify-end gap-1 opacity-80 transition-opacity duration-product group-hover:opacity-100">
                             {apt.status === 'requested' && (
                               <button
+                                type="button"
                                 onClick={() => updateAptStatus.mutate({ id: apt._id, status: 'confirmed' })}
-                                className="p-1 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                                className="btn-icon btn-icon-success"
                                 title="Confirm check-in"
+                                aria-label="Confirm check-in"
                               >
-                                <Check className="w-4 h-4" />
+                                <Check className="h-4 w-4" />
                               </button>
                             )}
                             <button
+                              type="button"
                               onClick={() => updateAptStatus.mutate({ id: apt._id, status: 'cancelled' })}
-                              className="p-1 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                              className="btn-icon btn-icon-danger"
                               title="Cancel slot"
+                              aria-label="Cancel slot"
                             >
-                              <Trash className="w-3.5 h-3.5" />
+                              <Trash className="h-3.5 w-3.5" />
                             </button>
                           </div>
                         </td>

@@ -26,22 +26,27 @@ export default function OfflineBanner() {
   if (!isOffline || dismissed) return null;
 
   return (
-    <div className="fixed bottom-6 right-6 z-[100] w-full max-w-sm animate-slide-in-right rounded-2xl border border-slate-800 bg-slate-950 p-4 text-white shadow-premium-lg">
+    <div
+      role="status"
+      className="fixed bottom-6 right-6 z-[100] w-full max-w-sm animate-slide-in-right rounded-xl border border-white/10 bg-surface-inverse p-4 text-ink-inverse shadow-lg"
+    >
       <div className="flex items-start gap-3">
-        <div className="shrink-0 rounded-xl bg-rose-500/10 p-2 text-rose-400">
-          <WifiOff className="h-4.5 w-4.5" />
+        <div className="shrink-0 rounded-lg bg-danger/15 p-2 text-danger-border">
+          <WifiOff className="h-4 w-4" aria-hidden />
         </div>
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           <h4 className="text-sm font-medium">You&apos;re offline</h4>
           <p className="mt-1 text-xs font-normal text-white/55">
             Clinova will sync your updates once connectivity is restored.
           </p>
         </div>
-        <button 
-          onClick={() => setDismissed(true)} 
-          className="text-slate-500 hover:text-slate-300 p-0.5 rounded-lg hover:bg-slate-800 transition-colors"
+        <button
+          type="button"
+          onClick={() => setDismissed(true)}
+          className="rounded-lg p-1 text-white/50 transition-colors duration-product hover:bg-white/10 hover:text-white"
+          aria-label="Dismiss offline notice"
         >
-          <X className="w-4 h-4" />
+          <X className="h-4 w-4" />
         </button>
       </div>
     </div>

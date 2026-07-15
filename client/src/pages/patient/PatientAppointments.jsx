@@ -7,18 +7,11 @@ import { toast } from 'sonner';
 import InteractiveCalendar from '../../components/InteractiveCalendar';
 import { SkeletonTable } from '../../components/SkeletonLoader';
 import { formatDoctorName } from '../../utils/format';
-import { cn } from '../../utils/cn';
 import Modal from '../../components/ui/Modal';
 import EmptyState from '../../components/ui/EmptyState';
 import DataValue from '../../components/ui/DataValue';
-
-const statusClass = (status) => {
-  if (status === 'confirmed') return 'badge-success';
-  if (status === 'requested') return 'badge-warning';
-  if (status === 'cancelled') return 'badge-danger';
-  if (status === 'completed') return 'badge-info';
-  return 'badge-neutral';
-};
+import StatusBadge from '../../components/ui/StatusBadge';
+import SegmentedControl from '../../components/ui/SegmentedControl';
 
 const PatientAppointments = () => {
   const queryClient = useQueryClient();
@@ -121,34 +114,15 @@ const PatientAppointments = () => {
           <p className="page-subtitle">Manage your upcoming and past visits</p>
         </div>
         <div className="flex w-full items-center gap-3 sm:w-auto">
-          <div className="flex items-center rounded-full border border-slate-200 bg-slate-50 p-1">
-            <button
-              type="button"
-              onClick={() => setViewMode('list')}
-              className={cn(
-                'rounded-full p-2 transition-colors',
-                viewMode === 'list'
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-400 hover:text-slate-700'
-              )}
-              title="List view"
-            >
-              <List className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode('calendar')}
-              className={cn(
-                'rounded-full p-2 transition-colors',
-                viewMode === 'calendar'
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-400 hover:text-slate-700'
-              )}
-              title="Calendar view"
-            >
-              <CalendarIcon className="h-4 w-4" />
-            </button>
-          </div>
+          <SegmentedControl
+            aria-label="Appointment view"
+            value={viewMode}
+            onChange={setViewMode}
+            options={[
+              { id: 'list', label: 'List view', icon: List },
+              { id: 'calendar', label: 'Calendar view', icon: CalendarIcon },
+            ]}
+          />
 
           <button
             type="button"
@@ -235,9 +209,7 @@ const PatientAppointments = () => {
                         </p>
                       </td>
                       <td className="table-cell whitespace-nowrap">
-                        <span className={cn('badge uppercase tracking-wider', statusClass(apt.status))}>
-                          {apt.status}
-                        </span>
+                        <StatusBadge status={apt.status} className="uppercase tracking-wider" />
                       </td>
                       <td className="table-cell whitespace-nowrap text-right">
                         {['requested', 'confirmed'].includes(apt.status) && (
@@ -245,7 +217,7 @@ const PatientAppointments = () => {
                             type="button"
                             onClick={() => cancelAppointment.mutate(apt._id)}
                             disabled={cancelAppointment.isPending}
-                            className="btn btn-sm border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100"
+                            className="btn btn-sm btn-soft-danger"
                           >
                             <X className="h-3.5 w-3.5" />
                             Cancel

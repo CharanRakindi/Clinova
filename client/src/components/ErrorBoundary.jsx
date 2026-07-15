@@ -19,13 +19,13 @@ export default class ErrorBoundary extends React.Component {
     if (this.state.hasError) {
       return (
         <div className="flex min-h-[60vh] flex-col items-center justify-center p-6 text-center">
-          <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-rose-100 bg-rose-50 text-rose-500">
-            <AlertOctagon className="h-6 w-6" />
+          <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-lg border border-danger-border bg-danger-soft text-danger">
+            <AlertOctagon className="h-6 w-6" aria-hidden />
           </div>
-          <h2 className="mb-2 text-lg font-medium tracking-tight text-slate-900">
+          <h2 className="mb-2 text-lg font-medium tracking-tight text-ink">
             Something went wrong
           </h2>
-          <p className="mb-7 max-w-md text-sm font-normal text-slate-500">
+          <p className="mb-7 max-w-md text-sm font-normal text-ink-muted">
             An unexpected error occurred while loading this view. Try reloading the page.
           </p>
           <button

@@ -136,7 +136,7 @@ export default function BrandMark({
           className={cn(
             'font-brand font-medium leading-none tracking-[-0.045em]',
             s.word,
-            isLight ? 'text-white' : 'text-slate-900'
+            isLight ? 'text-white' : 'text-ink'
           )}
         >
           Clino

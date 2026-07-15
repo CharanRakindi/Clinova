@@ -14,6 +14,7 @@ import { formatDoctorName } from '../../utils/format';
 import { cn } from '../../utils/cn';
 import EmptyState from '../../components/ui/EmptyState';
 import Modal from '../../components/ui/Modal';
+import StatusBadge from '../../components/ui/StatusBadge';
 
 const DoctorDashboard = () => {
   const queryClient = useQueryClient();
@@ -243,19 +244,27 @@ const DoctorDashboard = () => {
             className="btn btn-secondary"
             title="Controls whether patients can request appointments with you"
           >
-            <span className={cn(
-              "w-2 h-2 rounded-full",
-              isAvailable ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-slate-400"
-            )} />
+            <span
+              className={cn(
+                'h-2 w-2 rounded-full',
+                isAvailable ? 'bg-success' : 'bg-ink-faint'
+              )}
+              aria-hidden
+            />
             <span>Accepting: {isAvailable ? 'Yes' : 'No'}</span>
-            {isAvailable ? <ToggleRight className="w-5 h-5 text-slate-400 ml-1" /> : <ToggleLeft className="w-5 h-5 text-slate-300 ml-1" />}
+            {isAvailable ? (
+              <ToggleRight className="ml-1 h-5 w-5 text-ink-faint" aria-hidden />
+            ) : (
+              <ToggleLeft className="ml-1 h-5 w-5 text-ink-faint" aria-hidden />
+            )}
           </button>
         </div>
       </div>
-      
+
+      {/* Focal metric first; supporting metrics quieter */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <StatCard
-          index={0}
+          emphasis
           title="Today's schedule"
           value={todayAppointments.length}
           icon={Calendar}
@@ -263,14 +272,16 @@ const DoctorDashboard = () => {
           trendType="neutral"
           contextText={
             todayAppointments.length > 0
-              ? `Next: ${todayAppointments.find((a) => a.status !== 'completed')?.timeSlot || '—'}`
+              ? `Next: ${
+                  todayAppointments.find((a) => a.status !== 'completed')?.timeSlot ||
+                  'time not set'
+                }`
               : 'No appointments scheduled'
           }
           actionText="View calendar"
           actionHref="#calendar-view"
         />
         <StatCard
-          index={1}
           title="Patients"
           value={stats?.totalAssignedPatients || 0}
           icon={Users}
@@ -279,7 +290,6 @@ const DoctorDashboard = () => {
           actionHref="/doctor/patients"
         />
         <StatCard
-          index={2}
           title="Completed today"
           value={todayAppointments.filter((a) => a.status === 'completed').length}
           icon={CheckCircle}
@@ -295,7 +305,7 @@ const DoctorDashboard = () => {
           <div id="pending-requests" className="card space-y-4 p-5">
             <div>
               <h3 className="panel-title flex items-center gap-2">
-                <CheckCheck className="h-4 w-4 text-slate-400" strokeWidth={1.75} />
+                <CheckCheck className="h-4 w-4 text-ink-faint" strokeWidth={1.75} />
                 Pending requests
               </h3>
               <p className="panel-meta">Accept or decline patient bookings (today &amp; future)</p>
@@ -307,20 +317,20 @@ const DoctorDashboard = () => {
                 pendingRequests.map((apt) => (
                   <div key={apt._id} className="list-row flex-col items-stretch gap-2.5 sm:flex-row sm:items-center">
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium tracking-[-0.01em] text-slate-800">
+                      <p className="truncate text-sm font-medium tracking-[-0.01em] text-ink-secondary">
                         {apt.patient?.name}
                       </p>
-                      <p className="mt-0.5 text-2xs text-slate-400">
+                      <p className="mt-0.5 text-2xs text-ink-faint">
                         {format(new Date(apt.appointmentDate), 'MMM dd, yyyy')} · {apt.timeSlot}
                       </p>
-                      <p className="mt-0.5 line-clamp-1 text-2xs text-slate-500">{apt.reason}</p>
+                      <p className="mt-0.5 line-clamp-1 text-2xs text-ink-muted">{apt.reason}</p>
                     </div>
                     <div className="flex shrink-0 gap-1.5">
                       <button
                         type="button"
                         onClick={() => updateStatus.mutate({ id: apt._id, status: 'confirmed' })}
                         disabled={updateStatus.isPending}
-                        className="btn btn-sm border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                        className="btn btn-sm btn-soft-success"
                         title="Accept appointment"
                       >
                         <Check className="h-3.5 w-3.5" />
@@ -336,7 +346,7 @@ const DoctorDashboard = () => {
                           })
                         }
                         disabled={updateStatus.isPending}
-                        className="btn btn-sm border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100"
+                        className="btn btn-sm btn-soft-danger"
                         title="Decline appointment"
                       >
                         <X className="h-3.5 w-3.5" />
@@ -352,7 +362,7 @@ const DoctorDashboard = () => {
           <div id="consultations-queue" className="card space-y-4 p-5">
             <div>
               <h3 className="panel-title flex items-center gap-2">
-                <Clock className="h-4 w-4 text-slate-400" strokeWidth={1.75} />
+                <Clock className="h-4 w-4 text-ink-faint" strokeWidth={1.75} />
                 Today&apos;s queue
               </h3>
               <p className="panel-meta">Prioritized by time slot</p>
@@ -377,13 +387,13 @@ const DoctorDashboard = () => {
                       <div className="min-w-0">
                         <p
                           className={cn(
-                            'truncate text-sm font-medium tracking-[-0.01em] text-slate-800',
-                            apt.status === 'completed' && 'line-through text-slate-400'
+                            'truncate text-sm font-medium tracking-[-0.01em] text-ink-secondary',
+                            apt.status === 'completed' && 'line-through text-ink-faint'
                           )}
                         >
                           {apt.patient?.name}
                         </p>
-                        <p className="mt-0.5 text-2xs text-slate-400">
+                        <p className="mt-0.5 text-2xs text-ink-faint">
                           {apt.timeSlot} · <span className="capitalize">{apt.status}</span>
                           {apt.reason ? ` · ${apt.reason}` : ''}
                         </p>
@@ -395,8 +405,9 @@ const DoctorDashboard = () => {
                             onClick={() =>
                               updateStatus.mutate({ id: apt._id, status: 'confirmed' })
                             }
-                            className="rounded-lg p-1.5 text-sky-600 transition-colors hover:bg-sky-50"
+                            className="btn-icon btn-icon-success"
                             title="Accept request"
+                            aria-label="Accept request"
                           >
                             <CheckCheck className="h-3.5 w-3.5" />
                           </button>
@@ -407,15 +418,17 @@ const DoctorDashboard = () => {
                             onClick={() =>
                               updateStatus.mutate({ id: apt._id, status: 'completed' })
                             }
-                            className="rounded-lg p-1.5 text-emerald-600 transition-colors hover:bg-emerald-50"
+                            className="btn-icon btn-icon-success"
                             title="Complete consultation"
+                            aria-label="Complete consultation"
                           >
                             <Check className="h-3.5 w-3.5" />
                           </button>
                         )}
                         <Link
                           to={`/doctor/patients/${apt.patient?._id}`}
-                          className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-700"
+                          className="btn-icon"
+                          aria-label={`Open chart for ${apt.patient?.name || 'patient'}`}
                         >
                           <ChevronRight className="h-4 w-4" />
                         </Link>
@@ -431,7 +444,7 @@ const DoctorDashboard = () => {
             <div className="card space-y-4 p-5">
               <div>
                 <h3 className="panel-title flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-slate-400" strokeWidth={1.75} />
+                  <Calendar className="h-4 w-4 text-ink-faint" strokeWidth={1.75} />
                   Upcoming confirmed
                 </h3>
                 <p className="panel-meta">Future visits you have accepted</p>
@@ -440,16 +453,14 @@ const DoctorDashboard = () => {
                 {upcomingConfirmed.slice(0, 12).map((apt) => (
                   <div key={apt._id} className="list-row">
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium tracking-[-0.01em] text-slate-800">
+                      <p className="truncate text-sm font-medium tracking-[-0.01em] text-ink-secondary">
                         {apt.patient?.name}
                       </p>
-                      <p className="mt-0.5 text-2xs text-slate-400">
+                      <p className="mt-0.5 text-2xs text-ink-faint">
                         {format(new Date(apt.appointmentDate), 'MMM dd, yyyy')} · {apt.timeSlot}
                       </p>
                     </div>
-                    <span className="badge badge-success shrink-0 uppercase tracking-wider">
-                      confirmed
-                    </span>
+                    <StatusBadge status="confirmed" className="shrink-0 uppercase tracking-wider" />
                   </div>
                 ))}
               </div>
@@ -460,7 +471,7 @@ const DoctorDashboard = () => {
           <div className="card space-y-4 p-5">
             <div>
               <h3 className="panel-title flex items-center gap-2">
-                <PenTool className="h-4 w-4 text-slate-400" strokeWidth={1.75} />
+                <PenTool className="h-4 w-4 text-ink-faint" strokeWidth={1.75} />
                 Quick clinical notes
               </h3>
               <p className="panel-meta">Jot down quick updates. Saved locally.</p>
@@ -469,7 +480,7 @@ const DoctorDashboard = () => {
               rows={4}
               value={quickNote}
               onChange={(e) => setQuickNote(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 text-slate-700 placeholder:text-slate-400 transition-all font-sans resize-none"
+              className="input min-h-[6rem] resize-none py-2.5"
               placeholder="Start typing reminders, code shortcuts, or clinical notes..."
             />
           </div>
@@ -479,7 +490,7 @@ const DoctorDashboard = () => {
             <div className="flex items-center justify-between gap-2">
               <div>
                 <h3 className="panel-title flex items-center gap-2">
-                  <FlaskConical className="h-4 w-4 text-slate-400" />
+                  <FlaskConical className="h-4 w-4 text-ink-faint" />
                   Lab orders
                 </h3>
                 <p className="panel-meta">
@@ -502,16 +513,19 @@ const DoctorDashboard = () => {
                 labReports.slice(0, 8).map((report) => (
                   <div
                     key={report._id}
-                    className="flex items-center justify-between gap-2 rounded-xl border border-slate-200/70 bg-white p-3"
+                    className="flex items-center justify-between gap-2 rounded-lg border border-line bg-surface p-3"
                   >
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-slate-800">
+                      <p className="truncate text-sm font-medium text-ink-secondary">
                         {report.testName}
                       </p>
-                      <p className="mt-0.5 truncate text-2xs text-slate-400">
-                        {report.patient?.name || 'Patient'} ·{' '}
-                        {format(new Date(report.orderedDate || report.createdAt), 'MMM dd')} ·{' '}
-                        <span className="capitalize">{String(report.status || '').replace(/_/g, ' ')}</span>
+                      <p className="mt-0.5 flex flex-wrap items-center gap-1.5 truncate text-2xs text-ink-faint">
+                        <span>{report.patient?.name || 'Patient not linked'}</span>
+                        <span aria-hidden>·</span>
+                        <span>
+                          {format(new Date(report.orderedDate || report.createdAt), 'MMM dd')}
+                        </span>
+                        <StatusBadge status={report.status} />
                       </p>
                     </div>
                     <button
@@ -534,8 +548,8 @@ const DoctorDashboard = () => {
         {/* Schedule Calendar */}
         <div id="calendar-view" className="lg:col-span-2 card p-5 relative z-0">
           <div className="mb-4">
-            <h3 className="text-base font-medium text-slate-800">Interactive Clinical Calendar</h3>
-            <p className="text-2xs font-medium text-slate-400 mt-0.5">Manage schedules, consultations, and drag/drop adjustments.</p>
+            <h3 className="text-base font-medium text-ink-secondary">Interactive Clinical Calendar</h3>
+            <p className="text-2xs font-medium text-ink-faint mt-0.5">Manage schedules, consultations, and drag/drop adjustments.</p>
           </div>
           <InteractiveCalendar 
             events={allAppointments || []} 
@@ -582,7 +596,7 @@ const DoctorDashboard = () => {
 
               <div>
                 <label className="label">
-                  Appointment <span className="font-normal text-slate-400">(optional)</span>
+                  Appointment <span className="font-normal text-ink-faint">(optional)</span>
                 </label>
                 <select
                   className="input"
@@ -635,7 +649,7 @@ const DoctorDashboard = () => {
                   {['Normal', 'Urgent'].map((p) => (
                     <label
                       key={p}
-                      className="flex cursor-pointer items-center gap-2 text-sm font-normal text-slate-700"
+                      className="flex cursor-pointer items-center gap-2 text-sm font-normal text-ink-secondary"
                     >
                       <input
                         type="radio"
@@ -643,7 +657,7 @@ const DoctorDashboard = () => {
                         value={p}
                         checked={labForm.priority === p}
                         onChange={() => setLabForm({ ...labForm, priority: p })}
-                        className="h-4 w-4 border-slate-300 text-slate-900 focus:ring-slate-400"
+                        className="h-4 w-4 border-line-strong text-ink focus:ring-slate-400"
                       />
                       <span>{p}</span>
                     </label>
@@ -662,7 +676,7 @@ const DoctorDashboard = () => {
                 />
               </div>
 
-              <div className="flex justify-end gap-2 border-t border-slate-100 pt-4">
+              <div className="flex justify-end gap-2 border-t border-line-soft pt-4">
                 <button
                   type="button"
                   onClick={() => setIsLabModalOpen(false)}

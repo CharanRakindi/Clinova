@@ -119,7 +119,7 @@ export default function Profile() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <form onSubmit={handleSave} className="space-y-6 lg:col-span-2">
           <div className="card space-y-6 p-5 sm:p-6">
-            <div className="flex flex-col gap-2 border-b border-slate-100 pb-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-2 border-b border-line-soft pb-3 sm:flex-row sm:items-center sm:justify-between">
               <h3 className="section-title">Personal details</h3>
               <button type="submit" disabled={saving} className="btn btn-primary btn-sm self-start sm:self-auto">
                 {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
@@ -130,7 +130,7 @@ export default function Profile() {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="md:col-span-2">
                 <label className="label flex items-center gap-1.5">
-                  <User className="h-3.5 w-3.5 text-slate-400" />
+                  <User className="h-3.5 w-3.5 text-ink-faint" />
                   Full name
                 </label>
                 <input
@@ -145,19 +145,19 @@ export default function Profile() {
 
               <div className="md:col-span-2">
                 <label className="label flex items-center gap-1.5">
-                  <Mail className="h-3.5 w-3.5 text-slate-400" />
+                  <Mail className="h-3.5 w-3.5 text-ink-faint" />
                   Email address
                 </label>
                 <div className="relative">
                   <input
-                    className="input cursor-not-allowed bg-slate-50 pr-10 text-slate-500"
+                    className="input cursor-not-allowed bg-surface-subtle pr-10 text-ink-muted"
                     value={user.email}
                     disabled
                     readOnly
                   />
-                  <Lock className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+                  <Lock className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-ink-faint" />
                 </div>
-                <p className="mt-1.5 flex items-start gap-1.5 text-xs leading-snug text-slate-400">
+                <p className="mt-1.5 flex items-start gap-1.5 text-xs leading-snug text-ink-faint">
                   <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                   {isStaff
                     ? 'Staff email can only be changed by an administrator.'
@@ -167,7 +167,7 @@ export default function Profile() {
 
               <div>
                 <label className="label flex items-center gap-1.5">
-                  <Phone className="h-3.5 w-3.5 text-slate-400" />
+                  <Phone className="h-3.5 w-3.5 text-ink-faint" />
                   Phone
                 </label>
                 <input
@@ -181,7 +181,7 @@ export default function Profile() {
 
               <div>
                 <label className="label flex items-center gap-1.5">
-                  <Calendar className="h-3.5 w-3.5 text-slate-400" />
+                  <Calendar className="h-3.5 w-3.5 text-ink-faint" />
                   Date of birth
                 </label>
                 <input
@@ -210,11 +210,11 @@ export default function Profile() {
 
               <div>
                 <label className="label flex items-center gap-1.5">
-                  <Shield className="h-3.5 w-3.5 text-slate-400" />
+                  <Shield className="h-3.5 w-3.5 text-ink-faint" />
                   Role
                 </label>
                 <input
-                  className="input cursor-not-allowed bg-slate-50 capitalize text-slate-500"
+                  className="input cursor-not-allowed bg-surface-subtle capitalize text-ink-muted"
                   value={String(user.role || '').replace(/_/g, ' ')}
                   disabled
                   readOnly
@@ -224,9 +224,9 @@ export default function Profile() {
           </div>
 
           <div className="card space-y-5 p-5 sm:p-6">
-            <h3 className="section-title border-b border-slate-100 pb-3">
+            <h3 className="section-title border-b border-line-soft pb-3">
               <span className="inline-flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-slate-400" />
+                <MapPin className="h-4 w-4 text-ink-faint" />
                 Address
               </span>
             </h3>
@@ -282,16 +282,16 @@ export default function Profile() {
         </form>
 
         <div className="card flex flex-col items-center p-6 text-center">
-          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-900 text-2xl font-medium text-white shadow-premium">
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-ink text-2xl font-medium text-white shadow-premium">
             {user.name?.charAt(0).toUpperCase()}
           </div>
-          <h3 className="text-md font-medium tracking-[-0.02em] text-slate-900">{user.name}</h3>
-          <p className="mt-1 text-sm font-normal text-slate-500">{user.email}</p>
+          <h3 className="text-md font-medium tracking-[-0.02em] text-ink">{user.name}</h3>
+          <p className="mt-1 text-sm font-normal text-ink-muted">{user.email}</p>
           <span className="badge badge-neutral mt-3 uppercase tracking-wider">
             {String(user.role || '').replace(/_/g, ' ')}
           </span>
 
-          <div className="mt-6 w-full space-y-3 border-t border-slate-100 pt-5 text-left">
+          <div className="mt-6 w-full space-y-3 border-t border-line-soft pt-5 text-left">
             <div className="meta-row">
               <span className="meta-label inline-flex items-center gap-1.5">
                 <Activity className="h-3.5 w-3.5" /> Status
@@ -303,7 +303,11 @@ export default function Profile() {
             <div className="meta-row">
               <span className="meta-label">Member since</span>
               <span className="meta-value">
-                {user.createdAt ? format(new Date(user.createdAt), 'MMM yyyy') : '—'}
+                {user.createdAt ? (
+                  format(new Date(user.createdAt), 'MMM yyyy')
+                ) : (
+                  <span className="data-empty">Not on file</span>
+                )}
               </span>
             </div>
             {formatAddress(user.address) && (

@@ -8,19 +8,19 @@ import Modal from '../../components/ui/Modal';
 import EmptyState from '../../components/ui/EmptyState';
 
 const ROLE_META = {
-  admin: { label: 'Admin', icon: Shield, className: 'bg-slate-900 text-white' },
-  doctor: { label: 'Doctor', icon: Stethoscope, className: 'bg-primary-50 text-primary-700 border border-primary-100' },
-  patient: { label: 'Patient', icon: UserIcon, className: 'bg-slate-100 text-slate-600 border border-slate-200' },
-  receptionist: { label: 'Receptionist', icon: UserIcon, className: 'bg-blue-50 text-blue-700 border border-blue-100' },
-  lab_technician: { label: 'Lab Tech', icon: Shield, className: 'bg-indigo-50 text-indigo-700 border border-indigo-100' },
+  admin: { label: 'Admin', icon: Shield, className: 'badge badge-neutral bg-ink text-ink-inverse' },
+  doctor: { label: 'Doctor', icon: Stethoscope, className: 'badge badge-info' },
+  patient: { label: 'Patient', icon: UserIcon, className: 'badge badge-neutral' },
+  receptionist: { label: 'Receptionist', icon: UserIcon, className: 'badge badge-warning' },
+  lab_technician: { label: 'Lab Tech', icon: Shield, className: 'badge badge-success' },
 };
 
 const RoleBadge = ({ role }) => {
   const meta = ROLE_META[role] || ROLE_META.patient;
   const Icon = meta.icon;
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-2xs font-medium ${meta.className}`}>
-      <Icon className="h-3 w-3" />
+    <span className={`inline-flex items-center gap-1.5 ${meta.className}`}>
+      <Icon className="h-3 w-3" aria-hidden />
       {meta.label}
     </span>
   );
@@ -32,12 +32,12 @@ const SortHeader = ({ label, sortKey, sortConfig, onSort }) => {
   return (
     <th
       scope="col"
-      className="cursor-pointer select-none whitespace-nowrap px-6 py-3.5 text-left text-2xs font-medium uppercase tracking-wider text-slate-400 transition-colors hover:text-slate-600"
+      className="cursor-pointer select-none whitespace-nowrap px-6 py-3.5 text-left text-2xs font-medium uppercase tracking-wider text-ink-faint transition-colors hover:text-ink-muted"
       onClick={() => onSort(sortKey)}
     >
       <span className="inline-flex items-center gap-1.5">
         {label}
-        <Icon className={`h-3 w-3 ${isActive ? 'text-primary-600' : 'text-slate-300'}`} />
+        <Icon className={`h-3 w-3 ${isActive ? 'text-ink' : 'text-ink-faint'}`} />
       </span>
     </th>
   );
@@ -200,9 +200,9 @@ const AdminUsers = () => {
 
       <div className="card overflow-hidden">
         {/* Filters */}
-        <div className="flex flex-col items-center gap-3 border-b border-slate-100 p-4 sm:flex-row">
+        <div className="flex flex-col items-center gap-3 border-b border-line-soft p-4 sm:flex-row">
           <div className="relative w-full max-w-md flex-1">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-faint" />
             <input
               type="text"
               className="input pl-9"
@@ -228,13 +228,13 @@ const AdminUsers = () => {
         {/* Table */}
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-slate-100">
-            <thead className="bg-slate-50/60">
+            <thead className="bg-surface-subtle/60">
               <tr>
                 <SortHeader label="User details" sortKey="name" sortConfig={sortConfig} onSort={handleSort} />
                 <SortHeader label="Role" sortKey="role" sortConfig={sortConfig} onSort={handleSort} />
                 <SortHeader label="Status" sortKey="isActive" sortConfig={sortConfig} onSort={handleSort} />
                 <SortHeader label="Joined date" sortKey="createdAt" sortConfig={sortConfig} onSort={handleSort} />
-                <th scope="col" className="px-6 py-3.5 text-right text-2xs font-medium uppercase tracking-wider text-slate-400">Actions</th>
+                <th scope="col" className="px-6 py-3.5 text-right text-2xs font-medium uppercase tracking-wider text-ink-faint">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50 bg-white">
@@ -260,8 +260,8 @@ const AdminUsers = () => {
                           {(user.name || '?').charAt(0).toUpperCase()}
                         </div>
                         <div className="ml-3">
-                          <div className="text-sm font-medium text-slate-900">{user.name}</div>
-                          <div className="text-xs font-medium text-slate-400">{user.email}</div>
+                          <div className="text-sm font-medium text-ink">{user.name}</div>
+                          <div className="text-xs font-medium text-ink-faint">{user.email}</div>
                         </div>
                       </div>
                     </td>
@@ -269,23 +269,33 @@ const AdminUsers = () => {
                       <RoleBadge role={user.role} />
                     </td>
                     <td className="whitespace-nowrap px-6 py-3.5">
-                      <span className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-2xs font-medium ${user.isActive
-                        ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                        : 'border-red-200 bg-red-50 text-red-700'
-                        }`}>
-                        <span className={`h-1.5 w-1.5 rounded-full ${user.isActive ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                      <span
+                        className={`badge inline-flex items-center gap-1.5 ${
+                          user.isActive ? 'badge-success' : 'badge-danger'
+                        }`}
+                      >
+                        <span
+                          className={`h-1.5 w-1.5 rounded-full ${
+                            user.isActive ? 'bg-success' : 'bg-danger'
+                          }`}
+                          aria-hidden
+                        />
                         {user.isActive ? 'Active' : 'Suspended'}
                       </span>
                     </td>
-                    <td className="whitespace-nowrap px-6 py-3.5 text-xs font-medium text-slate-500">
-                      {new Date(user.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    <td className="whitespace-nowrap px-6 py-3.5 text-xs font-medium text-ink-muted">
+                      {new Date(user.createdAt).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })}
                     </td>
                     <td className="whitespace-nowrap px-6 py-3.5 text-right">
                       <div className="flex items-center justify-end gap-1.5">
                         <button
                           type="button"
                           onClick={() => openEdit(user)}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50"
+                          className="btn btn-secondary btn-sm"
                           title="Edit name, email, phone"
                         >
                           <Pencil className="h-3.5 w-3.5" />
@@ -293,17 +303,22 @@ const AdminUsers = () => {
                         </button>
                         <button
                           type="button"
-                          onClick={() => toggleStatus.mutate({ id: user._id, isActive: !user.isActive })}
+                          onClick={() =>
+                            toggleStatus.mutate({ id: user._id, isActive: !user.isActive })
+                          }
                           disabled={toggleStatus.isPending}
-                          className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50 ${user.isActive
-                            ? 'border-red-200 bg-white text-red-600 hover:bg-red-50'
-                            : 'border-emerald-200 bg-white text-emerald-700 hover:bg-emerald-50'
-                            }`}
+                          className={`btn btn-sm ${
+                            user.isActive ? 'btn-soft-danger' : 'btn-soft-success'
+                          }`}
                         >
                           {user.isActive ? (
-                            <><UserX className="h-3.5 w-3.5" /> Suspend</>
+                            <>
+                              <UserX className="h-3.5 w-3.5" /> Suspend
+                            </>
                           ) : (
-                            <><UserCheck className="h-3.5 w-3.5" /> Activate</>
+                            <>
+                              <UserCheck className="h-3.5 w-3.5" /> Activate
+                            </>
                           )}
                         </button>
                       </div>
@@ -317,8 +332,8 @@ const AdminUsers = () => {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between border-t border-slate-100 px-6 py-3.5">
-            <span className="text-xs font-medium text-slate-400">
+          <div className="flex items-center justify-between border-t border-line-soft px-6 py-3.5">
+            <span className="text-xs font-medium text-ink-faint">
               Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, sortedUsers?.length || 0)} of {sortedUsers?.length || 0} entries
             </span>
             <div className="flex gap-2">
@@ -385,7 +400,7 @@ const AdminUsers = () => {
                     <option value="lab_technician">Lab technician</option>
                     <option value="receptionist">Receptionist</option>
                   </select>
-                  <p className="mt-1 text-2xs text-slate-400">
+                  <p className="mt-1 text-2xs text-ink-faint">
                     Staff must use a @clinova.com email
                   </p>
                 </div>
@@ -478,14 +493,14 @@ const AdminUsers = () => {
                 )}
               </div>
 
-              <div className="flex gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3.5 text-xs font-normal text-slate-600">
-                <span className="font-medium text-slate-800">Note:</span>
+              <div className="flex gap-2 rounded-xl border border-line bg-surface-subtle p-3.5 text-xs font-normal text-ink-muted">
+                <span className="font-medium text-ink-secondary">Note:</span>
                 <span>
                   New accounts must change their password on first login to Clinova.
                 </span>
               </div>
 
-              <div className="flex justify-end gap-2 border-t border-slate-100 pt-4">
+              <div className="flex justify-end gap-2 border-t border-line-soft pt-4">
                 <button
                   type="button"
                   onClick={() => setIsCreateModalOpen(false)}

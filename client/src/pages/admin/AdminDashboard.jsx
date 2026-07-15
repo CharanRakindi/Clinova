@@ -154,7 +154,7 @@ const AdminDashboard = () => {
 
         <div className="card flex flex-col p-5">
           <h2 className="panel-title mb-1 flex items-center gap-2">
-            <ShieldAlert className="h-4 w-4 text-slate-400" strokeWidth={1.75} />
+            <ShieldAlert className="h-4 w-4 text-ink-faint" strokeWidth={1.75} />
             Recent audit activity
           </h2>
           <p className="panel-meta mb-4">Latest security-relevant events</p>
@@ -165,17 +165,17 @@ const AdminDashboard = () => {
             ) : (
               auditLogs.map((log) => (
                 <div key={log._id} className="flex gap-3">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-100 bg-surface-muted text-slate-400">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-line-soft bg-surface-muted text-ink-faint">
                     <Clock className="h-3.5 w-3.5" strokeWidth={1.75} />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs leading-snug tracking-[-0.01em] text-slate-700">
-                      <span className="font-medium text-slate-900">
+                    <p className="text-xs leading-snug tracking-[-0.01em] text-ink-secondary">
+                      <span className="font-medium text-ink">
                         {log.actor?.name || 'System'}
                       </span>{' '}
                       · {log.action}
                     </p>
-                    <p className="mt-0.5 text-2xs text-slate-400">
+                    <p className="mt-0.5 text-2xs text-ink-faint">
                       {log.resourceType} ·{' '}
                       {format(new Date(log.timestamp), 'MMM dd, h:mm a')}
                     </p>

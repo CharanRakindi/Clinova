@@ -6,9 +6,9 @@ import { CheckCircle, ArrowRight, Paperclip, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { SkeletonTable } from '../../components/SkeletonLoader';
-import { cn } from '../../utils/cn';
 import EmptyState from '../../components/ui/EmptyState';
 import Modal from '../../components/ui/Modal';
+import StatusBadge from '../../components/ui/StatusBadge';
 
 export default function LabTechDashboard() {
   const queryClient = useQueryClient();
@@ -89,22 +89,6 @@ export default function LabTechDashboard() {
     }
   };
 
-  const statusBadge = (status) => {
-    switch (status) {
-      case 'ordered':
-        return 'badge-warning';
-      case 'sample_collected':
-        return 'badge-info';
-      case 'processing':
-        return 'badge-info';
-      case 'completed':
-      case 'reviewed':
-        return 'badge-success';
-      default:
-        return 'badge-neutral';
-    }
-  };
-
   const columns = [
     { id: 'ordered', title: 'Ordered' },
     { id: 'sample_collected', title: 'Sample collected' },
@@ -141,12 +125,10 @@ export default function LabTechDashboard() {
             return (
               <div
                 key={col.id}
-                className="flex w-80 shrink-0 flex-col overflow-hidden rounded-2xl border border-slate-200/70 bg-white shadow-premium"
+                className="flex w-80 shrink-0 flex-col overflow-hidden rounded-xl border border-line bg-surface shadow-sm"
               >
-                <div className="flex items-center justify-between border-b border-slate-100 bg-surface-muted/80 px-4 py-3.5">
-                  <h3 className="text-2xs font-medium uppercase tracking-[0.12em] text-slate-500">
-                    {col.title}
-                  </h3>
+                <div className="flex items-center justify-between border-b border-line-soft bg-surface-muted/80 px-4 py-3.5">
+                  <h3 className="ui-label">{col.title}</h3>
                   <span className="badge badge-neutral">{colReports.length}</span>
                 </div>
 
@@ -157,31 +139,27 @@ export default function LabTechDashboard() {
                     colReports.map((report) => (
                       <div
                         key={report._id}
-                        className="rounded-xl border border-slate-200/70 bg-white p-4 transition-[border-color,box-shadow] hover:border-slate-300 hover:shadow-premium"
+                        className="rounded-lg border border-line bg-surface p-4 transition-[border-color,box-shadow] duration-product ease-product hover:border-line-strong hover:shadow-sm"
                       >
                         <div className="mb-2 flex items-start justify-between gap-2">
-                          <h4 className="text-sm font-medium tracking-[-0.01em] text-slate-900">
-                            {report.testName}
-                          </h4>
-                          <span className={cn('badge shrink-0 capitalize', statusBadge(report.status))}>
-                            {report.status.replace(/_/g, ' ')}
-                          </span>
+                          <h4 className="text-sm font-medium text-ink">{report.testName}</h4>
+                          <StatusBadge status={report.status} className="shrink-0" />
                         </div>
-                        <p className="mb-3 flex items-center gap-1.5 text-2xs text-slate-400">
+                        <p className="mb-3 flex items-center gap-1.5 text-2xs text-ink-faint">
                           <Clock className="h-3.5 w-3.5" strokeWidth={1.75} />
                           {format(new Date(report.orderedDate), 'MMM dd, HH:mm')}
                         </p>
-                        <div className="flex items-center justify-between border-t border-slate-100 pt-3">
-                          <p className="truncate text-xs text-slate-600">
-                            <span className="text-slate-400">Patient · </span>
-                            <span className="font-medium text-slate-800">
+                        <div className="flex items-center justify-between border-t border-line-soft pt-3">
+                          <p className="truncate text-xs text-ink-muted">
+                            <span className="text-ink-faint">Patient · </span>
+                            <span className="font-medium text-ink-secondary">
                               {report.patient?.name}
                             </span>
                           </p>
                           <button
                             type="button"
                             onClick={() => advanceStatus(report)}
-                            className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-surface-muted text-slate-700 transition-colors hover:bg-slate-900 hover:text-white"
+                            className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-surface-muted text-ink-secondary transition-colors hover:bg-ink hover:text-white"
                             title={col.id === 'processing' ? 'Complete result' : 'Advance stage'}
                           >
                             {col.id === 'processing' ? (
@@ -199,37 +177,39 @@ export default function LabTechDashboard() {
             );
           })}
 
-          <div className="flex w-80 shrink-0 flex-col overflow-hidden rounded-2xl border border-slate-200/70 bg-white shadow-premium">
-            <div className="flex items-center justify-between border-b border-slate-100 bg-surface-muted/80 px-4 py-3.5">
-              <h3 className="text-2xs font-medium uppercase tracking-[0.12em] text-slate-500">
-                Completed
-              </h3>
+          <div className="flex w-80 shrink-0 flex-col overflow-hidden rounded-xl border border-line bg-surface shadow-sm">
+            <div className="flex items-center justify-between border-b border-line-soft bg-surface-muted/80 px-4 py-3.5">
+              <h3 className="ui-label">Completed</h3>
               <span className="badge badge-success">{completed.length}</span>
             </div>
             <div className="custom-scrollbar flex-1 space-y-2.5 overflow-y-auto p-3">
               {completed.length === 0 ? (
-                <EmptyState compact title="No completed tests" description="Finished reports appear here." />
+                <EmptyState
+                  compact
+                  title="No completed tests"
+                  description="Finished reports appear here."
+                />
               ) : (
                 completed.map((report) => (
                   <div
                     key={report._id}
-                    className="rounded-xl border border-slate-200/70 bg-surface-muted/40 p-4"
+                    className="rounded-lg border border-line bg-surface-muted/40 p-4"
                   >
                     <div className="mb-1.5 flex items-start justify-between gap-2">
-                      <h4 className="text-sm font-medium text-slate-900">
-                        {report.testName}
-                      </h4>
-                      <span className={cn('badge capitalize', statusBadge(report.status))}>
-                        {report.status}
-                      </span>
+                      <h4 className="text-sm font-medium text-ink">{report.testName}</h4>
+                      <StatusBadge status={report.status} className="shrink-0" />
                     </div>
-                    <p className="text-xs text-slate-500">
-                      {report.patient?.name}
+                    <p className="text-xs text-ink-muted">
+                      {report.patient?.name || (
+                        <span className="data-empty">Patient not linked</span>
+                      )}
                     </p>
-                    {report.resultSummary && (
-                      <p className="mt-2 line-clamp-2 text-2xs text-slate-400">
+                    {report.resultSummary ? (
+                      <p className="mt-2 line-clamp-2 text-2xs text-ink-faint">
                         {report.resultSummary}
                       </p>
+                    ) : (
+                      <p className="data-empty mt-2 text-2xs">No result documented</p>
                     )}
                   </div>
                 ))
@@ -250,7 +230,7 @@ export default function LabTechDashboard() {
                 <p className="ui-label">
                   Test details
                 </p>
-                <p className="mt-1 text-sm font-medium text-slate-800">
+                <p className="mt-1 text-sm font-medium text-ink-secondary">
                   {selectedReport.testName} · {selectedReport.patient?.name}
                 </p>
               </div>
@@ -279,7 +259,7 @@ export default function LabTechDashboard() {
                 />
               </div>
 
-              <div className="rounded-xl border border-slate-200 bg-surface-muted/50 p-4">
+              <div className="rounded-xl border border-line bg-surface-muted/50 p-4">
                 <FileUpload
                   onUploadSuccess={handleUploadSuccess}
                   label="Attach result PDF or image"
@@ -296,7 +276,7 @@ export default function LabTechDashboard() {
                 )}
               </div>
 
-              <div className="flex justify-end gap-2 border-t border-slate-100 pt-4">
+              <div className="flex justify-end gap-2 border-t border-line-soft pt-4">
                 <button
                   type="button"
                   onClick={() => setSelectedReport(null)}

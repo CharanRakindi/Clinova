@@ -84,7 +84,7 @@ export default function InteractiveCalendar({ events = [], onSelectEvent, onEven
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 h-[600px] w-full">
+    <div className="card h-[600px] w-full p-4">
       <DnDCalendar
         localizer={localizer}
         events={calendarEvents}

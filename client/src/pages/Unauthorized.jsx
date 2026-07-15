@@ -8,13 +8,13 @@ const Unauthorized = () => {
 
       <div className="relative z-10 w-full max-w-md">
         <div className="card p-8 sm:p-10">
-          <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-2xl border border-rose-100 bg-rose-50 text-rose-600">
-            <ShieldAlert className="h-5 w-5" strokeWidth={2} />
+          <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-lg border border-danger-border bg-danger-soft text-danger">
+            <ShieldAlert className="h-5 w-5" strokeWidth={2} aria-hidden />
           </div>
-          <h1 className="text-3xl font-medium tracking-tight text-slate-900">
+          <h1 className="text-3xl font-medium tracking-tight text-ink">
             Access denied
           </h1>
-          <p className="mt-2 text-base font-normal leading-relaxed text-slate-500">
+          <p className="mt-2 text-base font-normal leading-relaxed text-ink-muted">
             You don&apos;t have permission to view this page. If you believe this is an error, contact your administrator.
           </p>
           <div className="mt-8">

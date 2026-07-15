@@ -2,24 +2,17 @@ import { useQuery } from '@tanstack/react-query';
 import api from '../../api/axios';
 import StatCard from '../../components/StatCard';
 import { SkeletonCard } from '../../components/SkeletonLoader';
-import { Calendar, FileText, HeartPulse, ShieldAlert, FileCheck, Pill } from 'lucide-react';
+import { Calendar, FileText, ShieldAlert, FileCheck, Pill } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { useAuth } from '../../contexts/AuthContext';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { formatDoctorName } from '../../utils/format';
-import { cn } from '../../utils/cn';
 import Tabs from '../../components/ui/Tabs';
 import EmptyState from '../../components/ui/EmptyState';
 import DataValue from '../../components/ui/DataValue';
-
-const statusBadge = (status) => {
-  if (status === 'confirmed' || status === 'completed' || status === 'active') return 'badge-success';
-  if (status === 'requested' || status === 'ordered' || status === 'processing') return 'badge-warning';
-  if (status === 'cancelled') return 'badge-danger';
-  return 'badge-neutral';
-};
+import StatusBadge from '../../components/ui/StatusBadge';
 
 const PatientDashboard = () => {
   const { user } = useAuth();
@@ -116,7 +109,7 @@ const PatientDashboard = () => {
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <StatCard
-          index={0}
+          emphasis
           title="Upcoming visits"
           value={stats?.upcomingAppointments || 0}
           icon={Calendar}
@@ -129,7 +122,6 @@ const PatientDashboard = () => {
           actionHref="/patient/appointments"
         />
         <StatCard
-          index={1}
           title="Medical records"
           value={stats?.totalRecords || 0}
           icon={FileText}
@@ -138,58 +130,81 @@ const PatientDashboard = () => {
           actionHref="/patient/records"
         />
         <StatCard
-          index={2}
-          title="Health status"
-          value="Stable"
-          icon={HeartPulse}
-          contextText="Based on recent recorded vitals"
-          actionText="Review vitals trends"
-          actionHref="#vitals-trend"
+          title="Lab results"
+          value={stats?.labReports ?? labReports?.length ?? 0}
+          icon={FileCheck}
+          contextText={
+            (stats?.labReports ?? labReports?.length)
+              ? 'Reports from your care team'
+              : 'No lab results on file'
+          }
+          actionText="View activity"
+          actionHref="#care-activity"
         />
       </div>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
         <div className="space-y-5 lg:col-span-1">
           <div id="patient-health-profile" className="card space-y-4 p-5">
-            <h3 className="panel-title border-b border-slate-100 pb-3">Health profile</h3>
+            <h3 className="panel-title border-b border-line-soft pb-3">Health profile</h3>
             <div className="space-y-3.5">
               <div className="meta-row">
                 <span className="meta-label">Blood group</span>
-                <span className="meta-value">{profile?.bloodGroup || 'Not configured'}</span>
+                <DataValue
+                  as="span"
+                  className="meta-value"
+                  emptyClassName="meta-value data-empty"
+                  value={profile?.bloodGroup}
+                  empty="Not on file"
+                />
               </div>
               <div className="meta-row">
                 <span className="meta-label">Emergency contact</span>
-                <span className="meta-value">
-                  {profile?.emergencyContact?.name
-                    ? `${profile.emergencyContact.name}${
-                        profile.emergencyContact.relationship
-                          ? ` (${profile.emergencyContact.relationship})`
-                          : ''
-                      }`
-                    : 'Not configured'}
-                </span>
+                <DataValue
+                  as="span"
+                  className="meta-value"
+                  emptyClassName="meta-value data-empty"
+                  value={
+                    profile?.emergencyContact?.name
+                      ? `${profile.emergencyContact.name}${
+                          profile.emergencyContact.relationship
+                            ? ` (${profile.emergencyContact.relationship})`
+                            : ''
+                        }`
+                      : null
+                  }
+                  empty="Not on file"
+                />
               </div>
               <div className="meta-row">
                 <span className="meta-label">Insurance</span>
-                <span className="meta-value">
-                  {profile?.insuranceProvider || 'Not configured'}
-                </span>
+                <DataValue
+                  as="span"
+                  className="meta-value"
+                  emptyClassName="meta-value data-empty"
+                  value={profile?.insuranceProvider}
+                  empty="Not on file"
+                />
               </div>
               <div className="meta-row">
                 <span className="meta-label">Policy ID</span>
-                <span className="meta-value font-mono text-xs">
-                  {profile?.insuranceNumber || 'Not configured'}
-                </span>
+                <DataValue
+                  as="span"
+                  className="meta-value font-mono text-xs"
+                  emptyClassName="meta-value data-empty"
+                  value={profile?.insuranceNumber}
+                  empty="Not on file"
+                />
               </div>
             </div>
           </div>
 
           <div className="card space-y-3 p-5">
             <h3 className="panel-title flex items-center gap-2">
-              <ShieldAlert className="h-4 w-4 text-slate-400" strokeWidth={1.75} />
+              <ShieldAlert className="h-4 w-4 text-ink-faint" strokeWidth={1.75} />
               Medical alerts
             </h3>
-            <p className="text-xs leading-relaxed tracking-[-0.01em] text-slate-500">
+            <p className="text-xs leading-relaxed tracking-[-0.01em] text-ink-muted">
               Allergy and condition alerts appear here when recorded by your care team.
             </p>
           </div>
@@ -246,7 +261,7 @@ const PatientDashboard = () => {
             </div>
           )}
 
-          <div className="card overflow-hidden p-4 sm:p-5">
+          <div id="care-activity" className="card overflow-hidden p-4 sm:p-5">
             <Tabs
               variant="segmented"
               tabs={tabs.map((t) => ({ id: t.id, label: t.label }))}
@@ -276,9 +291,7 @@ const PatientDashboard = () => {
                             {format(new Date(apt.appointmentDate), 'MMM dd, yyyy')} · {apt.timeSlot}
                           </p>
                         </div>
-                        <span className={cn('badge shrink-0 capitalize', statusBadge(apt.status))}>
-                          {apt.status}
-                        </span>
+                        <StatusBadge status={apt.status} className="shrink-0" />
                       </div>
                     ))
                   )}
@@ -315,9 +328,7 @@ const PatientDashboard = () => {
                             </p>
                           )}
                         </div>
-                        <span className={cn('badge shrink-0 capitalize', statusBadge(p.status))}>
-                          {p.status}
-                        </span>
+                        <StatusBadge status={p.status} className="shrink-0" />
                       </div>
                     ))
                   )}
@@ -347,14 +358,7 @@ const PatientDashboard = () => {
                               : 'Results not documented yet'}
                           </p>
                         </div>
-                        <span
-                          className={cn(
-                            'badge shrink-0 capitalize',
-                            statusBadge(report.status)
-                          )}
-                        >
-                          {String(report.status || '').replace(/_/g, ' ')}
-                        </span>
+                        <StatusBadge status={report.status} className="shrink-0" />
                       </div>
                     ))
                   )}

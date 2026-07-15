@@ -96,10 +96,10 @@ const Register = () => {
           </div>
 
           <div>
-            <h2 className="text-xl font-medium tracking-[-0.025em] text-slate-900 sm:text-2xl">
+            <h2 className="text-xl font-medium tracking-[-0.025em] text-ink sm:text-2xl">
               Create an account
             </h2>
-            <p className="mt-1.5 text-sm font-normal leading-snug tracking-[-0.01em] text-slate-500">
+            <p className="mt-1.5 text-sm font-normal leading-snug tracking-[-0.01em] text-ink-muted">
               Fill in your details below to get started.
             </p>
           </div>
@@ -160,9 +160,9 @@ const Register = () => {
               </div>
             </form>
 
-            <p className="mt-7 text-center text-sm font-normal text-slate-500">
+            <p className="mt-7 text-center text-sm font-normal text-ink-muted">
               Already have an account?{' '}
-              <Link to="/login" className="font-medium text-slate-900 underline-offset-4 hover:underline">
+              <Link to="/login" className="font-medium text-ink underline-offset-4 hover:underline">
                 Sign in
               </Link>
             </p>

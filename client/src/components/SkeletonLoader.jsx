@@ -1,7 +1,7 @@
 import { cn } from '../utils/cn';
 
 export const SkeletonLine = ({ className }) => (
-  <div className={cn("animate-pulse bg-slate-200 rounded", className)} />
+  <div className={cn('animate-pulse rounded bg-line', className)} aria-hidden />
 );
 
 export const SkeletonCard = ({ className }) => (
@@ -19,7 +19,7 @@ export const SkeletonCard = ({ className }) => (
 
 export const SkeletonTable = ({ rows = 5 }) => (
   <div className="w-full">
-    <div className="border-b border-slate-200 pb-4 mb-4 flex gap-4">
+    <div className="border-b border-line pb-4 mb-4 flex gap-4">
       <SkeletonLine className="h-4 w-1/4" />
       <SkeletonLine className="h-4 w-1/4" />
       <SkeletonLine className="h-4 w-1/4" />

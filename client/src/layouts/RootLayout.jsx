@@ -109,13 +109,13 @@ const RootLayout = () => {
       <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-surface-muted p-4">
         <div className="card w-full max-w-md space-y-6 p-8 animate-scale-in">
           <div className="text-center">
-            <div className="mx-auto mb-4 flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-700">
-              <Lock className="h-4.5 w-4.5" />
+            <div className="mx-auto mb-4 flex h-11 w-11 items-center justify-center rounded-lg border border-line bg-surface-subtle text-ink-secondary">
+              <Lock className="h-4.5 w-4.5" aria-hidden />
             </div>
-            <h1 className="text-lg font-medium tracking-tight text-slate-900">
+            <h1 className="text-lg font-medium tracking-tight text-ink">
               Reset your password
             </h1>
-            <p className="mt-1.5 text-sm font-normal text-slate-500">
+            <p className="mt-1.5 text-sm font-normal text-ink-muted">
               This is your first login. Set a new password to secure your account.
             </p>
           </div>
@@ -167,7 +167,7 @@ const RootLayout = () => {
           <button
             type="button"
             onClick={logout}
-            className="btn btn-ghost w-full py-2 text-slate-500"
+            className="btn btn-ghost w-full py-2 text-ink-muted"
           >
             Cancel & log out
           </button>
@@ -188,8 +188,8 @@ const RootLayout = () => {
         className={cn(
           'sticky top-0 z-30 border-b transition-all duration-product',
           scrolled
-            ? 'border-slate-200/70 bg-surface-muted/90 shadow-sm backdrop-blur-xl'
-            : 'border-slate-200/40 bg-surface-muted/75 backdrop-blur-md'
+            ? 'border-line bg-surface-muted/90 shadow-sm backdrop-blur-xl'
+            : 'border-line bg-surface-muted/75 backdrop-blur-md'
         )}
       >
         <div className="flex h-14 items-center justify-between gap-2 px-3 sm:px-6 lg:px-8">
@@ -197,7 +197,7 @@ const RootLayout = () => {
             <button
               type="button"
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="tap-target -ml-1 inline-flex items-center justify-center rounded-xl p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 lg:hidden"
+              className="tap-target -ml-1 inline-flex items-center justify-center rounded-xl p-2 text-ink-muted transition-colors hover:bg-surface-subtle hover:text-ink lg:hidden"
               aria-label="Toggle menu"
             >
               <Menu className="h-5 w-5" />
@@ -207,8 +207,8 @@ const RootLayout = () => {
               <BrandMark size="sm" tone="dark" asLink />
             </div>
 
-            <div className="hidden items-center gap-2 text-xs font-normal text-slate-500 lg:flex">
-              <Clock className="h-3.5 w-3.5 text-slate-400" />
+            <div className="hidden items-center gap-2 text-xs font-normal text-ink-muted lg:flex">
+              <Clock className="h-3.5 w-3.5 text-ink-faint" />
               <span>
                 {currentTime.toLocaleDateString(undefined, {
                   weekday: 'short',
@@ -216,8 +216,8 @@ const RootLayout = () => {
                   day: 'numeric',
                 })}
               </span>
-              <span className="text-slate-300">·</span>
-              <span className="font-mono text-slate-600 tabular-nums">
+              <span className="text-ink-faint">·</span>
+              <span className="font-mono text-ink-muted tabular-nums">
                 {currentTime.toLocaleTimeString(undefined, {
                   hour: '2-digit',
                   minute: '2-digit',
@@ -236,18 +236,18 @@ const RootLayout = () => {
                   new KeyboardEvent('keydown', { key: 'k', metaKey: true })
                 )
               }
-              className="hidden items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-normal text-slate-400 transition-colors hover:bg-slate-100 sm:flex"
+              className="hidden items-center gap-2 rounded-full border border-line bg-surface-subtle px-3 py-1.5 text-xs font-normal text-ink-faint transition-colors hover:bg-surface-subtle sm:flex"
             >
               <Search className="h-3.5 w-3.5" />
               <span>Search</span>
-              <kbd className="rounded-md border border-slate-200 bg-white px-1.5 py-0.5 font-mono text-2xs text-slate-500">
+              <kbd className="rounded-md border border-line bg-white px-1.5 py-0.5 font-mono text-2xs text-ink-muted">
                 ⌘K
               </kbd>
             </button>
 
             <button
               type="button"
-              className="rounded-xl p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 sm:hidden"
+              className="rounded-xl p-2 text-ink-faint transition-colors hover:bg-surface-subtle hover:text-ink-secondary sm:hidden"
               onClick={() =>
                 document.dispatchEvent(
                   new KeyboardEvent('keydown', { key: 'k', metaKey: true })
@@ -259,18 +259,18 @@ const RootLayout = () => {
 
             <NotificationCenter />
 
-            <div className="mx-0.5 hidden h-5 w-px bg-slate-200 sm:block" />
+            <div className="mx-0.5 hidden h-5 w-px bg-line sm:block" aria-hidden />
 
             <div className="flex items-center gap-2.5">
               <div className="hidden flex-col items-end sm:flex">
-                <span className="text-sm font-medium leading-none text-slate-800">
+                <span className="text-sm font-medium leading-none text-ink-secondary">
                   {user?.name}
                 </span>
-                <span className="mt-1 rounded-full bg-slate-100 px-2 py-0.5 text-2xs font-medium uppercase tracking-wider text-slate-500">
+                <span className="mt-1 rounded-full bg-surface-subtle px-2 py-0.5 text-2xs font-medium uppercase tracking-wider text-ink-muted">
                   {user?.role?.replace('_', ' ')}
                 </span>
               </div>
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-xs font-medium text-white ring-2 ring-white">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-ink text-xs font-medium text-white ring-2 ring-white">
                 {user?.name?.charAt(0).toUpperCase()}
               </div>
             </div>
@@ -278,7 +278,7 @@ const RootLayout = () => {
             <button
               type="button"
               onClick={logout}
-              className="rounded-xl p-2 text-slate-400 transition-all hover:bg-rose-50 hover:text-rose-600"
+              className="rounded-lg p-2 text-ink-faint transition-colors duration-product hover:bg-danger-soft hover:text-danger"
               title="Log out"
             >
               <LogOut className="h-4.5 w-4.5" />
@@ -290,7 +290,7 @@ const RootLayout = () => {
       <div className="relative flex flex-1 overflow-hidden">
         {isSidebarOpen && (
           <div
-            className="fixed inset-0 z-40 bg-slate-950/50 backdrop-blur-sm transition-opacity lg:hidden"
+            className="fixed inset-0 z-40 bg-surface-inverse/50 backdrop-blur-sm transition-opacity lg:hidden"
             onClick={() => setIsSidebarOpen(false)}
           />
         )}
@@ -368,7 +368,7 @@ const RootLayout = () => {
           <div className="border-t border-white/[0.06] p-4">
             <div className="flex items-center justify-between rounded-xl bg-white/[0.04] px-3.5 py-3">
               <div className="flex items-center gap-2.5">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400/90" />
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-success" aria-hidden />
                 <span className="text-2xs font-normal tracking-[-0.01em] text-white/50">
                   System online
                 </span>

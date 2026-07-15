@@ -16,15 +16,9 @@ import DataValue from '../../components/ui/DataValue';
 import EmptyState from '../../components/ui/EmptyState';
 import AlertBanner from '../../components/ui/AlertBanner';
 import Modal from '../../components/ui/Modal';
+import StatusBadge from '../../components/ui/StatusBadge';
 
 const TABS = ['Overview', 'Timeline', 'Lab Reports', 'Prescriptions'];
-
-const SEVERITY_STYLES = {
-  Severe: 'badge-danger',
-  Moderate: 'badge-warning',
-  Mild: 'badge-neutral',
-  Unknown: 'badge-neutral',
-};
 
 function VitalCell({ label, icon: Icon, value, unit }) {
   const missing = value == null || value === '';
@@ -219,7 +213,7 @@ const DoctorPatientDetail = () => {
   if (profileLoading || recordsLoading || labReportsLoading || rxLoading) {
     return (
       <div className="flex justify-center p-16">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-primary-600" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-line border-t-primary-600" />
       </div>
     );
   }
@@ -236,7 +230,7 @@ const DoctorPatientDetail = () => {
             to="/doctor/patients"
             className="btn btn-secondary h-9 w-9 rounded-full p-0"
           >
-            <ArrowLeft className="h-4 w-4 text-slate-500" />
+            <ArrowLeft className="h-4 w-4 text-ink-muted" />
           </Link>
           <div>
             <h1 className="page-title">
@@ -377,16 +371,16 @@ const DoctorPatientDetail = () => {
 
             {/* Diagnosis Overview */}
             <div className="card p-5">
-              <h3 className="mb-4 flex items-center gap-2 text-base font-medium text-slate-800">
-                <Stethoscope className="h-4 w-4 text-primary-500" />
+              <h3 className="mb-4 flex items-center gap-2 text-base font-medium text-ink-secondary">
+                <Stethoscope className="h-4 w-4 text-ink-faint" />
                 Recent Diagnoses
               </h3>
               {records && records[0]?.diagnosis?.length > 0 ? (
                 <div className="flex flex-col gap-2">
                   {records[0].diagnosis.map((d, i) => (
-                    <div key={i} className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50/40 px-3.5 py-2.5">
+                    <div key={i} className="flex items-center gap-2 rounded-lg border border-line bg-surface-subtle/40 px-3.5 py-2.5">
                       <div className="h-1.5 w-1.5 rounded-full bg-primary-500" />
-                      <span className="text-sm font-medium text-slate-800">{d}</span>
+                      <span className="text-sm font-medium text-ink-secondary">{d}</span>
                     </div>
                   ))}
                 </div>
@@ -397,16 +391,17 @@ const DoctorPatientDetail = () => {
 
             {/* Allergies Overview */}
             <div className="card p-5">
-              <h3 className="mb-4 flex items-center gap-2 text-base font-medium text-slate-800">
-                <AlertTriangle className="h-4 w-4 text-primary-500" />
+              <h3 className="mb-4 flex items-center gap-2 text-base font-medium text-ink-secondary">
+                <AlertTriangle className="h-4 w-4 text-ink-faint" />
                 Allergies Log
               </h3>
               {allergies && allergies.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
                   {allergies.map((a) => (
-                    <span key={a._id} className={`badge ${SEVERITY_STYLES[a.severity] || SEVERITY_STYLES.Unknown}`}>
+                    <StatusBadge key={a._id} status={a.severity || 'Unknown'}>
                       {a.allergen}
-                    </span>
+                      {a.severity ? ` · ${a.severity}` : ''}
+                    </StatusBadge>
                   ))}
                 </div>
               ) : (
@@ -416,22 +411,16 @@ const DoctorPatientDetail = () => {
 
             {/* Conditions Overview */}
             <div className="card p-5">
-              <h3 className="mb-4 flex items-center gap-2 text-base font-medium text-slate-800">
-                <FileText className="h-4 w-4 text-primary-500" />
+              <h3 className="mb-4 flex items-center gap-2 text-base font-medium text-ink-secondary">
+                <FileText className="h-4 w-4 text-ink-faint" />
                 Clinical Conditions
               </h3>
               {conditions && conditions.length > 0 ? (
                 <div className="flex flex-col gap-2">
                   {conditions.map((c) => (
-                    <div key={c._id} className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50/40 px-3.5 py-2.5">
-                      <span className="text-sm font-medium text-slate-800">{c.conditionName}</span>
-                      <span className={`rounded px-1.5 py-0.5 text-2xs font-medium ${
-                        c.status === 'Active' ? 'border border-amber-100 bg-amber-50 text-amber-700' :
-                        c.status === 'Resolved' ? 'border border-emerald-100 bg-emerald-50 text-emerald-700' :
-                        'border border-slate-200 bg-white text-slate-400'
-                      }`}>
-                        {c.status}
-                      </span>
+                    <div key={c._id} className="flex items-center justify-between rounded-lg border border-line bg-surface-subtle/40 px-3.5 py-2.5">
+                      <span className="text-sm font-medium text-ink-secondary">{c.conditionName}</span>
+                      <StatusBadge status={c.status} />
                     </div>
                   ))}
                 </div>
@@ -460,90 +449,115 @@ const DoctorPatientDetail = () => {
             ) : (
               <div className="relative pl-8">
                 {/* Timeline center line */}
-                <div className="absolute left-[11px] top-2 bottom-2 w-px bg-slate-200/80" />
+                <div className="absolute bottom-2 left-[11px] top-2 w-px bg-line" aria-hidden />
 
                 <div className="space-y-6">
                   {records.map((record) => (
                     <div key={record._id} className="relative">
-                      {/* Timeline point */}
-                      <div className="absolute -left-8 top-1.5 flex h-[22px] w-[22px] items-center justify-center rounded-full border-4 border-white bg-slate-900 shadow-sm" />
+                      <div
+                        className="absolute -left-8 top-1.5 flex h-[22px] w-[22px] items-center justify-center rounded-full border-4 border-surface bg-ink shadow-xs"
+                        aria-hidden
+                      />
 
                       <div className="card p-5">
                         <div className="mb-4 flex flex-col items-start justify-between gap-2 sm:flex-row">
                           <div>
-                            <p className="text-2xs font-medium text-slate-400 font-mono">
+                            <p className="font-mono text-2xs font-medium text-ink-faint">
                               {format(new Date(record.visitDate), 'MMMM dd, yyyy')}
                             </p>
-                            <h3 className="mt-0.5 text-md font-medium text-slate-800">{record.chiefComplaint}</h3>
-                            <p className="mt-0.5 text-xs font-medium text-slate-500">
+                            <h3 className="mt-0.5 text-md font-medium text-ink-secondary">
+                              {record.chiefComplaint}
+                            </h3>
+                            <p className="mt-0.5 text-xs font-medium text-ink-muted">
                               Practitioner: {formatDoctorName(record.doctor?.name)}
                               {record.version > 1 && (
-                                <span className="ml-2 rounded border border-amber-200 bg-amber-50 px-1.5 py-0.5 text-2xs font-medium text-amber-700">
+                                <span className="badge badge-warning ml-2">
                                   Amended v{record.version}
                                 </span>
                               )}
                             </p>
                           </div>
-                          <span className={`rounded border px-2 py-0.5 text-2xs font-medium uppercase tracking-wider ${
-                            record.status === 'active' ? 'border-emerald-100 bg-emerald-50 text-emerald-700' :
-                            'border-slate-200 bg-slate-50 text-slate-400'
-                          }`}>
-                            {record.status}
-                          </span>
+                          <StatusBadge status={record.status} className="uppercase tracking-wider" />
                         </div>
 
-                        <div className="space-y-4 border-t border-slate-100 pt-4">
+                        <div className="space-y-4 border-t border-line-soft pt-4">
                           {(record.symptoms?.length > 0 || record.chiefComplaint) && (
                             <div>
-                              <span className="mb-1.5 block text-2xs font-medium uppercase tracking-wider text-slate-400">Symptoms</span>
+                              <span className="ui-label mb-1.5 block">Symptoms</span>
                               <div className="flex flex-wrap gap-1">
                                 {record.symptoms?.map((s, i) => (
-                                  <span key={i} className="rounded border border-slate-200 bg-slate-50 px-2 py-0.5 text-2xs font-medium text-slate-600">{s}</span>
+                                  <span key={i} className="badge badge-neutral">{s}</span>
                                 ))}
                               </div>
                             </div>
                           )}
 
-                          {record.vitals && Object.keys(record.vitals).some(k => record.vitals[k]) && (
+                          {record.vitals && Object.keys(record.vitals).some((k) => record.vitals[k]) && (
                             <div>
-                              <span className="mb-1.5 block text-2xs font-medium uppercase tracking-wider text-slate-400">Signed Vitals</span>
+                              <span className="ui-label mb-1.5 block">Signed vitals</span>
                               <div className="flex flex-wrap gap-2">
-                                {record.vitals.pulse && <span className="rounded border border-slate-200/80 bg-white px-2.5 py-1 text-2xs font-medium text-slate-600">{record.vitals.pulse} bpm</span>}
-                                {record.vitals.temperature && <span className="rounded border border-slate-200/80 bg-white px-2.5 py-1 text-2xs font-medium text-slate-600">{record.vitals.temperature}°C</span>}
-                                {record.vitals.bloodPressureSystolic && <span className="rounded border border-slate-200/80 bg-white px-2.5 py-1 text-2xs font-medium text-slate-600">{record.vitals.bloodPressureSystolic}/{record.vitals.bloodPressureDiastolic} mmHg</span>}
-                                {record.vitals.oxygenSaturation && <span className="rounded border border-slate-200/80 bg-white px-2.5 py-1 text-2xs font-medium text-slate-600">SpO₂ {record.vitals.oxygenSaturation}%</span>}
+                                {record.vitals.pulse && (
+                                  <span className="chip">{record.vitals.pulse} bpm</span>
+                                )}
+                                {record.vitals.temperature && (
+                                  <span className="chip">{record.vitals.temperature}°C</span>
+                                )}
+                                {record.vitals.bloodPressureSystolic && (
+                                  <span className="chip">
+                                    {record.vitals.bloodPressureSystolic}/
+                                    {record.vitals.bloodPressureDiastolic} mmHg
+                                  </span>
+                                )}
+                                {record.vitals.oxygenSaturation && (
+                                  <span className="chip">
+                                    SpO₂ {record.vitals.oxygenSaturation}%
+                                  </span>
+                                )}
                               </div>
                             </div>
                           )}
 
                           {(record.diagnosis?.length > 0 || record.clinicalNotes) && (
                             <div>
-                              <span className="mb-1.5 block text-2xs font-medium uppercase tracking-wider text-slate-400">Clinical Diagnoses</span>
+                              <span className="ui-label mb-1.5 block">Clinical diagnoses</span>
                               {record.diagnosis?.length > 0 && (
                                 <div className="mb-2 flex flex-wrap gap-1">
                                   {record.diagnosis.map((d, i) => (
-                                    <span key={i} className="rounded bg-primary-50 text-primary-700 px-2 py-0.5 text-2xs font-medium">{d}</span>
+                                    <span key={i} className="badge badge-info">{d}</span>
                                   ))}
                                 </div>
                               )}
-                              {record.clinicalNotes && <p className="text-sm font-medium text-slate-600">{record.clinicalNotes}</p>}
+                              {record.clinicalNotes && (
+                                <p className="text-sm font-medium text-ink-muted">
+                                  {record.clinicalNotes}
+                                </p>
+                              )}
                             </div>
                           )}
 
                           {record.treatmentPlan && (
-                            <div className="rounded-lg border border-slate-200 bg-slate-50/40 p-3.5">
-                              <span className="mb-1 block text-2xs font-medium uppercase tracking-wider text-slate-400">Treatment Plan</span>
-                              <p className="text-sm font-medium text-slate-700">{record.treatmentPlan}</p>
+                            <div className="soft-panel">
+                              <span className="ui-label mb-1 block">Treatment plan</span>
+                              <p className="text-sm font-medium text-ink-secondary">
+                                {record.treatmentPlan}
+                              </p>
                             </div>
                           )}
 
                           {record.attachments && record.attachments.length > 0 && (
                             <div>
-                              <span className="mb-1.5 block text-2xs font-medium uppercase tracking-wider text-slate-400">Attachments</span>
+                              <span className="ui-label mb-1.5 block">Attachments</span>
                               <div className="flex flex-wrap gap-2">
                                 {record.attachments.map((att, idx) => (
-                                  <a key={idx} href={att.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:border-slate-300 hover:text-slate-800">
-                                    <Paperclip className="h-3.5 w-3.5 text-slate-400" /> {att.filename}
+                                  <a
+                                    key={idx}
+                                    href={att.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="chip-outline transition-colors duration-product hover:border-line-strong hover:text-ink"
+                                  >
+                                    <Paperclip className="h-3.5 w-3.5 text-ink-faint" aria-hidden />
+                                    {att.filename}
                                   </a>
                                 ))}
                               </div>
@@ -572,25 +586,16 @@ const DoctorPatientDetail = () => {
             ) : (
               <div className="grid grid-cols-1 gap-4">
                 {labReports.map((report) => (
-                  <div key={report._id} className="card p-5 bg-white border border-slate-200/60 hover:border-slate-300 transition-colors">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-slate-100">
+                  <div key={report._id} className="card p-5 bg-white border border-line hover:border-line-strong transition-colors">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-line-soft">
                       <div>
-                        <h4 className="font-medium text-base text-slate-900">{report.testName}</h4>
-                        <p className="text-2xs font-medium text-slate-400 mt-0.5">
+                        <h4 className="font-medium text-base text-ink">{report.testName}</h4>
+                        <p className="text-2xs font-medium text-ink-faint mt-0.5">
                           Ordered: {format(new Date(report.orderedDate), 'MMM dd, yyyy')} • Practitioner: {formatDoctorName(report.doctor?.name)}
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className={`inline-flex px-2.5 py-0.5 text-2xs font-medium uppercase tracking-wider rounded-md border ${
-                          report.status === 'ordered' ? 'bg-amber-50 text-amber-600 border-amber-100' :
-                          report.status === 'sample_collected' ? 'bg-blue-50 text-blue-600 border-blue-100' :
-                          report.status === 'processing' ? 'bg-indigo-50 text-indigo-600 border-indigo-100' :
-                          report.status === 'completed' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
-                          report.status === 'cancelled' ? 'bg-rose-50 text-rose-600 border-rose-100' :
-                          'bg-slate-50 text-slate-600 border-slate-100'
-                        }`}>
-                          {report.status.replace(/_/g, ' ')}
-                        </span>
+                        <StatusBadge status={report.status} className="uppercase tracking-wider" />
                         <button
                           type="button"
                           onClick={() => reorderLab.mutate(report)}
@@ -607,16 +612,16 @@ const DoctorPatientDetail = () => {
                     <div className="pt-3.5 space-y-3 text-sm">
                       {report.notes && (
                         <div>
-                          <span className="text-2xs font-medium uppercase tracking-wider text-slate-500 block">Doctor Notes</span>
-                          <p className="text-slate-600 font-medium mt-0.5">{report.notes}</p>
+                          <span className="text-2xs font-medium uppercase tracking-wider text-ink-muted block">Doctor Notes</span>
+                          <p className="text-ink-muted font-medium mt-0.5">{report.notes}</p>
                         </div>
                       )}
                       
                       {(report.status === 'completed' || report.status === 'reviewed') && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50/50 p-3 rounded-lg border border-slate-200/40">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-surface-subtle/50 p-3 rounded-lg border border-line">
                           <div>
-                            <span className="text-2xs font-medium uppercase tracking-wider text-slate-500 block">Result Summary</span>
-                            <p className="text-slate-800 font-medium mt-0.5">
+                            <span className="text-2xs font-medium uppercase tracking-wider text-ink-muted block">Result Summary</span>
+                            <p className="text-ink-secondary font-medium mt-0.5">
                               {report.resultSummary?.trim()
                                 ? report.resultSummary
                                 : 'No result documented'}
@@ -624,8 +629,8 @@ const DoctorPatientDetail = () => {
                           </div>
                           {report.referenceRange && (
                             <div>
-                              <span className="text-2xs font-medium uppercase tracking-wider text-slate-500 block">Reference Range</span>
-                              <p className="text-slate-800 font-medium mt-0.5">{report.referenceRange}</p>
+                              <span className="text-2xs font-medium uppercase tracking-wider text-ink-muted block">Reference Range</span>
+                              <p className="text-ink-secondary font-medium mt-0.5">{report.referenceRange}</p>
                             </div>
                           )}
                         </div>
@@ -633,7 +638,7 @@ const DoctorPatientDetail = () => {
 
                       {report.attachments?.length > 0 && (
                         <div>
-                          <span className="text-2xs font-medium uppercase tracking-wider text-slate-500 block mb-1">Attachments</span>
+                          <span className="text-2xs font-medium uppercase tracking-wider text-ink-muted block mb-1">Attachments</span>
                           <div className="flex flex-wrap gap-2">
                             {report.attachments.map((file, idx) => (
                               <a
@@ -641,10 +646,10 @@ const DoctorPatientDetail = () => {
                                 href={file.url}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-600 hover:text-primary-600 hover:border-primary-300 transition-colors shadow-sm"
+                                className="chip-outline transition-colors duration-product hover:border-line-strong hover:text-ink"
                               >
-                                <Paperclip className="w-3.5 h-3.5" />
-                                <span className="truncate max-w-[150px]">{file.filename}</span>
+                                <Paperclip className="h-3.5 w-3.5 text-ink-faint" aria-hidden />
+                                <span className="max-w-[150px] truncate">{file.filename}</span>
                               </a>
                             ))}
                           </div>
@@ -685,27 +690,32 @@ const DoctorPatientDetail = () => {
                   <div key={rx._id} className="card p-5">
                     <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
                       <div>
-                        <p className="text-2xs font-medium uppercase tracking-wider text-slate-400">
+                        <p className="text-2xs font-medium uppercase tracking-wider text-ink-faint">
                           {format(new Date(rx.createdAt || rx.startDate), 'MMM dd, yyyy')}
                         </p>
-                        <p className="mt-0.5 text-sm text-slate-500">
+                        <p className="mt-0.5 text-sm text-ink-muted">
                           By {formatDoctorName(rx.doctor?.name)}
                         </p>
                       </div>
-                      <span className="badge badge-neutral uppercase tracking-wider">{rx.status || 'active'}</span>
+                      <StatusBadge status={rx.status || 'active'} className="uppercase tracking-wider" />
                     </div>
                     <ul className="space-y-2">
-                      {(rx.medicines || []).map((med, i) => (
-                        <li key={i} className="rounded-xl border border-slate-100 bg-slate-50/60 px-3.5 py-2.5 text-sm">
-                          <span className="font-medium text-slate-900">{med.medicineName || med.name}</span>
-                          <span className="mt-0.5 block text-xs text-slate-500">
-                            {[med.dosage, med.frequency, med.duration].filter(Boolean).join(' · ') || '—'}
-                          </span>
-                        </li>
-                      ))}
+                      {(rx.medicines || []).map((med, i) => {
+                        const sig = [med.dosage, med.frequency, med.duration].filter(Boolean).join(' · ');
+                        return (
+                          <li key={i} className="rounded-lg border border-line-soft bg-surface-subtle/60 px-3.5 py-2.5 text-sm">
+                            <span className="font-medium text-ink">{med.medicineName || med.name}</span>
+                            {sig ? (
+                              <span className="mt-0.5 block text-xs text-ink-muted">{sig}</span>
+                            ) : (
+                              <span className="data-empty mt-0.5 block text-xs">Dosing not documented</span>
+                            )}
+                          </li>
+                        );
+                      })}
                     </ul>
                     {rx.instructions && (
-                      <p className="mt-3 text-xs text-slate-600">{rx.instructions}</p>
+                      <p className="mt-3 text-xs text-ink-muted">{rx.instructions}</p>
                     )}
                   </div>
                 ))}
@@ -793,7 +803,7 @@ const DoctorPatientDetail = () => {
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <div>
                   <label className="label">
-                    Symptoms <span className="font-normal text-slate-400">(comma-separated)</span>
+                    Symptoms <span className="font-normal text-ink-faint">(comma-separated)</span>
                   </label>
                   <input
                     type="text"
@@ -805,7 +815,7 @@ const DoctorPatientDetail = () => {
                 </div>
                 <div>
                   <label className="label">
-                    Diagnosis <span className="font-normal text-slate-400">(comma-separated)</span>
+                    Diagnosis <span className="font-normal text-ink-faint">(comma-separated)</span>
                   </label>
                   <input
                     type="text"
@@ -837,9 +847,9 @@ const DoctorPatientDetail = () => {
                 />
               </div>
 
-              <div className="rounded-2xl border border-slate-200 bg-slate-50/40 p-5">
-                <label className="mb-4 flex items-center gap-2 text-sm font-medium text-slate-800">
-                  <Activity className="h-4 w-4 text-slate-400" /> Patient vitals
+              <div className="rounded-2xl border border-line bg-surface-subtle/40 p-5">
+                <label className="mb-4 flex items-center gap-2 text-sm font-medium text-ink-secondary">
+                  <Activity className="h-4 w-4 text-ink-faint" /> Patient vitals
                 </label>
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                   {[
@@ -852,7 +862,7 @@ const DoctorPatientDetail = () => {
                     { key: 'weight', label: 'Weight (kg)', placeholder: '70' },
                   ].map(({ key, label, placeholder }) => (
                     <div key={key}>
-                      <label className="mb-1 block text-2xs font-medium text-slate-400">
+                      <label className="mb-1 block text-2xs font-medium text-ink-faint">
                         {label}
                       </label>
                       <input
@@ -884,14 +894,14 @@ const DoctorPatientDetail = () => {
                 />
               </div>
 
-              <div className="rounded-2xl border border-slate-200 bg-slate-50/40 p-5">
+              <div className="rounded-2xl border border-line bg-surface-subtle/40 p-5">
                 <FileUpload
                   onUploadSuccess={handleUploadSuccess}
                   label="Attach report (PDF or image)"
                 />
                 {formData.attachments.length > 0 && (
                   <div className="mt-3">
-                    <p className="mb-2 text-2xs font-medium uppercase tracking-wider text-slate-400">
+                    <p className="mb-2 text-2xs font-medium uppercase tracking-wider text-ink-faint">
                       Attachments
                     </p>
                     <div className="flex flex-wrap gap-2">
@@ -906,7 +916,7 @@ const DoctorPatientDetail = () => {
                 )}
               </div>
 
-              <div className="flex justify-end gap-2 border-t border-slate-100 pt-4">
+              <div className="flex justify-end gap-2 border-t border-line-soft pt-4">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
