@@ -187,10 +187,30 @@ export const getLabReports = async (req, res, next) => {
         query.patient = patientId;
       }
     } else if (role === 'lab_technician') {
-      // Work queue: open orders only by default (not full historical PHI dump)
+      // Lab board: open queue + recently completed (so "Completed" column works)
       if (patientId) query.patient = patientId;
-      if (status) query.status = status;
-      else query.status = { $in: ['ordered', 'sample_collected', 'processing'] };
+      if (status) {
+        // Support comma-separated statuses: ?status=completed,reviewed
+        const parts = String(status)
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean);
+        query.status = parts.length > 1 ? { $in: parts } : parts[0] || status;
+      } else {
+        const recentDays = 30;
+        const since = new Date();
+        since.setDate(since.getDate() - recentDays);
+        query.$or = [
+          { status: { $in: ['ordered', 'sample_collected', 'processing'] } },
+          {
+            status: { $in: ['completed', 'reviewed'] },
+            $or: [
+              { resultDate: { $gte: since } },
+              { updatedAt: { $gte: since } },
+            ],
+          },
+        ];
+      }
     } else if (role === 'admin') {
       if (patientId) query.patient = patientId;
       if (status) query.status = status;
