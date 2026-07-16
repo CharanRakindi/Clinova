@@ -115,8 +115,6 @@ docker compose --env-file .env.docker --profile seed run --rm seed
 | Doctor | `sarah@clinova.com` / `password123` |
 | Patient | `john@example.com` / `password123` |
 
-Or use **Sign in → Portfolio demo** one-click chips on `/login`.
-
 Health check: `http://YOUR_PUBLIC_IP/health`
 
 ### Disk full / failed builds

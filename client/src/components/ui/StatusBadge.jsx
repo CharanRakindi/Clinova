@@ -38,7 +38,7 @@ const STATUS_TONE = {
   LOGOUT: 'neutral',
 };
 
-export function statusTone(status) {
+function statusTone(status) {
   if (status == null || status === '') return 'neutral';
   if (STATUS_TONE[status]) return STATUS_TONE[status];
   const lower = String(status).toLowerCase();

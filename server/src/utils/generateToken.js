@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 
 /** Parse ms / s / m / h / d duration strings used by jsonwebtoken expiresIn. */
-export function durationToMs(value, fallbackMs) {
+function durationToMs(value, fallbackMs) {
   if (value == null || value === '') return fallbackMs;
   if (typeof value === 'number' && Number.isFinite(value)) return value;
   const s = String(value).trim();

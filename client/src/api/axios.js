@@ -5,7 +5,7 @@ import axios from 'axios';
  * - VITE_API_URL if set
  * - Relative `/api/v1` by default (Vite proxy in dev, nginx in production)
  */
-export const API_BASE = import.meta.env.VITE_API_URL || '/api/v1';
+const API_BASE = import.meta.env.VITE_API_URL || '/api/v1';
 
 function readCookie(name) {
   if (typeof document === 'undefined') return '';

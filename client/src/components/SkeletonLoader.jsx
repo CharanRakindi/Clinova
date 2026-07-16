@@ -1,6 +1,6 @@
 import { cn } from '../utils/cn';
 
-export const SkeletonLine = ({ className }) => (
+const SkeletonLine = ({ className }) => (
   <div className={cn('animate-pulse rounded bg-line', className)} aria-hidden />
 );
 

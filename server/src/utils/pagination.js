@@ -10,22 +10,3 @@ export function parsePagination(query = {}, { defaultLimit = 25, maxLimit = 100 
   const skip = (page - 1) * limit;
   return { page, limit, skip };
 }
-
-/**
- * Run a find with count for pagination meta.
- */
-export async function paginateQuery(Model, filter, { page, limit, skip, sort = { createdAt: -1 }, populate = [] } = {}) {
-  let q = Model.find(filter).sort(sort).skip(skip).limit(limit);
-  for (const p of populate) {
-    q = typeof p === 'string' ? q.populate(p) : q.populate(p);
-  }
-  const [data, total] = await Promise.all([
-    q.lean ? q : q,
-    Model.countDocuments(filter),
-  ]);
-  const totalPages = Math.max(1, Math.ceil(total / limit) || 1);
-  return {
-    data,
-    meta: { page, limit, total, totalPages },
-  };
-}
